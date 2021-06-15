@@ -1,6 +1,6 @@
-423282a20edfb7377ceefd0e192615ee *DESCRIPTION
-36f3d61b86086f31f29768c50d97f23d *NAMESPACE
-37e9573cd16261deafe385d6690c51ed *NEWS
+c7e10180fee48e6265ee891518ae03ec *DESCRIPTION
+4678e7c9f692119be98413a5abd2f6e7 *NAMESPACE
+bb6ea1c9dadc9d26412be26e107580c3 *NEWS
 61e66e2561a8a0e89e9c9d0fa32ff495 *R/First.R
 7b5da2ffbcca4f497eb3c33f786306e3 *R/Math.im.R
 44f8a71ab76fed0cb52bcee94c0262f8 *R/Math.imlist.R
@@ -12,6 +12,7 @@ c369422b1ea076b175cb79439f726f8b *R/as.im.R
 3964c7a7a47fa8f73a9ed2842d34c674 *R/boundingbox.R
 cc3f8bffb96b961a96ba8ad83c30886c *R/boundingcircle.R
 84e49509a581835fbec8b9d835e9bc69 *R/breakpts.R
+46bf0db54adbeb928c271e3bad59b449 *R/bufftess.R
 af810a4aec1706ad6f5b8ea1de775f0e *R/by.ppp.R
 5efd1803e37d7b6109ce6a9e60879748 *R/centroid.R
 eca522aca0b04c9773424ba04cd39767 *R/circarcs.R
@@ -40,7 +41,7 @@ a90f2d580f886a276c423ff8cdc0221a *R/distances.psp.R
 fe6cb244910293e136cf9c94d438278c *R/distanxD.R
 9675f83d15361064edbe88f751122f83 *R/distbdry.R
 a25105ed90e5f77b6e2145aa2996de5f *R/distfun.R
-39cd1eff2d77cd47b3d269237239434d *R/distmap.R
+8721d01c3a3d04249f1b1a594fc7863b *R/distmap.R
 9c33a28d219e0a17c118a98574e4b8d0 *R/dummy.R
 7eeedaa0c8b3ee1ab8cb8f1515e2cbed *R/edges2triangles.R
 1539189a0ae07f00bc8488fb54b8f071 *R/edit.R
@@ -148,7 +149,7 @@ b1333ff8439dfd41629fdf56be763bea *R/weights.R
 0c2a78e887a2a02aede78419714380ce *R/wingeom.R
 6f2f4dd6b46a2edd246daafc2d147f4e *inst/CITATION
 ac6aa02ee30a52f0a13abc4a17ff0174 *inst/doc/downstream.txt
-3b0a281e2f64a097e168afacbcde7b8c *inst/doc/packagesizes.txt
+c4c5b0d71040b78f9b5a4c53d3d7858a *inst/doc/packagesizes.txt
 12e68895fef0d3aa0bde45a0ddbadfa4 *inst/ratfor/Makefile
 22e8a5189942ba190c13475b35459c7f *inst/ratfor/dppll.r
 6d471ec061ea91398ba16323de56b9db *inst/ratfor/inxypOld.r
@@ -223,6 +224,7 @@ e9947043b140536c1538f9e9e3f25ff0 *man/bounding.box.xy.Rd
 fa49250919d7dac2934569031e9e6f9f *man/boundingcircle.Rd
 3d31bf6cfa4a213f6ef7524001440339 *man/box3.Rd
 54834701b5ec9fb27880597f2e7593e3 *man/boxx.Rd
+b3d5443a173efca1b2efc148eece2500 *man/bufftess.Rd
 8535d23cee4edbc27dbc6fc6fc17042b *man/by.im.Rd
 134f1de6d4c1926550604e4b865ec19d *man/by.ppp.Rd
 0db6efd37b8692c75a2ae1a990764143 *man/cbind.hyperframe.Rd
@@ -288,7 +290,7 @@ c53fe2258477819ee4cb1088d9ea959e *man/distfun.Rd
 e19978feb573ce14850e9e03aecd4239 *man/distmap.Rd
 d394b8f06716cda74d91136b900df574 *man/distmap.owin.Rd
 d15a16bec0585434fe49f855aad27b89 *man/distmap.ppp.Rd
-d342c07a66859851fde8c661f720b0d2 *man/distmap.psp.Rd
+882c2e631feeb59374653d038908c9b1 *man/distmap.psp.Rd
 a19d33312cf5e2235f24b58c805cd10a *man/domain.Rd
 f6b361ee19802275e239b31f06d60879 *man/duplicated.ppp.Rd
 2c8a2832c36a28895f184e502e3b6624 *man/edges.Rd
@@ -449,7 +451,7 @@ f2a2afff874266688981a56ba0f0887d *man/plot.quad.Rd
 00cd55cb42db85a314c8511ce34128cb *man/plot.texturemap.Rd
 9eaa193b31b3538c61dfc1d41f0686d6 *man/plot.yardstick.Rd
 712d96939c7ae79c3eb23e3e3479dca5 *man/pointsOnLines.Rd
-04940384df5f248a622b732dafef54a0 *man/polartess.Rd
+5ec1833c199a76bbc42dc5ff862d0ecd *man/polartess.Rd
 e3ccaf8de1f8eab497c3819dddf55cb9 *man/pp3.Rd
 1e18a06faa3a253a72fa1d0585d9734d *man/ppp.Rd
 8a289b61c3ee65292294dce483b0f07d *man/ppp.object.Rd
@@ -469,7 +471,7 @@ bdfd0ef9b27f33d246fb7a02b2008eae *man/print.quad.Rd
 50259be5c9f3766353dab049b10a4937 *man/psp.object.Rd
 9f2cbd2102ac597a98a692331a30b7e1 *man/quad.object.Rd
 82aa5711d12449bdbc444988a80fa685 *man/quadratcount.Rd
-14b14f1c8184afd20ca04b7b32d614af *man/quadrats.Rd
+3c982b5df11eb42ab1251becc90c798e *man/quadrats.Rd
 79ba60d586282d75a10556c09eed9640 *man/quadscheme.Rd
 156f51cd2835ddcdba954ac1f14a5b36 *man/quadscheme.logi.Rd
 50fe56a582cf822f0107becbdd92e49f *man/quantess.Rd
@@ -550,7 +552,7 @@ f23cc00208383929a5281303b5548643 *man/summary.quad.Rd
 38e24aa9efb53685da86c344a2159827 *man/summary.splitppp.Rd
 f5b2c9d71c697ca0270d51df5a92f965 *man/superimpose.Rd
 09a3c8bb94a975eb23a398d8123bc4f0 *man/symbolmap.Rd
-39cd120527d002bb52ee56aeede6de8a *man/tess.Rd
+d630c9c920094230759b327adb9efb61 *man/tess.Rd
 14c1d5c5827f7dc90731c2acbfe32b44 *man/test.crossing.psp.Rd
 766154132888085e59081410bec2501b *man/text.ppp.Rd
 44e4516ec3b5e2d588d381b7ac48697e *man/texturemap.Rd
@@ -662,14 +664,14 @@ c1624129ac630ef4653e3119d70ffa5b *tests/selfcross.txt
 21ab8ea2db211c65b9682a0001b9c7c6 *tests/testsAtoC.R
 1545a52f384ae984361d7dc756a9136c *tests/testsD.R
 b3b91cc07d68d17f340a7930fae7c5c2 *tests/testsEtoF.R
-c4b5b290abae5ebdff7f9966dfbcddb7 *tests/testsGtoJ.R
+e0155fca4ee9b6810b71c2166ecb2110 *tests/testsGtoJ.R
 bd48e397baa926bd320898c771fc2ecf *tests/testsK.R
 2656e51d2502ce38411ac2618bdde3d6 *tests/testsL.R
 9e8f43244f6213772e79404838bf1f49 *tests/testsM.R
-b1c138d94bcd4168ce948556422dca3f *tests/testsNtoO.R
+0b2469c496c8928fc534b3d9d9b2ebe2 *tests/testsNtoO.R
 cf39997f128d022ddfee79c41ae5c4af *tests/testsP1.R
 0bd39fc8aafd0f1b9356556ee0a5c1ea *tests/testsP2.R
 62854add4b01d7292323c5935d6e182e *tests/testsQ.R
-66c0a853c9313bc552bc33e64b317d30 *tests/testsS.R
+ac95f35cec890e37f2d20e7c80b86066 *tests/testsS.R
 96956e19b99889c263329e598d8d1315 *tests/testsT.R
 206d26e4f4ed1424bd4702b064a6d2c8 *tests/testsUtoZ.R

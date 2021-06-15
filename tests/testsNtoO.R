@@ -22,7 +22,7 @@ cat(paste("--------- Executing",
 #
 # Also test whether minnndist(X) == min(nndist(X))
 #
-#   $Revision: 1.37 $  $Date: 2021/04/12 07:59:00 $
+#   $Revision: 1.39 $  $Date: 2021/05/20 09:31:23 $
 #
 
 
@@ -125,7 +125,7 @@ local({
       stop("nncross(k > 1) gives wrong answer")
   }
 
-  if(ALWAYS) {
+  if(FULLTEST) {
     ## example from Hank Stevens
     A <- data.frame(
           m= c("K", "K", "A1", "A2", "G", "A2", "A3"),
@@ -143,7 +143,7 @@ local({
       stop("Error in nncross (finite values) in Hank Stevens example")
     M <- as.matrix(minnndist(X, by=marks(X)))
     M[is.infinite(M)] <- 0
-    maxer <- range(M - t(M))
+    maxer <- max(abs(M - t(M)))
     if(maxer > 0.001)
       stop("Error in minnndist(by) in Hank Stevens example")
   }
@@ -158,7 +158,9 @@ local({
     Ndw <- nncross(X,Y, iX, iY, k=3)
     Nw  <- nncross(X,Y, iX, iY, k=3, what="which")
     Nd  <- nncross(X,Y, iX, iY, k=3, what="dist")
+  }
 
+  if(FULLTEST) {
     ## special cases
     nndist(X[FALSE])
     nndist(X[1])
@@ -178,8 +180,8 @@ local({
 
   if(ALWAYS) {
     rthree <- function(n) { pp3(runif(n), runif(n), runif(n), box3(c(0,1))) }
-    ## X <- runifpoint3(42)
-    X <- rthree(42)
+    XX <- rthree(42)
+    X <- XX[1:20]
     nn <- nndist(X)
     nnP <- f(pairdist(X), 1)
     if(any(abs(nn - nnP) > eps))
@@ -216,6 +218,10 @@ local({
     a2 <- nncross(X,Y, what="which", k=2)
     if(any(a2 != gg(DXY, 2)))
       stop("incorrect result from nncross.pp3(k=2, what='which')")
+  }
+
+  if(FULLTEST) {
+    X <- XX
     iX <- 1:42
     iZ <- 30:42
     Z <- X[iZ]
