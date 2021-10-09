@@ -1,11 +1,15 @@
 \name{rjitter}
 \alias{rjitter}
+\alias{rjitter.ppp}
 \title{Random Perturbation of a Point Pattern}
 \description{
   Applies independent random displacements to each point in a point pattern.
 }
 \usage{
-rjitter(X, radius, retry=TRUE, giveup = 10000, \dots, nsim=1, drop=TRUE)
+
+rjitter(X, \dots)
+
+\method{rjitter}{ppp}(X, radius, retry=TRUE, giveup = 10000, \dots, nsim=1, drop=TRUE)
 }
 \arguments{
   \item{X}{
@@ -16,6 +20,9 @@ rjitter(X, radius, retry=TRUE, giveup = 10000, \dots, nsim=1, drop=TRUE)
     The displacement vectors will be uniformly
     distributed in a circle of this radius.
     There is a sensible default.
+    Alternatively, \code{radius} may be a numeric vector of length
+    equal to the number of points in \code{X}, giving a different
+    displacement radius for each data point.
   }
   \item{retry}{
     What to do when a perturbed point lies outside the window
@@ -35,11 +42,14 @@ rjitter(X, radius, retry=TRUE, giveup = 10000, \dots, nsim=1, drop=TRUE)
   }
 }
 \value{
-  A point pattern (an object of class \code{"ppp"})
-  if \code{nsim=1}, or a list of point patterns if \code{nsim > 1},
-  in the same window as \code{X}.
+  The result of \code{rjitter.ppp} is
+  a point pattern (an object of class \code{"ppp"})
+  or a list of point patterns.
 }
 \details{
+  The function \code{rjitter} is generic, with methods for point
+  patterns (described here) and for some other types of geometrical objects.
+
   Each of the points in the point pattern \code{X} is subjected to
   an independent random displacement. The displacement vectors are
   uniformly distributed in a circle of radius \code{radius}.
@@ -61,11 +71,8 @@ rjitter(X, radius, retry=TRUE, giveup = 10000, \dots, nsim=1, drop=TRUE)
    plot(Y)
    Z <- rjitter(X)
 }
-\author{\adrian
-  
-  
-  and \rolf
-  
+\author{
+  \spatstatAuthors.
 }
 \keyword{spatial}
 \keyword{datagen}

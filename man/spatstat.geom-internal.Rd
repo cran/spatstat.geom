@@ -186,6 +186,7 @@
 \alias{owinpoly2mask}
 \alias{owin2polypath}
 \alias{param.quad}
+\alias{PDtoNN}
 \alias{pickoption}
 \alias{plotEachLayer}
 \alias{plot3Dpoints}
@@ -207,6 +208,8 @@
 \alias{print.indicfun}       
 \alias{print.layered}
 \alias{print.lut}
+\alias{print.metric}
+\alias{print.metricfun}
 \alias{print.nnfun}
 \alias{print.numberwithunit}
 \alias{print.onearrow}
@@ -287,6 +290,7 @@
 \alias{summary.hyperframe}
 \alias{summary.logiquad}
 \alias{summary.lut}
+\alias{summary.metric}
 \alias{summary.pppmatching}
 \alias{summary.ppx}
 \alias{summary.splitppx}
@@ -313,6 +317,8 @@
 \alias{verifyclass}
 \alias{veryunique}
 \alias{warn.once}
+\alias{warn.no.metric.support}
+\alias{warn.unsupported.args}
 \alias{waxlyrical}
 \alias{wrangle2image}
 \alias{w.quad}               
@@ -320,6 +326,7 @@
 \alias{y.quad}
 \alias{xy.grid}
 \alias{xtfrm.im}
+\alias{XDtoNN}
 \alias{xypolygon2psp}
 \alias{xypolyselfint}
 \alias{ZeroValue}
@@ -519,6 +526,7 @@ owinpolycheck(W, verbose=TRUE)
 owinpoly2mask(w, rasta, check=TRUE)
 owin2polypath(w)
 param.quad(Q)
+PDtoNN(d, what, k, \dots)
 pickoption(what="option", key, keymap, \dots,
            exact=FALSE, list.on.err=TRUE, die=TRUE, multi=FALSE,
            allow.all=TRUE)
@@ -547,6 +555,8 @@ prepareTitle(main)
 \method{print}{indicfun}(x, \dots)
 \method{print}{layered}(x, \dots)
 \method{print}{lut}(x, \dots)
+\method{print}{metric}(x, \dots)
+\method{print}{metricfun}(x, \dots)
 \method{print}{nnfun}(x, \dots)
 \method{print}{numberwithunit}(x, \dots)
 \method{print}{onearrow}(x, \dots)
@@ -627,6 +637,7 @@ store.versionstring.spatstat()
 \method{summary}{hyperframe}(object, \dots, brief=FALSE)
 \method{summary}{logiquad}(object, \dots, checkdup=FALSE)
 \method{summary}{lut}(object, \dots)
+\method{summary}{metric}(object, \dots)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{ppx}(object, \dots)
 \method{summary}{splitppx}(object, \dots)
@@ -657,6 +668,8 @@ versionstring.spatstat()
 veryunique(z)
 verifyclass(X, C, N = deparse(substitute(X)), fatal = TRUE)
 warn.once(key, \dots)
+warn.no.metric.support(caller, \dots, metric)
+warn.unsupported.args(unsup, \dots)
 waxlyrical(type, terse)
 wrangle2image(values, template)
 w.quad(Q)               
@@ -665,6 +678,7 @@ y.quad(Q)
 xy.grid(xr, yr, nx, ny, dx, dy)
 \method{xtfrm}{im}(x)
 xypolyselfint(p, eps, proper, yesorno, checkinternal)
+XDtoNN(d, what, iX, iY, k, \dots)
 xypolygon2psp(p, w, check)
 ZeroValue(x)
 \method{ZeroValue}{im}(x)

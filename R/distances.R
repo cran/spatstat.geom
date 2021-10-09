@@ -1,7 +1,7 @@
 #
 #      distances.R
 #
-#      $Revision: 1.48 $     $Date: 2021/01/07 01:15:08 $
+#      $Revision: 1.49 $     $Date: 2021/09/05 10:44:32 $
 #
 #
 #      Interpoint distances between pairs 
@@ -12,8 +12,15 @@ pairdist <- function(X, ...) {
   UseMethod("pairdist")
 }
 
-pairdist.ppp <- function(X, ..., periodic=FALSE, method="C", squared=FALSE) {
+pairdist.ppp <- function(X, ..., periodic=FALSE, method="C", squared=FALSE,
+                         metric=NULL) {
   verifyclass(X, "ppp")
+  if(!is.null(metric)) {
+    d <- invoke.metric(metric, "pairdist.ppp",
+                       X, ...,
+                       periodic=periodic, method=method, squared=squared)
+    return(d)
+  }
   if(!periodic)
     return(pairdist.default(X$x, X$y, method=method, squared=squared))
   # periodic case
@@ -31,9 +38,11 @@ pairdist.ppp <- function(X, ..., periodic=FALSE, method="C", squared=FALSE) {
 pairdist.default <-
   function(X, Y=NULL, ..., period=NULL, method="C", squared=FALSE)
 {
+  warn.no.metric.support("pairdist.default", ...)
+  
   if(!is.null(dim(X)) && ncol(X) > 2)
     stop("Data contain more than 2 coordinates")
-  
+
   xy <- xy.coords(X,Y)[c("x","y")]
 
   if(identical(xy$xlab, "Index")) 
@@ -113,9 +122,16 @@ crossdist <- function(X, Y, ...) {
 }
 
 crossdist.ppp <- function(X, Y, ...,
-                          periodic=FALSE, method="C", squared=FALSE) {
+                          periodic=FALSE, method="C", squared=FALSE,
+                          metric=NULL) {
   verifyclass(X, "ppp")
   Y <- as.ppp(Y)
+  if(!is.null(metric)) {
+    d <- invoke.metric(metric, "crossdist.ppp",
+                       X, Y, ...,
+                       periodic=periodic, method=method, squared=squared)
+    return(d)
+  }
   if(!periodic)
     return(crossdist.default(X$x, X$y, Y$x, Y$y,
                              method=method, squared=squared))
