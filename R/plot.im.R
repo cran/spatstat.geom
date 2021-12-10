@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.139 $   $Date: 2020/12/19 05:25:06 $
+#  $Revision: 1.145 $   $Date: 2021/11/14 07:41:07 $
 #
 #  Plotting code for pixel images
 #
@@ -21,8 +21,7 @@ plot.im <- local({
     aarg <- resolve.defaults(...)
     add      <- resolve.1.default(list(add=FALSE),     aarg)
     show.all <- resolve.1.default(list(show.all=!add), aarg)
-    addcontour <- resolve.1.default(list(addcontour=FALSE), aarg)
-    args.contour <- resolve.1.default(list(args.contour=list()), aarg)
+    addcontour <- isTRUE(aarg$addcontour)
     ##
     if(add && show.all) {
       ## set up the window space *with* the main title
@@ -51,18 +50,22 @@ plot.im <- local({
     z <- do.call.matched(image.default,
                          append(imagedata, aarg),
                          extrargs=extrargs)
-    if(addcontour)
+    if(addcontour) {
       do.call(do.contour,
               resolve.defaults(imagedata,
                                list(add=TRUE),
-                               args.contour,
+                               aarg$args.contour,
                                list(col=par('fg')),
                                aarg,
                                .StripNull=TRUE))
+    }
+    
     return(z)
   }
 
-  do.contour <- function(x, y, z, ..., drawlabels=TRUE) {
+  do.contour <- function(x, y, z, ...,
+                         levels=NULL, labels=NULL, drawlabels=TRUE, 
+                         values.are.log=FALSE) {
     nx <- length(x)
     ny <- length(y)
     nz <- dim(z)
@@ -86,8 +89,33 @@ plot.im <- local({
         ny <- ny-1
       }
     }
+    if(values.are.log) {
+      ## z is log10 of actual value
+      if(!is.null(levels)) {
+        labels <- paste(levels)
+        levels <- log10(levels)
+      } else {
+        logra <- range(z)
+        ## default levels commensurate with logarithmic colour scale
+        if(diff(logra) > 1.5) {
+          wholepowers <- 10^(floor(logra[1]):ceiling(logra[2]))
+          explevels <- sort(as.numeric(outer(wholepowers, c(1,2,5), "*")))
+        } else {
+          nlevels <- resolve.1.default(list(nlevels=10), list(...))
+          explevels <- pretty(10^logra, nlevels)
+        }
+        explevels <- explevels[inside.range(explevels, 10^logra)]
+        labels <- paste(explevels)
+        levels <- log10(explevels)
+      }
+    }
     do.call.matched(contour.default,
-                    list(x=x, y=y, z=z, ..., drawlabels=drawlabels))
+                    resolve.defaults(list(x=x, y=y, z=z,
+                                          ...,
+                                          levels=levels,
+                                          labels=labels,
+                                          drawlabels=drawlabels),
+                                     .StripNull=TRUE))
   }
                  
   do.box.etc <- function(bb, add, argh) {
@@ -569,8 +597,8 @@ plot.im <- local({
                  dotargs,
                  list(useRaster=useRaster, add=add, show.all=show.all),
                  colourinfo,
-                 list(zlim=vrange),
-                 list(asp = 1, main = main))
+                 list(zlim=vrange, asp = 1, main = main),
+                 list(values.are.log=do.log))
 ##      if(add && show.all)
 ##        fakemaintitle(x, main, dotargs)
 
@@ -651,8 +679,8 @@ plot.im <- local({
                dotargs,
                list(useRaster=useRaster),
                colourinfo,
-               list(zlim=vrange),
-               list(asp = 1, main = main))
+               list(zlim=vrange, asp = 1, main = main),
+               list(values.are.log=do.log))
 
 ##    if(add && show.all)
 ##      fakemaintitle(bb.all, main, ...)
@@ -695,7 +723,8 @@ plot.im <- local({
                list(useRaster=rib.useRaster),
                list(main="", sub="", xlab="", ylab=""),
                dotargs,
-               colourinfo)
+               colourinfo,
+               list(values.are.log=do.log))
     # box around ribbon?
     resol <- resolve.defaults(ribargs, dotargs)
     if(!identical(resol$box, FALSE))
