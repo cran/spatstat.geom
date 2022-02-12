@@ -1,6 +1,6 @@
 Package: spatstat.geom
-Version: 2.3-1
-Date: 2021-12-10
+Version: 2.3-2
+Date: 2022-02-12
 Title: Geometrical Functionality of the 'spatstat' Family
 Authors@R: c(person("Adrian", "Baddeley", 
                     role = c("aut", "cre"),
@@ -23,8 +23,8 @@ Depends: R (>= 3.5.0), spatstat.data (>= 2.0-0), stats, graphics,
         grDevices, utils, methods
 Imports: spatstat.utils (>= 2.2-0), deldir (>= 1.0-2), polyclip (>=
         1.10-0)
-Suggests: spatstat.core, spatstat.linnet, maptools (>= 0.9-9), spatial,
-        fftwtools (>= 0.9-8), spatstat (>= 2.0-0)
+Suggests: spatstat.core, spatstat.random, spatstat.linnet, maptools (>=
+        0.9-9), spatial, fftwtools (>= 0.9-8), spatstat (>= 2.0-0)
 Description: Defines spatial data types and supports geometrical operations
 	     on them. Data types include point patterns, windows (domains),
 	     pixel images, line segment patterns, tessellations and hyperframes.
@@ -47,7 +47,7 @@ URL: http://spatstat.org/
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat.geom/issues
-Packaged: 2021-12-10 00:37:17 UTC; adrian
+Packaged: 2022-02-12 06:23:01 UTC; adrian
 Author: Adrian Baddeley [aut, cre],
   Rolf Turner [aut],
   Ege Rubak [aut],
@@ -59,4 +59,4 @@ Author: Adrian Baddeley [aut, cre],
   Dominic Schuhmacher [ctb],
   Rasmus Waagepetersen [ctb]
 Repository: CRAN
-Date/Publication: 2021-12-10 09:00:02 UTC
+Date/Publication: 2022-02-12 10:20:02 UTC
