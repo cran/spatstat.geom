@@ -1,3 +1,118 @@
+        CHANGES IN spatstat.geom VERSION 2.4-0
+
+OVERVIEW
+
+    o We thank Fernando Milesi, Suman Rakshit and Mark Walsh for contributions.
+
+    o Bug fixes in 'distmap' and 'distfun'.
+    
+    o Bug fixes in 'closepairs'.
+
+    o Bug fixes in 'nncross.ppp'.
+
+    o Minor improvements and bug fixes.
+
+NEW FUNCTIONS
+
+    o framedist.pixels
+    Computes distance from each pixel to the enclosing rectangle.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o nncross.ppp
+    When X is a point pattern and Y is a line segment pattern,
+    higher order neighbours (k > 1) are now supported.
+
+    o intersect.tess
+    New argument 'keepempty'.
+
+    o unnormdensity
+    Argument 'weights' may have length 1.
+    New argument 'defaults'.
+
+    o distmap.owin
+    Behaviour has been altered so that, when X is a binary mask, the results of
+    distmap(X, invert=TRUE) and distmap(complement.owin(X)) are identical.
+    This affects a few pixels close to the edge of the frame.
+    [Suggested by Fernando Milesi.]
+
+    o distmap.ppp
+    New argument 'clip'.
+    
+BUG FIXES
+
+    o distmap.owin
+    If the window was a binary mask, the distance values were
+    slightly too large (by a factor 1 + 1/n where n is the pixel grid dimension),
+    due to a coding error.
+    [Spotted by Fernando Milesi.]
+    Fixed.
+    
+    o distfun.owin
+    If the window was a binary mask, the distance values were
+    slightly too small (typically reduced by 1/20 of a pixel width).
+    [Spotted by Fernando Milesi.]
+    Fixed.
+
+    o distmap.owin
+    Values were incorrect if X was an empty window (is.empty(X) = TRUE).
+    Fixed.
+    
+    o distmap.ppp, distmap.psp
+    Values were incorrect if X was an empty pattern (npoints(X) = 0).
+    Fixed.
+    
+    o distmap.psp
+    Values were incorrect if X was an empty pattern (nsegments(X) = 0).
+    Fixed.
+    
+    o closepairs.ppp
+    If distinct=FALSE and what="all", the resulting vectors
+    'yi' and 'yj' contained incorrect values, and had the wrong length.
+    Fixed.
+
+    o nncross.ppp
+    When k > 1, distance values were incorrectly replaced by 'Inf' in some cases.
+    Fixed.
+    
+    o closepairs.ppp
+    Crashed with a message 'unable to allocate memory'
+    if the window of X had zero area.
+    Fixed.
+
+    o crosspairs.ppp
+    Crashed with a message 'unable to allocate memory'
+    if the window of Y had zero area.
+    Fixed.
+
+    o closepairs.pp3
+    Crashed with a message 'unable to allocate memory'
+    if the domain of X had zero volume.
+    Fixed.
+
+    o crosspairs.pp3
+    Crashed with a message 'unable to allocate memory'
+    if the domain of Y had zero volume.
+    Fixed.
+
+    o as.im.owin
+    If 'value' was a categorical (factor) value, the result was not a factor-valued image.
+    Fixed.
+
+    o tile.areas
+    For a tessellation defined by a pixel image,
+    the result of tile.areas() was not a numeric vector.
+    [Spotted by Suman Rakshit.]
+    Fixed.
+
+    o dirichlet
+    Rarely, the number of tiles in the tessellation
+    was less than the number of unique data points.
+    This occurred only when the window was a binary mask.
+    [Spotted by Suman Rakshit.]
+    Fixed.
+
+
         CHANGES IN spatstat.geom VERSION 2.3-2
 
 OVERVIEW
