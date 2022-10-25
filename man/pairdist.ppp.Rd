@@ -67,20 +67,17 @@
   \code{\link{pairdist.psp}},
   \code{\link{crossdist}},
   \code{\link{nndist}},
-  \code{\link[spatstat.core]{Kest}}
+  \code{\link[spatstat.explore]{Kest}}
 }
 \examples{
-   data(cells)
    d <- pairdist(cells)
    d <- pairdist(cells, periodic=TRUE)
    d <- pairdist(cells, squared=TRUE)
 }
-\author{Pavel Grabarnik
-  \email{pavel.grabar@issp.serpukhov.su}
+\author{
+  \pavel
   and 
-  \adrian
-  
-  
+  \adrian.
 }
 \keyword{spatial}
 \keyword{math}

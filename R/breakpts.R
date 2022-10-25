@@ -6,7 +6,7 @@
 #
 #	even.breaks()
 #
-#	$Revision: 1.25 $	$Date: 2020/04/12 08:34:19 $
+#	$Revision: 1.26 $	$Date: 2022/05/23 02:33:06 $
 #
 #
 #       Other functions in this directory use the standard Splus function
@@ -109,9 +109,10 @@ make.even.breaks <- function(bmax, npos, bstep) {
     # single argument
     X <- XL[[1L]]
 
-    if(!is.null(class(X)) && class(X) == "breakpts")
-    # X already in correct form
+    if(inherits(X, "breakpts")) {
+      ## X already in correct form
       return(X)
+    }
   
     if(is.vector(X) && length(X) > 2) {
       ## it's a vector

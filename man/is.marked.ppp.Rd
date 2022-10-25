@@ -44,19 +44,15 @@
 }
 \seealso{
   \code{\link{is.marked}},
-  \code{\link[spatstat.core]{is.marked.ppm}}
+  \code{\link[spatstat.model]{is.marked.ppm}}
 }
 \examples{
-   data(cells)
    is.marked(cells)  #FALSE
    data(longleaf)
    is.marked(longleaf) #TRUE
 }
 \author{\adrian
-  
-  
   and \rolf
-  
 }
 \keyword{spatial}
 \keyword{manip}

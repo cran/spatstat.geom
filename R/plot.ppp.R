@@ -1,7 +1,7 @@
 #
 #	plot.ppp.R
 #
-#	$Revision: 1.99 $	$Date: 2020/12/19 05:25:06 $
+#	$Revision: 1.104 $	$Date: 2022/04/23 09:43:12 $
 #
 #
 #--------------------------------------------------------------------------
@@ -28,7 +28,14 @@ plot.ppp <- local({
          spatstat.options("transparent"))
         cols <- rgb(0,0,0, default.transparency(nx))
       if(!is.null(cols) && !is.null(col)) col <- NULL
-      return(symbolmap(..., chars=chars, cols=cols, col=col))
+      symap <- symbolmap(..., chars=chars, cols=cols, col=col)
+      pnames <- symbolmapparnames(symap)
+      if("shape" %in% pnames && !("size" %in% pnames)) {
+        ## symbols require a size parameter
+        m <- mark.scale.default(rep(1, npoints(x)), Window(x), maxsize=maxsize, meansize=meansize)
+        symap <- update(symap, size=m)
+      }
+      return(symap)
     }
     if(!is.null(dim(marx)))
       stop("Internal error: multivariate marks in default.symap.points")
@@ -340,12 +347,15 @@ plot.ppp <- local({
     sizeguess <- if(maxsize <= 0) NULL else (1.5 * maxsize)
     leg.args <- append(list(side=leg.side, vertical=vertical), leg.args)
     ## draw up layout
-    legbox <- do.call.matched(plan.legend.layout,
-                              append(list(B=quote(BB), size = sizeguess,
-                                          started=FALSE, map=symap),
-                                     leg.args))
+    layoutboxes <- do.call.matched(plan.legend.layout,
+                                  append(list(B=quote(BB), size = sizeguess,
+                                              started=FALSE, map=symap),
+                                         leg.args))
     ## bounding box for everything
-    BB <- legbox$A
+    BB <- layoutboxes[["A"]]
+    ## bounding box for legend
+    legbox <- layoutboxes[["b"]]
+    attr(symap, "legbox") <- legbox
   }
 
   ## return now if not plotting
@@ -421,13 +431,12 @@ plot.ppp <- local({
   
   ## add legend
   if(legend) {
-    b <- legbox$b
     legendmap <- if(length(leg.args) == 0) symap else 
                  do.call(update, append(list(object=quote(symap)), leg.args))
     dont.complain.about(legendmap)
     do.call(plot,
             append(list(x=quote(legendmap), main="", add=TRUE,
-                        xlim=b$xrange, ylim=b$yrange),
+                        xlim=legbox$xrange, ylim=legbox$yrange),
                    leg.args))
   }
   

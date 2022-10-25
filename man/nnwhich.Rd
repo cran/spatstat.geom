@@ -139,7 +139,6 @@
   \code{\link{nncross}}
 }
 \examples{
-   data(cells)
    plot(cells)
    m <- nnwhich(cells)
    m2 <- nnwhich(cells, k=2)
@@ -159,12 +158,10 @@
    # nearest neighbours of each type
    head(nnwhich(ants, by=marks(ants)))
 }
-\author{Pavel Grabarnik
-  \email{pavel.grabar@issp.serpukhov.su}
+\author{
+  \pavel
   and
   \adrian
-  
-  
 }
 \keyword{spatial}
 \keyword{math}

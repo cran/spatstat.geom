@@ -1,3 +1,102 @@
+        CHANGES IN spatstat.geom VERSION 3.0-3
+
+OVERVIEW
+
+    o Minor internal changes to satisfy package checker.
+
+        CHANGES IN spatstat.geom VERSION 3.0-2
+
+OVERVIEW
+
+    o Minor internal changes to satisfy package checker.
+
+        CHANGES IN spatstat.geom VERSION 3.0-1
+
+OVERVIEW
+
+    o Minor internal changes.
+
+        CHANGES IN spatstat.geom VERSION 3.0-0
+
+OVERVIEW
+
+    o Minor improvements and bug fixes.
+
+    o Changes to package dependence.
+    
+NEW FUNCTIONS
+
+    o is.linnet
+    Test whether an object is a linear network.
+
+    o as.data.frame.ppplist
+    Method for 'as.data.frame' for lists of point patterns.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o Package dependence
+    spatstat.geom now suggests the new packages spatstat.explore and
+    spatstat.model, which have replaced spatstat.core.
+    
+    o crosspairs.ppp
+    New argument 'periodic' specifies whether to use
+    periodic (toroidal) distances.
+
+    o crosspairs.ppp
+    New arguments 'iX', 'iY' make it possible to eliminate pairs
+    in which the two points are identical.
+    
+    o bufftess 
+    The result now has attribute 'breaks' which is the vector of
+    distance breakpoints.
+
+    o contour.im
+    New argument 'log' specifies whether the contour lines
+    should be equally spaced on a logarithmic scale.
+    
+    o plot.im, image.im
+    New argument 'addcontour' specifies that contour lines should be drawn
+    over the image plot.
+
+    o invoke.symbolmap
+    New argument 'angleref'.
+
+    o funxy
+    The result now has a unitname, inherited from the argument W.
+
+    o integral.im
+    New argument 'weight' specifies a weight function for the integration.
+    
+    o markstat, applynbd
+    These functions now work for point patterns in three dimensions
+    (class 'pp3') and point patterns on a network (class 'lpp').
+
+    o plot.psp
+    New argument 'use.marks', for consistency with other methods.
+    
+BUG FIXES
+
+    o framedist.pixels
+    Result was always a matrix, regardless of the value of 'style'.
+    Fixed.
+
+    o plot.im
+    Ignored ribargs$labels.
+    Fixed.
+
+    o plot.ppp
+    Crashed with an obscure message when argument 'shape' was given,
+    unless argument 'size' was also given.
+    Fixed.
+
+    o closepairs
+    Crashed if npoints(X)^2 exceeded the largest possible integer.
+    Fixed.
+
+    o crosspairs
+    Crashed if npoints(X) * npoints(Y) exceeded the largest possible integer.
+    Fixed.
+    
         CHANGES IN spatstat.geom VERSION 2.4-0
 
 OVERVIEW

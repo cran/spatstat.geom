@@ -7,7 +7,7 @@
   in which the pixels are unit squares 
   and the pixel centres start at (0,0)
 
-  $Revision: 1.2 $ $Date: 2019/02/19 04:28:47 $
+  $Revision: 1.5 $ $Date: 2022/10/22 10:09:51 $
 
  */
 
@@ -19,22 +19,23 @@
 #include "chunkloop.h"
 #include "yesno.h"
 
-double sqrt(), fround();
+double sqrt(double x);
+/* fround is defined in Rmath.h */
 
 void 
-nearestvalidpixel(n, x, y,
-		  nr, nc, aspect, z,
-		  nsearch,
-		  rr, cc
-	   )
-int *n;         /* number of query points */
-double *x, *y;  /* coordinates of query points (transformed) */
-int *nr, *nc;   /* matrix dimensions */
-double *aspect; /* aspect ratio (y/x) of original pixels */
-int *z;         /* entries of logical matrix */
-int *nsearch;   /* maximum permitted number of pixel steps on each axis */
-int *rr, *cc;   /* row and column indices (-1) of nearest pixel centre */
-{
+nearestvalidpixel(
+  int *n,         /* number of query points */
+  double *x,
+  double *y,      /* coordinates of query points (transformed) */
+  int *nr,
+  int *nc,        /* matrix dimensions */
+  double *aspect, /* aspect ratio (y/x) of original pixels */
+  int *z,         /* entries of logical matrix */
+  int *nsearch,   /* maximum permitted number of pixel steps on each axis */
+  /* OUTPUTS */
+  int *rr,
+  int *cc         /* row and column indices (-1) of nearest pixel centre */
+) {
   int maxchunk, N, Nrow, Ncol, maxrow, maxcol, maxsearch;
   double asp, xi, yi, ddd, ddi, huge, deltax, deltay;
   int i, row, col, zvalue;

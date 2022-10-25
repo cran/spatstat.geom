@@ -1,7 +1,7 @@
 #
 #     ewcdf.R
 #
-#     $Revision: 1.23 $  $Date: 2021/09/01 02:41:58 $
+#     $Revision: 1.24 $  $Date: 2022/05/21 09:52:11 $
 #
 #  With contributions from Kevin Ummel
 #
@@ -13,7 +13,7 @@ ewcdf <- function(x, weights=NULL, normalise=TRUE, adjust=1)
   weighted <- (nw > 0)
 
   if(weighted) {
-    check.nvector(weights, things="entries of x", oneok=TRUE)
+    check.nvector(weights, things="entries of x", oneok=TRUE, vname="weights")
     stopifnot(all(weights >= 0))
     if(nw == 1) 
       weights <- rep(weights, nx)

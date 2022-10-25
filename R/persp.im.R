@@ -4,7 +4,7 @@
 ##  'persp' method for image objects
 ##      plus annotation
 ##  
-##  $Revision: 1.27 $ $Date: 2021/11/01 07:26:43 $
+##  $Revision: 1.28 $ $Date: 2022/05/23 02:33:06 $
 ##
 
 persp.im <- function(x, ...,
@@ -274,10 +274,10 @@ perspSegments <- local({
 #      nX <- nrow(eX)
     } else {
 #      nX <- length(x0)
-      check.nvector(x0, naok=TRUE)
-      check.nvector(y0, naok=TRUE)
-      check.nvector(x1, naok=TRUE)
-      check.nvector(y1, naok=TRUE)
+      check.nvector(x0, naok=TRUE, vname="x0")
+      check.nvector(y0, naok=TRUE, vname="y0")
+      check.nvector(x1, naok=TRUE, vname="x1")
+      check.nvector(y1, naok=TRUE, vname="y1")
       eX <- cbind(x0, y0, x1, y1)
     }
     if(is.null(V)) {

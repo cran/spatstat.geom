@@ -20,6 +20,7 @@
 \alias{AsymmDistance.psp}
 \alias{as.breakpts}
 \alias{as.character.unitname}
+\alias{as.data.frame.ppplist}
 \alias{as.double.im}
 \alias{as.imlist}
 \alias{as.linimlist}
@@ -246,6 +247,7 @@
 \alias{recognise.spatstat.type}
 \alias{rectquadrat.breaks}
 \alias{rectquadrat.countEngine}
+\alias{remove.identical.pairs}
 \alias{repair.image.xycoords}
 \alias{resolve.stringsAsFactors}
 \alias{rgbNA}
@@ -297,6 +299,7 @@
 \alias{summary.splitppx}
 \alias{superimposeMarks}
 \alias{symbolmapdomain}
+\alias{symbolmapparnames}
 \alias{symbolmaptype}
 \alias{tail.hyperframe}
 \alias{thickSegments}
@@ -364,6 +367,7 @@ areaLoss.poly(X, r, \dots, W, subset, splitem)
 AsymmDistance.psp(X, Y, metric, method)
 as.breakpts(\dots)
 \method{as.character}{unitname}(x, \dots)
+\method{as.data.frame}{ppplist}(x, row.names, \dots)
 \method{as.double}{im}(x, \dots)
 as.imlist(x, check)
 as.linimlist(x, check)
@@ -595,6 +599,7 @@ rasterfilter(X, f)
 recognise.spatstat.type(x)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
+remove.identical.pairs(cl, imap, jmap)
 repair.image.xycoords(x)
 resolve.stringsAsFactors(stringsAsFactors)
 rgbNA(red, green, blue, alpha, maxColorValue)
@@ -646,6 +651,7 @@ store.versionstring.spatstat()
 \method{summary}{splitppx}(object, \dots)
 superimposeMarks(arglist, nobj)
 symbolmapdomain(x)
+symbolmapparnames(x)
 symbolmaptype(x)
 \method{tail}{hyperframe}(x,n,\dots)
 thickSegments(x, widths, \dots,
@@ -685,6 +691,8 @@ XDtoNN(d, what, iX, iY, k, \dots)
 xypolygon2psp(p, w, check)
 ZeroValue(x)
 \method{ZeroValue}{im}(x)
+
+
 
 
 

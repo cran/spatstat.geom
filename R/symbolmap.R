@@ -1,7 +1,7 @@
 ##
 ## symbolmap.R
 ##
-##   $Revision: 1.37 $  $Date: 2020/01/11 04:45:05 $
+##   $Revision: 1.42 $  $Date: 2022/05/12 06:01:44 $
 ##
 
 symbolmap <- local({
@@ -153,6 +153,8 @@ symbolmapdomain <- function(x) {
   return(d)
 }
 
+symbolmapparnames <- function(x) { names(attr(x, "stuff")[["parlist"]]) }
+
 update.symbolmap <- function(object, ...) {
   y <- attr(object, "stuff")
   oldargs <- append(y[["parlist"]], y[c("inputs", "range")])
@@ -245,12 +247,17 @@ invoke.symbolmap <- local({
     return(max(cex %orifnull% 1))
   }
   ## plot symbols likewise
+  known.shapes <-  c("circles", "squares", "arrows", "crossticks")
   do.symbols <- function(x, y, ..., 
                          shape,
                          size=cex, cex=NULL,
                          fg=col, col=cols, cols=NULL,
-                         lwd=1, etch=FALSE, do.plot=TRUE) {
+                         lwd=1, etch=FALSE,
+                         angleref=0,
+                         do.plot=TRUE) {
     if(do.plot) {
+      if(is.null(size))
+        stop("parameter 'size' is required", call.=FALSE)
       ## zap tiny sizes
       tiny <- (size < (max(size)/1000))
       size[tiny] <- 0
@@ -258,8 +265,8 @@ invoke.symbolmap <- local({
       n <- length(x)
       if(length(lwd) == 1) lwd <- rep(lwd, n)
       if(length(etch) == 1) etch <- rep(etch, n)
-      if(length(fg) == 0) fg <- rep(par("col"), n) else
-      if(length(fg) == 1) fg <- rep(fg, n)
+      if(length(fg) == 0) fg <- rep(par("col"), n) else if(length(fg) == 1) fg <- rep(fg, n)
+      if(length(angleref) == 1) angleref <- rep(angleref, n)
       other <- resolve.defaults(list(...),
                                 list(add=TRUE, inches=FALSE))
       ## infer which arguments are parallelised
@@ -314,6 +321,30 @@ invoke.symbolmap <- local({
                           lapply(other.vec, "[", i=i),
                           list(lwd=lwd[i], cols=fg[i])),
                         extrargs=c("cols", "col", "lwd", "lty"))
+      if(any(i <- (shape == "crossticks") & as.logical(etch)))
+        do.call.matched(do.crossticks,
+                        c(list(x=x[i], y=y[i], len=size[i], angleref=angleref[i]),
+                          other.fixed,
+                          lapply(other.vec, "[", i=i),
+                          list(lwd=anti.lwd[i], cols=anti.fg[i])),
+                        extrargs=c("cols", "col", "lwd", "lty"))
+      if(any(i <- (shape == "crossticks"))) 
+        do.call.matched(do.crossticks,
+                        c(list(x=x[i], y=y[i], len=size[i], angleref=angleref[i]),
+                          other.fixed,
+                          lapply(other.vec, "[", i=i),
+                          list(lwd=lwd[i], cols=fg[i])),
+                        extrargs=c("cols", "col", "lwd", "lty"))
+      if(any(nomatch <- is.na(match(shape, known.shapes)))) {
+        unknown <- unique(shape[nomatch])
+        nun <- length(unknown)
+        warning(paste("Unrecognised",
+                      ngettext(nun, "shape", "shapes"),
+                      paste0(commasep(sQuote(unknown)), ";"),
+                      "recognised values are",
+                      commasep(sQuote(known.shapes))),
+                call.=FALSE)
+      }
     }
     return(max(size))
   }
@@ -325,8 +356,8 @@ invoke.symbolmap <- local({
                         lwd=1, lty=1) {
     #' vectorise all arguments
     df <- data.frame(x=x, y=y, len=len, direction=direction,
-                     arrowtype=arrowtype, headangle=headangle,
-                     cols=cols, lwd=lwd, lty=lty)
+                     arrowtype=arrowtype, headlength=headlength,
+                     headangle=headangle, cols=cols, lwd=lwd, lty=lty)
     with(df, {
       alpha <- direction * pi/180
       dx <- len * cos(alpha)/2
@@ -360,26 +391,38 @@ invoke.symbolmap <- local({
     })
     return(invisible(NULL))
   }
-  
+
+  do.crossticks <- function(x, y, len, angleref=0, arrowtype=0, ...,
+                            direction = angleref + 90) {
+    do.arrows(x=x, y=y, len=len,
+              direction=direction,
+              arrowtype=arrowtype, ...)
+  }
+
   ## main function
+
   invoke.symbolmap <- function(map, values, x=NULL, y=NULL, ...,
-                                 add=FALSE, do.plot=TRUE,
-                                 started = add && do.plot) {
+                               angleref=NULL, 
+                               add=FALSE, do.plot=TRUE,
+                               started = add && do.plot) {
     if(!inherits(map, "symbolmap"))
-      stop("map should be an object of class 'symbolmap'")
+      stop("Argument 'map' should be an object of class 'symbolmap'")
     if(hasxy <- (!is.null(x) || !is.null(y))) {
       xy <- xy.coords(x, y)
       x <- xy$x
       y <- xy$y
-    } 
+    }
+    if(is.null(angleref)) 
+      angleref <- numeric(length(x)) ## zeroes, or numeric(0)
     ## function will return maximum size of symbols plotted.
     maxsize <- 0
     if(do.plot && !add) plot(x, y, type="n", ...)
-    force(values)
+    ## map numerical/factor values to graphical parameters
     g <- map(values)
     parnames <- colnames(g)
     if(do.plot) {
-      xydf <- data.frame(x=x, y=y)
+      ## add spatial coordinates
+      xydf <- data.frame(x=x, y=y, angleref=angleref)
       if(nrow(xydf) == 0)
         return(invisible(maxsize))
       g <- if(prod(dim(g)) == 0) xydf else 
@@ -488,7 +531,7 @@ plot.symbolmap <- function(x, ..., main,
     if(is.null(ylim)) ylim <- usr[3:4]
   } else {
     ## create new plot
-    maxdiam <- invoke.symbolmap(map, vv, do.plot=FALSE, started=FALSE)
+    maxdiam <- invoke.symbolmap(map, vv, do.plot=FALSE, started=FALSE, ...)
     zz <- c(0, max(1, maxdiam))
     if(is.null(xlim) && is.null(ylim)) {
       if(vertical) {
@@ -514,7 +557,7 @@ plot.symbolmap <- function(x, ..., main,
                                           asp=1.0),
                                      list(...)))
   ## maximum symbol diameter
-  maxdiam <- invoke.symbolmap(map, vv, do.plot=FALSE, started=TRUE)
+  maxdiam <- invoke.symbolmap(map, vv, do.plot=FALSE, started=TRUE, ...)
 
   ## .......... plot symbols ....................
   if(type == "constant") {
@@ -543,7 +586,8 @@ plot.symbolmap <- function(x, ..., main,
       xp <- z[-1] - diff(z)/2
     }
   }
-  invoke.symbolmap(map, vv, xp, yp, ..., add=TRUE)
+  invoke.symbolmap(map, vv, xp, yp, ..., add=TRUE,
+                   angleref=if(vertical) 90 else 0)
 
   ## ................. draw annotation ..................
   if(annotate && length(ll) > 0) {

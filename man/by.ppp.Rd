@@ -60,11 +60,10 @@
 }
 \examples{
   # multitype point pattern, broken down by type
-  data(amacrine)
   by(amacrine, FUN=minnndist)
   by(amacrine, FUN=function(x) { intensity(unmark(x)) })
 
-  if(require(spatstat.core)) {
+  if(require(spatstat.explore)) {
   # how to pass additional arguments to FUN
   by(amacrine, FUN=clarkevans, correction=c("Donnelly","cdf"))
   }
@@ -75,7 +74,7 @@
   ## compute minimum nearest neighbour distance for points in each tile
   B <- by(swedishpines, tes, minnndist)
 
-  if(require(spatstat.core)) {
+  if(require(spatstat.explore)) {
   B <- by(swedishpines, tes, clarkevans, correction="Donnelly")
   simplify2array(B)
   }

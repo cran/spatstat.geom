@@ -19,7 +19,10 @@ closepairs(X, rmax, \dots)
 
 crosspairs(X, Y, rmax, \dots)
 
-\method{crosspairs}{ppp}(X, Y, rmax, what=c("all", "indices", "ijd"), \dots)
+\method{crosspairs}{ppp}(X, Y, rmax,
+                        what=c("all", "indices", "ijd"),
+                        periodic=FALSE, \dots,
+                        iX=NULL, iY=NULL)
 }
 \arguments{
   \item{X,Y}{
@@ -62,6 +65,10 @@ crosspairs(X, Y, rmax, \dots)
     Opposite pairs of edges of the window will be treated as identical.
   }
   \item{\dots}{Extra arguments, ignored by methods.}
+  \item{iX,iY}{
+    Optional vectors used to determine whether a point in \code{X}
+    is identical to a point in \code{Y}. See Details.
+  }
 }
 \details{
   These are the efficient low-level functions used by \pkg{spatstat}
@@ -89,6 +96,18 @@ crosspairs(X, Y, rmax, \dots)
   \code{(X[i], Y[j])} between the patterns \code{X} and \code{Y},
   and returns them. The result is
   a list with the same format as for \code{closepairs}.
+  
+  The arguments \code{iX} and \code{iY} are used when
+  the two point patterns \code{X} and \code{Y} may have some points in
+  common.  In this situation \code{crosspairs(X, Y)} would return some
+  pairs of points in which the two points are identical.
+  To avoid this, attach a unique integer
+  identifier to each point, such that two points are identical if their
+  identifier values are equal. Let \code{iX} be the vector of
+  identifier values for the points in \code{X}, and \code{iY}
+  the vector of identifiers for points in \code{Y}. Then the code
+  will only compare two points if they have different values of the
+  identifier. 
 }
 \section{Warning about accuracy}{
   The results of these functions may not agree exactly with
@@ -119,7 +138,7 @@ crosspairs(X, Y, rmax, \dots)
   \code{\link{closepairs.pp3}} for the corresponding
   functions for 3D point patterns.
   
-  \code{\link[spatstat.core]{Kest}}, \code{\link[spatstat.core]{Kcross}},
+  \code{\link[spatstat.explore]{Kest}}, \code{\link[spatstat.explore]{Kcross}},
   \code{\link{nndist}}, \code{\link{nncross}},
   \code{\link{applynbd}}, \code{\link{markstat}}
   for functions which use these capabilities.

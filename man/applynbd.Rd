@@ -129,7 +129,8 @@
 
   The format of the argument \code{current} is as follows.
   If \code{X} is an unmarked point pattern, then \code{current} is a
-  vector of length 2 containing the coordinates of the current point.
+  list of length 2 with entries \code{current$x} and \code{current$y}
+  containing the coordinates of the current point.
   If \code{X} is marked, then \code{current} is a point pattern
   containing exactly one point, so that \code{current$x} is its
   \eqn{x}-coordinate and \code{current$marks} is its mark value.
@@ -144,13 +145,13 @@
   See \code{\link{markstat}} for a common use of this function.
 
   To simply tabulate the marks in every \code{R}-neighbourhood, use
-  \code{\link[spatstat.core]{marktable}}.
+  \code{\link[spatstat.explore]{marktable}}.
 }
 \seealso{
   \code{\link{ppp.object}},
   \code{\link{apply}},
   \code{\link{markstat}},
-  \code{\link[spatstat.core]{marktable}}
+  \code{\link[spatstat.explore]{marktable}}
 }
 \examples{
   redwood

@@ -44,12 +44,13 @@ commonGrid(\dots)
   and \rolf
 }
 \examples{
-if(require(spatstat.core)) {
-   A <- setcov(square(1))
-   G <- density(runifpoint(42), dimyx=16)
+if(require(spatstat.random)) {
+   A <- setcov(square(1), dimyx=32)
+   G <- as.im(function(x,y) { x^2 - y }, W=owin(), dimyx=8)
    H <- commonGrid(A, letterR, G)
    newR <- as.mask(letterR, xy=H)
    newG <- as.im(G, W=H)
+   if(interactive()) plot(solist(G=newG, R=newR), main="")
 }
 }
 \seealso{

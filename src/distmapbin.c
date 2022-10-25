@@ -4,7 +4,7 @@
        Distance transform of a discrete binary image
        (8-connected path metric)
        
-       $Revision: 1.7 $ $Date: 2018/12/18 02:43:11 $
+       $Revision: 1.10 $ $Date: 2022/10/22 09:29:51 $
 
        
   Copyright (C) Adrian Baddeley, Ege Rubak and Rolf Turner 2001-2018
@@ -16,17 +16,19 @@
 #include "raster.h"
 #include <R_ext/Utils.h>
 
-void   dist_to_bdry();
-void   shape_raster();
+void dist_to_bdry(Raster *d);
 
+void shape_raster(Raster *ras, void *data,
+		  double xmin, double ymin, double xmax, double ymax,
+		  int nrow, int ncol, int mrow, int mcol);
 
 void
-distmap_bin(in, dist)
-        Raster  *in;            /* input:  binary image */
-	Raster	*dist;		/* output: distance to nearest point */
+distmap_bin(
+    Raster  *in,            /* input:  binary image */
+    Raster  *dist           /* output: distance to nearest point */
 	/* rasters must have been dimensioned by shape_raster()
 	   and must all have identical dimensions and margins */
-{
+) {
 	int	j,k;
 	double	d, dnew;
 	double  xstep, ystep, diagstep, huge;
@@ -102,17 +104,22 @@ distmap_bin(in, dist)
 
 /* R interface */
 
-void distmapbin(xmin, ymin, xmax, ymax, nr, nc,
-		inp, distances, boundary)
-	double *xmin, *ymin, *xmax, *ymax;  	  /* x, y dimensions */
-	int *nr, *nc;	 	                  /* raster dimensions
-				                     EXCLUDING margin of 1 on each side */
-	int   *inp;              /* input:  binary image */
-	double *distances;	/* output: distance to nearest point */
-	double *boundary;       /* output: distance to boundary of rectangle */
+void distmapbin(
+  double *xmin,
+  double *ymin,
+  double *xmax,
+  double *ymax,  	  /* x, y dimensions */
+  int *nr,
+  int *nc,                /* raster dimensions
+	                   EXCLUDING margin of 1 on each side */
+  int   *inp,              /* input:  binary image */
+  double *distances,	/* output: distance to nearest point */
+  double *boundary       /* output: distance to boundary of rectangle */
 	/* all images must have identical dimensions including a margin of 1 on each side */
-{
+) {
 	Raster data, dist, bdist;
+
+	void distmap_bin(Raster *in, Raster *dist);
 
 	shape_raster( &data, (void *) inp, *xmin,*ymin,*xmax,*ymax,
 			    *nr+2, *nc+2, 1, 1);

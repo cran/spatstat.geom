@@ -25,29 +25,34 @@
   Copyright (C) Adrian Baddeley, Jens Oehlschlagel and Rolf Turner 2000-2013
   Licence: GPL >= 2
 
-  $Revision: 1.11 $  $Date: 2021/04/12 07:33:03 $
+  $Revision: 1.13 $  $Date: 2022/10/23 00:23:50 $
 
 
 */
 #endif
 
-void FNAME(n1, x1, y1, id1, 
-           n2, x2, y2, id2, 
-	   kmax,
-	   nnd, nnwhich, 
-	   huge)
-     /* inputs */
-     int *n1, *n2;
-     double *x1, *y1, *x2, *y2, *huge;
-     int *id1, *id2;
-     int *kmax;
-     /* outputs */
-     double *nnd;
-     int *nnwhich;
-     /* some inputs + outputs are not used in all functions */
-{ 
+#undef USEJ
+#ifndef EXCLUDE
+#define USEJ
+#endif
+
+void FNAME(
+  /* inputs */
+  int *n1, double *x1, double *y1, int *id1,
+  int *n2, double *x2, double *y2, int *id2,
+  int *kmax,
+  /* outputs */
+  double *nnd,
+  int *nnwhich,
+  /* upper bound on pairwise distance */
+  double *huge
+  /* some inputs + outputs are not used in all functions */
+) { 
   int npoints1, npoints2, nk, nk1;
-  int maxchunk, i, jleft, jright, jwhich, lastjwhich, unsorted, k, k1;
+  int maxchunk, i, jleft, jright, lastjwhich, unsorted, k, k1;
+#ifdef USEJ
+  int jwhich;
+#endif
   double d2, d2minK, x1i, y1i, dx, dy, dy2, hu, hu2, tmp;
   double *d2min; 
 #ifdef WHICH
@@ -97,7 +102,9 @@ void FNAME(n1, x1, y1, id1,
 
       /* initialise nn distances and indices */
       d2minK = hu2;
+#ifdef USEJ
       jwhich = -1;
+#endif      
       for(k = 0; k < nk; k++) {
 	d2min[k] = hu2;
 #ifdef WHICH
@@ -154,7 +161,9 @@ void FNAME(n1, x1, y1, id1,
 			d2min[nk1], d2);
 #endif
 		d2min[nk1] = d2;
+#ifdef USEJ
 		jwhich = jright;
+#endif		
 #ifdef WHICH
 		which[nk1] = jright;
 #endif
@@ -234,7 +243,9 @@ void FNAME(n1, x1, y1, id1,
 			d2min[nk1], d2);
 #endif
 		d2min[nk1] = d2;
+#ifdef USEJ
 		jwhich = jleft;
+#endif		
 #ifdef WHICH
 		which[nk1] = jleft;
 #endif
