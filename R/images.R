@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#      $Revision: 1.174 $     $Date: 2022/06/09 04:47:04 $
+#      $Revision: 1.177 $     $Date: 2023/01/15 02:01:31 $
 #
 #      The class "im" of raster images
 #
@@ -491,7 +491,8 @@ update.im <- function(object, ...) {
       } else {
         vnew[!is.na(v)] <- as.integer(value)
       }
-      v <- factor(vnew, labels=levels(value))
+      lnew <- levels(value)
+      v <- factor(vnew, levels=seq_along(lnew), labels=lnew)
     }
     X$v <- v
     return(update(X))
@@ -1079,6 +1080,12 @@ quantile.im <- function(x, ...) {
   return(q)
 }
 
+quantilefun.im <- function(x, ..., type=1) {
+  verifyclass(x, "im")
+  f <- ecdf(as.numeric(x[]))
+  quantilefun(f, type=type)
+}
+  
 integral <- function(f, domain=NULL, ...) {
   UseMethod("integral")
 }

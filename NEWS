@@ -1,3 +1,79 @@
+        CHANGES IN spatstat.geom VERSION 3.0-5
+
+OVERVIEW
+
+    o Convert several factors or factor-valued images to a common set of levels.
+    
+    o Extension to rjitter
+
+    o Alternative to rjitter
+
+    o Quantile function as a function
+
+    o Improvements to plot code.
+
+NEW FUNCTIONS
+
+    o harmoniseLevels
+    Given several factors or factor-valued pixel images,
+    convert them all to have the same set of factor levels.
+
+    o rexplode
+    'Explode' a point pattern by randomly displacing each
+    group of duplicated points to make a circular pattern
+    around the original location. An alternative to 'rjitter'.
+
+    o quantilefun
+    Return a function that computes any quantiles of a given dataset.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o rjitter.ppp
+    If 'trim=TRUE', the displacement radius will be constrained
+    to be less than or equal to the distance from the data point
+    to the window boundary. 
+    
+    o plot.ppp
+    For multitype point patterns, a warning is issued if 
+    the plot legend does not represent every possible type of point
+    due to space restrictions.
+
+    o plot.symbolmap
+    New argument 'warn'.
+
+    o plot.symbolmap
+    Issues a warning if the plot of a discrete symbol map does not
+    represent every possible input value, due to space restrictions.
+
+    o plot.solist
+    When equal.ribbon=TRUE, the images may now be factor-valued
+    or character-valued. Character-valued images will be converted
+    to factor-valued images. The common colour map will combine the
+    levels of all the factor images. 
+    
+BUG FIXES
+
+    o "[<-.im"
+    Errors occurred in x[] <- v when x and v were both factor-valued
+    but with different sets of levels.
+
+    o rjitter
+    If retry=FALSE, marks were ignored.
+    Fixed.
+    
+        CHANGES IN spatstat.geom VERSION 3.0-4
+
+OVERVIEW
+
+    o Improvements to perspective plots.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o perspPoints, perspLines, perspSegments, perspContour
+    New argument 'occluded' specifies whether the surface
+    should be treated as opaque or transparent.
+
+
         CHANGES IN spatstat.geom VERSION 3.0-3
 
 OVERVIEW

@@ -1,7 +1,7 @@
 #
 #	plot.ppp.R
 #
-#	$Revision: 1.104 $	$Date: 2022/04/23 09:43:12 $
+#	$Revision: 1.107 $	$Date: 2023/01/18 08:17:07 $
 #
 #
 #--------------------------------------------------------------------------
@@ -247,7 +247,8 @@ plot.ppp <- local({
                      resolve.defaults(list(x=quote(y), main=main,
                                            show.window=show.window && !clipped,
                                            do.plot=do.plot,
-                                           type=type),
+                                           type=type,
+                                           symap=symap),
                                       list(...),
                                       list(equal.scales=TRUE),
                                       list(panel.end=clippy),
@@ -305,7 +306,6 @@ plot.ppp <- local({
                                     markscale=markscale,
                                     ...)
   }
-#  gtype <- symbolmaptype(symap)
 
   ## Determine bounding box for main plot
   BB <- as.rectangle(x)
@@ -434,7 +434,7 @@ plot.ppp <- local({
     legendmap <- if(length(leg.args) == 0) symap else 
                  do.call(update, append(list(object=quote(symap)), leg.args))
     dont.complain.about(legendmap)
-    do.call(plot,
+    do.call(plot.symbolmap,
             append(list(x=quote(legendmap), main="", add=TRUE,
                         xlim=legbox$xrange, ylim=legbox$yrange),
                    leg.args))
