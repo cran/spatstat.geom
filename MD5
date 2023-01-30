@@ -1,6 +1,6 @@
-67c3aaa44db4351fc8f9226ceed34958 *DESCRIPTION
+fe1c6eb20999fbd1ba1bd5ed97995a07 *DESCRIPTION
 0b8931dbd870f384e5600a98c16ac59c *NAMESPACE
-a9945486bb21e7dc3498980d6a488723 *NEWS
+b609e45e5b55dd5858c52381153e0cb7 *NEWS
 61e66e2561a8a0e89e9c9d0fa32ff495 *R/First.R
 7b5da2ffbcca4f497eb3c33f786306e3 *R/Math.im.R
 44f8a71ab76fed0cb52bcee94c0262f8 *R/Math.imlist.R
@@ -51,7 +51,7 @@ c568e14e0b06fcc8ab2243b1a9afd4be *R/eval.im.R
 e5a0a2074a539352f5572994731bfccd *R/ewcdf.R
 7e491d198a1cb8866a4c5cbe98477868 *R/exactPdt.R
 82f0c2597ae60271c9db658b30f2b89b *R/exactdt.R
-b702dd0654452a83b68e9a78db30f030 *R/factors.R
+087615e45fee7233bf762fdd4c3bceb1 *R/factors.R
 a78edb263ce2be48c9e5e829c28b8770 *R/fardist.R
 0d8c663012546b61deb9db628fc33e71 *R/fft.R
 9b4accc71b99440893950bbb817ba851 *R/flipxy.R
@@ -151,9 +151,9 @@ b62b3dc94a5e2837685ade20ebafce98 *R/util.R
 b1333ff8439dfd41629fdf56be763bea *R/weights.R
 9a83d547bf57d7dcc88ad3659fb0bbc1 *R/window.R
 3d18369e9efc2b30c7e369077b9924a8 *R/wingeom.R
-152bbf4b15996c2c583ad5578f14d45b *inst/CITATION
+988c93d9b11b903170e3f640220d3ed9 *inst/CITATION
 ac6aa02ee30a52f0a13abc4a17ff0174 *inst/doc/downstream.txt
-c6e74c1a226780fdbe06be7296d0f290 *inst/doc/packagesizes.txt
+871cff51e12673e3a255fb90479ef994 *inst/doc/packagesizes.txt
 12e68895fef0d3aa0bde45a0ddbadfa4 *inst/ratfor/Makefile
 22e8a5189942ba190c13475b35459c7f *inst/ratfor/dppll.r
 6d471ec061ea91398ba16323de56b9db *inst/ratfor/inxypOld.r
@@ -678,7 +678,7 @@ d43888baaecd5e2a8d25bc8bae058fb0 *src/whist.c
 c1624129ac630ef4653e3119d70ffa5b *tests/selfcross.txt
 ebd5f51ebac09a044996511b64533232 *tests/testsAtoC.R
 1545a52f384ae984361d7dc756a9136c *tests/testsD.R
-656d2209a3749e2a199992096c6caf0a *tests/testsEtoF.R
+0ea5c7e4c4ed266a63f8c3523a2cff00 *tests/testsEtoF.R
 225195f59c6f22f655ad08de2eff658b *tests/testsGtoJ.R
 bd48e397baa926bd320898c771fc2ecf *tests/testsK.R
 2656e51d2502ce38411ac2618bdde3d6 *tests/testsL.R
