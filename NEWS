@@ -1,3 +1,62 @@
+        CHANGES IN spatstat.geom VERSION 3.1-0
+
+OVERVIEW
+
+    o Methods for "[[" and "[[<-" for hyperframes.
+
+    o Colour map for pH values.
+
+    o Restrict a colour map to a narrower range of values.
+
+    o Integral of a one-dimensional density estimate.
+    
+    o Minor improvements and bug fixes.
+
+NEW FUNCTIONS
+
+    o "[[.hyperframe", "[[<-.hyperframe"
+    Methods for "[[" and "[[<-" for hyperframes.
+
+    o pHcolourmap, pHcolour
+    Colour map for values of pH
+
+    o restrict.colourmap
+    Restrict a colourmap to a narrower range of values.
+
+    o integral.density
+    Compute the integral of a one-dimensional kernel density estimate.
+
+    o as.colourmap
+    Extract colour information from an object.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o plot.symbolmap
+    New argument colour.only makes it possible to display only the
+    colour map information in a symbolmap.
+    
+    o "[.hyperframe", "[<-.hyperframe"
+    Improved error message when the format of index i or j is not supported.
+
+    o unnormdensity
+    Computation accelerated.
+
+    o unnormdensity
+    Handles datasets containing fewer than 2 values.
+
+BUG FIXES
+
+    o unnormdensity
+    If 'weights' was a single numerical value 'w', the calculation incorrectly
+    assigned the weight for each observation to be 'w/n' where 'n=length(x)'.
+    Fixed.
+
+    o unnormdensity
+    A crash could occur if 'x' was a very long vector,
+    with an error message originating from 'deparse1'.
+    Fixed.
+
+    
         CHANGES IN spatstat.geom VERSION 3.0-6
 
 OVERVIEW

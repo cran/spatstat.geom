@@ -3,7 +3,7 @@
 #
 # support for colour maps and other lookup tables
 #
-# $Revision: 1.47 $ $Date: 2020/07/03 03:21:28 $
+# $Revision: 1.49 $ $Date: 2023/02/21 08:20:14 $
 #
 
 colourmap <- function(col, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1) {
@@ -219,6 +219,17 @@ plot.colourmap <- local({
     if(dw == 0) 1 else (dw * (if(separate) (n + (n-1)*gap) else 10))
   }
 
+  sideCode <- function(side) {
+    if(is.numeric(side)) {
+      stopifnot(side %in% 1:4)
+      sidecode <- side
+    } else if(is.character(side)) {
+      stopifnot(side %in% c("bottom", "left", "top", "right"))
+      sidecode <- match(side, c("bottom", "left", "top", "right"))
+    } else stop("Unrecognised format for 'side'")
+    return(sidecode)
+  }
+    
   plot.colourmap <- function(x, ..., main,
                              xlim=NULL, ylim=NULL, vertical=FALSE, axis=TRUE,
                              labelmap=NULL, gap=0.25, add=FALSE,
@@ -393,7 +404,8 @@ plot.colourmap <- local({
         if(reverse)
           at <- rev(at)
         # default axis position is below the ribbon (side=1)
-        sidecode <- resolve.1.default("side", list(...), list(side=1L))
+        side <- resolve.1.default("side", list(...), list(side=1L))
+        sidecode <- sideCode(side)
         if(!(sidecode %in% c(1L,3L)))
           warning(paste("side =", sidecode,
                         "is not consistent with horizontal orientation"))
@@ -420,7 +432,8 @@ plot.colourmap <- local({
         if(reverse)
           at <- rev(at)
         # default axis position is to the right of ribbon (side=4)
-        sidecode <- resolve.1.default("side", list(...), list(side=4))
+        side <- resolve.1.default("side", list(...), list(side=4))
+        sidecode <- sideCode(side)
         if(!(sidecode %in% c(2L,4L)))
           warning(paste("side =", sidecode,
                         "is not consistent with vertical orientation"))
@@ -583,4 +596,69 @@ colouroutputs <- function(x) {
   assign("stuff", st, envir=environment(x))
   return(x)
 }
+
+restrict.colourmap <- function(x, ..., range=NULL, breaks=NULL, inputs=NULL) {
+  stopifnot(inherits(x, "colourmap"))
+  given <- c(!is.null(range), !is.null(breaks), !is.null(inputs))
+  names(given) <- nama <- c("range", "breaks", "inputs")
+  ngiven <- sum(given)
+  if(ngiven == 0L)
+    return(x)
+  if(ngiven > 1L) {
+    offending <- nama[given]
+    stop(paste("The arguments",
+               commasep(sQuote(offending)),
+               "are incompatible"))
+  }
+  stuff <- attr(x, "stuff")
+  if(!is.null(inputs)) {
+    ## discrete colour map
+    if(!stuff$discrete) 
+      stop("Cannot update 'inputs'; the existing colour map is not discrete",
+           call.=FALSE)
+    oldinputs <- stuff$inputs
+    oldoutputs <- stuff$outputs
+    m <- match(inputs, oldinputs)
+    if(any(is.na(m)))
+      stop("New inputs are not a subset of the old inputs", call.=FALSE)
+    result <- colourmap(oldoutputs[m], inputs=inputs)
+  } else if(!is.null(range)) {
+    ## colour map for continuous domain
+    ## range specified
+    if(stuff$discrete) 
+      stop("Cannot update 'range'; the existing colour map is discrete",
+           call.=FALSE)
+    check.range(range)
+    oldbreaks <- stuff$breaks
+    if(!all(inside.range(range, range(oldbreaks))))
+      stop("new range of values is not a subset of current range")
+    ## restrict existing breaks to new range
+    newbreaks <- pmax(range[1], pmin(range[2], oldbreaks))
+    newbreaks <- unique(newbreaks)
+    ## evaluate current colour at midpoint of each new interval
+    newmid <- newbreaks[-length(newbreaks)] + diff(newbreaks)/2
+    newout <- x(newmid)
+    result <- colourmap(newout, breaks=newbreaks)
+  } else {
+    ## colour map for continuous domain
+    ## breaks specified
+    if(stuff$discrete) 
+      stop("Cannot update 'breaks'; the existing colour map is discrete",
+           call.=FALSE)
+    oldbreaks <- stuff$breaks
+    if(!all(inside.range(breaks, range(oldbreaks))))
+      stop("new range of 'breaks' is not a subset of current range of 'breaks'",
+           call.=FALSE)
+    newmid <- breaks[-length(breaks)] + diff(breaks)/2
+    newout <- x(newmid)
+    result <- colourmap(newout, breaks=breaks)
+  }
+  return(result)
+}
+
+as.colourmap <- function(x, ...) {
+  UseMethod("as.colourmap")
+}
+
+as.colourmap.colourmap <- function(x, ...) { x }
 
