@@ -31,6 +31,7 @@
 \alias{avenndist}
 \alias{bbEngine}
 \alias{bdry.mask}
+\alias{boundingbox.list}
 \alias{bounding.box3}
 \alias{break.holes}
 \alias{breakpts}
@@ -379,6 +380,7 @@ as.unitname(s)
 avenndist(X)
 bbEngine(\dots)
 bdry.mask(W)
+\method{boundingbox}{list}(\dots)
 bounding.box3(\dots)
 break.holes(x, splitby, depth, maxdepth)
 breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
@@ -414,7 +416,7 @@ diagramobj(X, \dots)
 \method{dim}{im}(x)
 \method{dim}{owin}(x)
 dist2dpath(dist, method="C")
-do.as.im(x, action, \dots, W, eps, dimyx, xy, na.replace)
+do.as.im(x, action, \dots, W, eps, dimyx, xy, rule.eps, na.replace)
 do.call.plotfun(fun, arglist, \dots, envir)
 drawSignedPoly(x,y,pars,sgn)
 emptywindow(w)

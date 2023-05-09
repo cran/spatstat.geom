@@ -1,3 +1,62 @@
+        CHANGES IN spatstat.geom VERSION 3.2-1
+
+OVERVIEW
+
+    o Fixed errors and omissions in documentation.
+
+    o Minor improvements in C code.
+
+        CHANGES IN spatstat.geom VERSION 3.2-0
+
+OVERVIEW
+
+    o We thank Warick Brown and Tilman Davies for suggestions.
+
+    o More options for converting polygons to a binary mask.
+
+    o More options for controlling pixel size.
+
+    o Improvement to progress reports.
+    
+    o Minor tweaks to package documentation.
+
+NEW FUNCTIONS
+
+    o psp2mask
+    Function 'as.mask.psp' has been renamed 'psp2mask'.
+    The old function 'as.mask.psp' still exists, but it will
+    soon be deprecated, and ultimately removed.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o owin2mask
+    New options op="majority" and op="minority".
+    If op="majority", a pixel belongs to the resulting mask if
+    at least half of the pixel area is covered by the window.
+    
+    o as.mask
+    New argument 'rule.eps' specifies what to do when the
+    desired pixel size is not a divisor of the frame size.
+
+    o as.im
+    Many methods for 'as.im' now have argument 'rule.eps'.
+
+    o discretise
+    New argument 'rule.eps'
+
+    o distfun
+    New argument 'rule.eps'
+
+    o nnfun
+    New argument 'rule.eps'
+
+    o progressreport
+    New argument 'formula' controls the calculation of estimated time remaining.
+    
+    o progressreport
+    New argument 'savehistory' specifies whether to save the elapsed times
+    when the function was called.
+    
         CHANGES IN spatstat.geom VERSION 3.1-0
 
 OVERVIEW

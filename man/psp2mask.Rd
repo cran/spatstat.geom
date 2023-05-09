@@ -1,4 +1,5 @@
-\name{as.mask.psp}
+\name{psp2mask}
+\alias{psp2mask}
 \alias{as.mask.psp}
 \title{
   Convert Line Segment Pattern to Binary Pixel Mask
@@ -8,6 +9,7 @@
   by determining which pixels intersect the lines.
 }
 \usage{
+psp2mask(x, W=NULL, ...)
 as.mask.psp(x, W=NULL, ...)
 }
 
@@ -25,6 +27,10 @@ as.mask.psp(x, W=NULL, ...)
   }
 }
 \details{
+  The functions \code{psp2mask} and \code{as.mask.psp} are currently
+  identical. In future versions of the package, \code{as.mask.psp}
+  will be deprecated, and then removed. 
+  
   This function converts a line segment pattern to a binary
   pixel mask by determining which pixels intersect the lines.
 
@@ -50,14 +56,12 @@ as.mask.psp(x, W=NULL, ...)
 }
 \examples{
   X <- psp(runif(10), runif(10), runif(10), runif(10), window=owin())
-  plot(as.mask.psp(X))
+  plot(psp2mask(X))
   plot(X, add=TRUE, col="red")
 }
-\author{\adrian
-  
-  
+\author{
+  \adrian
   and \rolf
-  
 }
 \keyword{spatial}
 \keyword{manip}
