@@ -1,6 +1,6 @@
 Package: spatstat.geom
-Version: 3.2-1
-Date: 2023-05-09
+Version: 3.2-2
+Date: 2023-07-03
 Title: Geometrical Functionality of the 'spatstat' Family
 Authors@R: c(person("Adrian", "Baddeley", 
                     role = c("aut", "cre", "cph"),
@@ -53,7 +53,7 @@ URL: http://spatstat.org/
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat.geom/issues
-Packaged: 2023-05-09 05:00:27 UTC; adrian
+Packaged: 2023-07-03 07:32:55 UTC; adrian
 Author: Adrian Baddeley [aut, cre, cph]
     (<https://orcid.org/0000-0001-9499-8382>),
   Rolf Turner [aut, cph] (<https://orcid.org/0000-0001-5521-5218>),
@@ -68,4 +68,4 @@ Author: Adrian Baddeley [aut, cre, cph]
   Dominic Schuhmacher [ctb],
   Rasmus Waagepetersen [ctb]
 Repository: CRAN
-Date/Publication: 2023-05-09 06:20:02 UTC
+Date/Publication: 2023-07-06 00:10:02 UTC

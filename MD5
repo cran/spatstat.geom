@@ -1,6 +1,6 @@
-e71466adc6e1ce64abcb70efb716280c *DESCRIPTION
+c45d82aabadf578a8adf0d7b316f504c *DESCRIPTION
 429b1d99b77ab5abcc663a8065e8713e *NAMESPACE
-950987fe6d99aba6309828dd00da58f8 *NEWS
+400f9e3c0b3fd388d22e50332c3ffd3e *NEWS
 61e66e2561a8a0e89e9c9d0fa32ff495 *R/First.R
 7b5da2ffbcca4f497eb3c33f786306e3 *R/Math.im.R
 44f8a71ab76fed0cb52bcee94c0262f8 *R/Math.imlist.R
@@ -111,9 +111,9 @@ f93c36af4fe440a5994cc1d3797e34f0 *R/pppmatch.R
 0bf053f8e0f5932bd093deccd0d3b193 *R/psp2pix.R
 c784bd48092ca94b0fadfeee3cf92b21 *R/pspcross.R
 2f4d79a05e995e8d6e2151a82e783ba2 *R/quadclass.R
-7d200f792479495858118de7f7fa2eca *R/quadratcount.R
+a0bed7ef5166e3e8002d4f57cec0b904 *R/quadratcount.R
 ba81abd6fe6794df409e9434dc1897f4 *R/quadscheme.R
-9f9884b6c1fd25f91c085ad0f1d687ee *R/quantess.R
+40d92ee81858ea56b28c0b7892758491 *R/quantess.R
 84efac90a60297aca6d1357cf1bf5474 *R/quasirandom.R
 99bbebe9d1988fe6dbd1e569ee241eed *R/randombasic.R
 2ad5ac7d5f88aa1e4854a8f6bd21a3d2 *R/randomseg.R
@@ -149,11 +149,11 @@ b48288a1f1e90c1e87f43686a18f9756 *R/unstack.R
 998db506a27ed60542581bf4cbfd0b66 *R/versions.R
 7accd418a80dab4fcf7bdd697984b79f *R/weightedStats.R
 b1333ff8439dfd41629fdf56be763bea *R/weights.R
-f906e3e188277dcddf5329becd414114 *R/window.R
+fb1e4791498066ed4cb1ea2e405d23b0 *R/window.R
 3d18369e9efc2b30c7e369077b9924a8 *R/wingeom.R
 f2d49fc8f50fef7f76bcb3fc7f34efb4 *inst/CITATION
 ac6aa02ee30a52f0a13abc4a17ff0174 *inst/doc/downstream.txt
-526654d28cf812dca2dacc79d41d079b *inst/doc/packagesizes.txt
+b60e1b35f130ef1264112716efe5cb8b *inst/doc/packagesizes.txt
 12e68895fef0d3aa0bde45a0ddbadfa4 *inst/ratfor/Makefile
 22e8a5189942ba190c13475b35459c7f *inst/ratfor/dppll.r
 6d471ec061ea91398ba16323de56b9db *inst/ratfor/inxypOld.r
@@ -208,7 +208,7 @@ e1aa9d5d00be7300ee71c8b4d50739b6 *man/as.hyperframe.Rd
 d03abf7731ca84359964a1b0e20e77e6 *man/as.hyperframe.ppx.Rd
 2a5875b5b05dada674c766f0de674c8f *man/as.im.Rd
 6c32c91d76940f0a4a3b82b2e65bf751 *man/as.layered.Rd
-5cfd006766576c8435db4c8862a87f4d *man/as.mask.Rd
+c0c11f3f6fb0b198733dcf5df1e7cb14 *man/as.mask.Rd
 f3083d1539e1ea6d8167d6be61fee79b *man/as.matrix.im.Rd
 4f0323fe12b26266d955603f279fe9fe *man/as.matrix.owin.Rd
 cdb7ab9caf7ac0eb26cb14b6828441f0 *man/as.owin.Rd
