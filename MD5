@@ -1,6 +1,6 @@
-c45d82aabadf578a8adf0d7b316f504c *DESCRIPTION
-429b1d99b77ab5abcc663a8065e8713e *NAMESPACE
-400f9e3c0b3fd388d22e50332c3ffd3e *NEWS
+434edca602a2f911f7998d2efb21ce8a *DESCRIPTION
+1ad90177aaf44f3c6c79f0ff9fe2f749 *NAMESPACE
+34ac1f1ff7e13b2f565ded532fc5437e *NEWS
 61e66e2561a8a0e89e9c9d0fa32ff495 *R/First.R
 7b5da2ffbcca4f497eb3c33f786306e3 *R/Math.im.R
 44f8a71ab76fed0cb52bcee94c0262f8 *R/Math.imlist.R
@@ -25,7 +25,7 @@ eca522aca0b04c9773424ba04cd39767 *R/circarcs.R
 2b6116c99692b04c64d77377186effc0 *R/colourschemes.R
 9b6a756339ea295c7b29cf6c83765d31 *R/colourtables.R
 2981e10272e916cd70b742d9c5f4e468 *R/colourtools.R
-3bb7d4d5ddeba09970338b9f533f12b4 *R/connected.R
+afcc68d10693c407da14cecf9a86daff *R/connected.R
 e3ff30e17b737e6b82a239440b9dbe82 *R/convexdist.R
 01f3ef8f6e61c4d7686fe0fcc203b15f *R/convexify.R
 dd5451066df5ffab2ccb336f7d1e8f0d *R/covering.R
@@ -54,6 +54,7 @@ e5a0a2074a539352f5572994731bfccd *R/ewcdf.R
 087615e45fee7233bf762fdd4c3bceb1 *R/factors.R
 a78edb263ce2be48c9e5e829c28b8770 *R/fardist.R
 0d8c663012546b61deb9db628fc33e71 *R/fft.R
+28b46b8980e7c66355c36de02e0fb3a0 *R/flaky.R
 9b4accc71b99440893950bbb817ba851 *R/flipxy.R
 ca97c5fe546c7b2d1ea8b370ee2b1cf8 *R/fourierbasis.R
 ac20192057a72cbc14a397470511157e *R/funxy.R
@@ -94,9 +95,9 @@ ed5ceb9d18447ec47e0490a65e259b75 *R/nnmark.R
 c73888548368e8f3a0b3c4a7abd1f51f *R/pickoption.R
 e0eeb6ebd736a1394fb5c9d9dee4f908 *R/pixellate.R
 b3615f69dad5382d60d4e792db519d77 *R/plot.anylist.R
-d4f134750e7dd17451937f03090ae6fc *R/plot.im.R
+f1982c76ef0d67ded07960c429b39996 *R/plot.im.R
 1878365bf66d6d67a429fb707566a519 *R/plot.owin.R
-30e11df2cc5ced28a93d9ec7ae377c16 *R/plot.ppp.R
+e319bf8373f4f61ff83ce68404643c9c *R/plot.ppp.R
 351ededcd4aa226acbed559254703510 *R/plot.psp.R
 7de8dfca9f086ef9e1d6d965f3bc55e4 *R/plot3d.R
 fb78ab475eba24c6202f9dafb81560a2 *R/pointsonlines.R
@@ -111,7 +112,7 @@ f93c36af4fe440a5994cc1d3797e34f0 *R/pppmatch.R
 0bf053f8e0f5932bd093deccd0d3b193 *R/psp2pix.R
 c784bd48092ca94b0fadfeee3cf92b21 *R/pspcross.R
 2f4d79a05e995e8d6e2151a82e783ba2 *R/quadclass.R
-a0bed7ef5166e3e8002d4f57cec0b904 *R/quadratcount.R
+1b8591bd2aa5a534693e4924b0d55150 *R/quadratcount.R
 ba81abd6fe6794df409e9434dc1897f4 *R/quadscheme.R
 40d92ee81858ea56b28c0b7892758491 *R/quantess.R
 84efac90a60297aca6d1357cf1bf5474 *R/quasirandom.R
@@ -123,7 +124,7 @@ e34c842a124f8b2a99d7349dfa0800d3 *R/rescale.R
 1c30f8c9cf5b707bab251c5afe77241a *R/rescue.rectangle.R
 9f131d0cb36ed648e36e623b90b674a9 *R/ripras.R
 f55cbf2dddbd415b9d1be26b0f2e2af0 *R/rotate.R
-2ef7687b1739a162d049eef56dc702d4 *R/round.R
+bc8480b0a4ed0c454813263f34bc280e *R/round.R
 f8f9812990a5d541a23f11f0b7c429c1 *R/setcov.R
 a01b28e0c0a1687daf544f0d8d0c1f36 *R/simplepanel.R
 285e2a3a1f1464ccacd3b42c738a536a *R/solist.R
@@ -135,7 +136,7 @@ fd8885ecb274bfdae6fee1249fa65c2d *R/summary.quad.R
 1cadd7278ca066ef831d2a47676f06e4 *R/superimpose.R
 d6f54624a50101f237e35dd7a92ef354 *R/symbolmap.R
 50b78af7927164f523baa8152a0b149a *R/terse.R
-c3c80657a4468bb11541bf0a1982e3d0 *R/tess.R
+adfbee69a428850db265458d07a2abd7 *R/tess.R
 f32ceec714cb611c01ad1ed6db9e9a38 *R/texture.R
 c3032a7090caf3ec6606ec27f85a6772 *R/timed.R
 7143eaf3c90beea6b15d60fc9fb65c77 *R/transmat.R
@@ -149,11 +150,11 @@ b48288a1f1e90c1e87f43686a18f9756 *R/unstack.R
 998db506a27ed60542581bf4cbfd0b66 *R/versions.R
 7accd418a80dab4fcf7bdd697984b79f *R/weightedStats.R
 b1333ff8439dfd41629fdf56be763bea *R/weights.R
-fb1e4791498066ed4cb1ea2e405d23b0 *R/window.R
+cf855d190f2c581de2c3a6e36e46051f *R/window.R
 3d18369e9efc2b30c7e369077b9924a8 *R/wingeom.R
 f2d49fc8f50fef7f76bcb3fc7f34efb4 *inst/CITATION
 ac6aa02ee30a52f0a13abc4a17ff0174 *inst/doc/downstream.txt
-b60e1b35f130ef1264112716efe5cb8b *inst/doc/packagesizes.txt
+de5a097d77654cda5075d6621ba6902e *inst/doc/packagesizes.txt
 12e68895fef0d3aa0bde45a0ddbadfa4 *inst/ratfor/Makefile
 22e8a5189942ba190c13475b35459c7f *inst/ratfor/dppll.r
 6d471ec061ea91398ba16323de56b9db *inst/ratfor/inxypOld.r
@@ -251,7 +252,7 @@ e728e649b9c5857377ca80056425dc3a *man/closing.Rd
 0dbb6f2874f36a2409367b425a20970b *man/compatible.im.Rd
 9d2c099b67451eeca3190f661f97c50e *man/complement.owin.Rd
 9c37062f39c1f519e59ef50d6dabf3fe *man/concatxy.Rd
-b34c06587f03985e77cf55d42d38857b *man/connected.Rd
+139b6c599ed725581d4f0d0a01d44df6 *man/connected.Rd
 4f1ab6267d02ee22580a21d0d2f5f9f2 *man/connected.ppp.Rd
 92cea0b6516af10d1549c551ca1ca07a *man/connected.tess.Rd
 a074a34c03ebcdbba730fe7b51f05a80 *man/contour.im.Rd
@@ -457,7 +458,7 @@ d2efcf6a2633aa5cf572cc0cbbf57f89 *man/plot.owin.Rd
 4c29a1e81309ce6dfa01d925efddf2b0 *man/plot.pppmatching.Rd
 ee6944b8913a7ecc6cc5471b37745072 *man/plot.psp.Rd
 a6c3d8063be2bfc459f2aa306d620c1c *man/plot.quad.Rd
-cc53a3cf1f68e85cadf5c75ac0ee6f68 *man/plot.quadratcount.Rd
+fea2d89deff7100d2e1b478b4be5d562 *man/plot.quadratcount.Rd
 915e8ef4fcc11db31edcfb39cd28dbc8 *man/plot.solist.Rd
 0c7dd9365f2a6e7efadfcc5e4e18a835 *man/plot.splitppp.Rd
 7a0fd82a1955035e002dca71a2de6836 *man/plot.symbolmap.Rd
@@ -486,7 +487,7 @@ c74b5a9f9d12f400efd6d96b1e7a05af *man/project2set.Rd
 50259be5c9f3766353dab049b10a4937 *man/psp.object.Rd
 456775b5a47bdf9d85614464ae4bafd7 *man/psp2mask.Rd
 c6fd6ba33e14070c08ee87107952a677 *man/quad.object.Rd
-af455cd1be7da680ee154d72a7f5c1ef *man/quadratcount.Rd
+d6aec03e52186bb25d3e6474b1a26a37 *man/quadratcount.Rd
 32ec12831c4a458bcce681f5086febe3 *man/quadrats.Rd
 f1967ab5c40f133f4818de860763d505 *man/quadscheme.Rd
 45e5f4392417ddeb9ed6be18bd7ccd67 *man/quadscheme.logi.Rd
@@ -520,7 +521,7 @@ ac9a85fac4ba1a83841e50b65c67cc12 *man/rotate.im.Rd
 dc4be145efd4b2e9ec908caf9512ac27 *man/rotate.owin.Rd
 e6de8cb9f1e09137d0d45baf45cd62eb *man/rotate.ppp.Rd
 9f3fade667205c62415a1f97fd609bcb *man/rotate.psp.Rd
-51349aa10f2e3d2f2cae88a16c642a39 *man/round.ppp.Rd
+d45f3895cba8875bf2487be3153621c5 *man/round.ppp.Rd
 c9d186c7862c636325ad11cad7a62bfb *man/rounding.Rd
 38c8e9825a27d2e98e21c7618cfb9b72 *man/rsyst.Rd
 c5d3d8890255ea2ed99542aa58eb4e81 *man/run.simplepanel.Rd
@@ -546,7 +547,7 @@ bd0c088722b2ab0ed1f888fff75139e4 *man/solist.Rd
 8a06c516216701c55b29d991c9deb5a1 *man/solutionset.Rd
 2f2b1a7f76f1ad52fd10304afc65186b *man/spatdim.Rd
 0e13f8a0192ecbfa70d977e6f8d2f771 *man/spatstat.geom-deprecated.Rd
-5438c187c9a325192c16a3975131e6b3 *man/spatstat.geom-internal.Rd
+2a80074fa23074016e079c38e7984285 *man/spatstat.geom-internal.Rd
 720c8e455b0ee782348255294c274b0f *man/spatstat.geom-package.Rd
 c27b57ffa272542e5afc9b8865157162 *man/spatstat.options.Rd
 c542af7c96e45067fd97f43574d48da6 *man/split.hyperframe.Rd
@@ -615,7 +616,9 @@ d329f4a16a2486d0fbc64b8a22ef6a1a *src/bdrymask.c
 e6c2bb01eb4b123255d2579ab351ef76 *src/close3pair.c
 2ebf50de6feb7cc18dd72446fa94d033 *src/closefuns.h
 085bf822979fbdd8cb6565747c8fab5c *src/closepair.c
-f24794fdc781a0ac8f79022f9c35c766 *src/connect.c
+2cc6931f580d3f705fa0f096d8de47f5 *src/connectgraph.c
+4f2f21110c44d80409db30228ac9f575 *src/connectpix.c
+ee7b2dff3f0921cb39e1009db294f3ae *src/connectpix.h
 becea4a1ea42b8a39021c01abdc6459d *src/constants.h
 dcf500827ff4c8b060819be2b274a7d7 *src/crossloop.h
 9d438b3137f879ab21f85378bba410a6 *src/dinfty.c
@@ -634,7 +637,7 @@ ae97c2bb0e1cc33983b7ce71ebd63dce *src/fardist.h
 f64c32ad80b0c295009994ffb7299670 *src/hasclose.c
 7a441c85a06aeaad161a3ffcae15227d *src/hasclose.h
 6fbedda3c74b58916a5ec20e250df805 *src/hotrod.c
-3af2de06d0c1bef01804116051c15e68 *src/init.c
+2c40c7f1a13e97bbec857c4ebeacae1d *src/init.c
 d6f4b2cd273b8e96396c383307c0bd45 *src/knn3Ddist.h
 b33197077824150955ca1361b93ddf1b *src/knn3DdistX.h
 1f8a15d24baa7b5e766ee43ca89e95bb *src/knnXdist.h
@@ -663,7 +666,7 @@ bac2bb99413a12ee94fc8ee85a8c917a *src/nngrid.c
 acdf88b1cfedbbb87d81bb727761decd *src/pairloop.h
 e739ec6dcba5cb6e51892ce370d21a70 *src/periodic.c
 3ec0b4840aa006539224f9d5941f01ed *src/poly2im.c
-916c9e141528c6440272a221a5cd472b *src/proto.h
+1bc807d37e9f99aac6868f6189c6081f *src/proto.h
 0aafe2526edd017dc5fd7de2e11ed15b *src/quasirandom.c
 615b05e6d7796156017ceac8f9589df0 *src/raster.c
 668e8318237175ac56af1fcfdb41be29 *src/raster.h
@@ -684,15 +687,15 @@ c1624129ac630ef4653e3119d70ffa5b *tests/selfcross.txt
 ebd5f51ebac09a044996511b64533232 *tests/testsAtoC.R
 1545a52f384ae984361d7dc756a9136c *tests/testsD.R
 0ea5c7e4c4ed266a63f8c3523a2cff00 *tests/testsEtoF.R
-6940211b621d85ae5f45d347832ce4e0 *tests/testsGtoJ.R
+2cb5393cdbf7134ef165cf20c53d5f32 *tests/testsGtoJ.R
 bd48e397baa926bd320898c771fc2ecf *tests/testsK.R
 2656e51d2502ce38411ac2618bdde3d6 *tests/testsL.R
 9e8f43244f6213772e79404838bf1f49 *tests/testsM.R
 0b2469c496c8928fc534b3d9d9b2ebe2 *tests/testsNtoO.R
 5b7cea4bd8327e1834a80809d78d5804 *tests/testsP1.R
 06ad32db3dcc8a9b4400985422d6b60c *tests/testsP2.R
-62854add4b01d7292323c5935d6e182e *tests/testsQ.R
+7112aad2d26c86461979a70f10903b83 *tests/testsQ.R
 894e8b51b2a4c1bb2c6b661bd959ab31 *tests/testsR.R
 9380867855581081a8a424f014884099 *tests/testsS.R
 96956e19b99889c263329e598d8d1315 *tests/testsT.R
-a9ef558fd4510ac3415cd4599903d140 *tests/testsUtoZ.R
+4134499e19a374e39448f8a849ae9926 *tests/testsUtoZ.R

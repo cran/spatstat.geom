@@ -3,7 +3,7 @@
 #
 # connected component transform
 #
-#    $Revision: 1.25 $  $Date: 2022/05/21 09:52:11 $
+#    $Revision: 1.29 $  $Date: 2023/07/18 03:59:12 $
 #
 # Interpreted code for pixel images by Julian Burgos <jmburgos@u.washington.edu>
 # Rewritten in C by Adrian Baddeley
@@ -14,15 +14,26 @@ connected <- function(X, ...) {
   UseMethod("connected")
 }
 
-connected.im <- function(X, ..., background=NA, method="C") {
-  W <- if(!is.na(background)) solutionset(X != background) else 
-       if(X$type == "logical") solutionset(X) else as.owin(X)
-  connected.owin(W, method=method, ...)
+connected.im <- function(X, ..., background=NA, method="C", connect=8) {
+  if(!is.na(background)) {
+    W <- solutionset(X != background)
+  } else if(X$type == "logical") {
+    W <- solutionset(X)
+  } else {
+    warning("Assuming background = NA, foreground = other values", call.=FALSE)
+    W <- as.owin(X)
+  }
+  connected.owin(W, method=method, ..., connect=connect)
 }
 
-connected.owin <- function(X, ..., method="C") {
+connected.owin <- function(X, ..., method="C", connect=8) {
   method <- pickoption("algorithm choice", method,
                        c(C="C", interpreted="interpreted"))
+  if(!missing(connect)) {
+    check.1.integer(connect)
+    if(!any(connect == c(4,8)))
+      stop("'connect' should be 4 or 8")
+  }
   # convert X to binary mask
   X <- as.mask(X, ...)
   #     
@@ -40,11 +51,42 @@ connected.owin <- function(X, ..., method="C") {
     L[M] <- seq_len(sum(M))
     L[!M] <- 0
     ## resolve labels
-    z <- .C(SG_cocoImage,
-            mat=as.integer(t(L)),
-            nr=as.integer(nr),
-            nc=as.integer(nc),
-            PACKAGE="spatstat.geom")
+    if(typeof(L) == "double") {
+      ## Labels are numeric (not integer)
+      ## This can occur if raster is really large
+      if(connect == 8) {
+        ## 8-connected
+        z <- .C(SG_coco8dbl,
+                mat=as.double(t(L)),
+                nr=as.integer(nr),
+                nc=as.integer(nc),
+                PACKAGE="spatstat.geom")
+      } else {
+        ## 4-connected
+        z <- .C(SG_coco4dbl,
+                mat=as.double(t(L)),
+                nr=as.integer(nr),
+                nc=as.integer(nc),
+                PACKAGE="spatstat.geom")
+      }
+    } else {
+      ## Labels are integer
+      if(connect == 8) {
+        ## 8-connected
+        z <- .C(SG_coco8int,
+                mat=as.integer(t(L)),
+                nr=as.integer(nr),
+                nc=as.integer(nc),
+                PACKAGE="spatstat.geom")
+      } else {
+        ## 4-connected
+        z <- .C(SG_coco4int,
+                mat=as.integer(t(L)),
+                nr=as.integer(nr),
+                nc=as.integer(nc),
+                PACKAGE="spatstat.geom")
+      }
+    }
     # unpack
     Z <- matrix(z$mat, nr+2, nc+2, byrow=TRUE)
   } else {
@@ -59,7 +101,9 @@ connected.owin <- function(X, ..., method="C") {
     currentlab <- 1L
     todo <- as.vector(t(Y))
     equiv <- NULL
-  
+    ## extension by Adrian
+    nprev <- as.integer(connect/2)
+    
     # ........ main loop ..........................
     while(any(todo)){
       # pick first unresolved pixel
@@ -68,12 +112,17 @@ connected.owin <- function(X, ..., method="C") {
       onecol <- one -((onerow-1L)*nc)
       parow=onerow+1L # Equivalent rows & column in padded matrix
       pacol=onecol+1L
-      #Examine four previously scanned neighbors
-      # (use padded matrix to avoid edge issues)
-      nbrs <- rbind(c(parow-1L,pacol-1L),
-                    c(parow-1L,pacol),
-                    c(parow,  pacol-1L),
-                    c(parow-1L,pacol+1L))
+      ## Examine four previously scanned neighbors
+      ## (use padded matrix to avoid edge issues)
+      nbrs <- if(connect == 8) {
+                rbind(c(parow-1L,pacol-1L),
+                      c(parow-1L,pacol),
+                      c(parow,  pacol-1L),
+                      c(parow-1L,pacol+1L))
+              } else {
+                rbind(c(parow-1L,pacol),
+                      c(parow,  pacol-1L))
+              }
       px <- sum(padY[nbrs])
       if (px==0){
         # no neighbours: new component
@@ -92,7 +141,7 @@ connected.owin <- function(X, ..., method="C") {
         labs <- unique(Z[nbrs], na.rm=TRUE)
         labs <- labs[labs != 0]
         labs <- sort(labs)
-        equiv <- rbind(equiv,c(labs,rep.int(0,times=4-length(labs))))
+        equiv <- rbind(equiv,c(labs,rep.int(0,times=nprev-length(labs))))
         Z[parow,pacol] <- labs[1L]
         currentlab <- max(Z)+1L
         todo[one] <- FALSE
@@ -113,7 +162,7 @@ connected.owin <- function(X, ..., method="C") {
       }
       for (i in 1:nrow(equiv)){
         current <- equiv[i, 1L]
-        for (j in 2:4){
+        for (j in 2:nprev){
           twin <- equiv[i,j]
           if (twin>0){
             # Change labels matrix
