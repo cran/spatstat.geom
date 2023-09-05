@@ -1,3 +1,34 @@
+        CHANGES IN spatstat.geom VERSION 3.2-5
+
+OVERVIEW
+
+    o Extension of distance transform algorithm.
+
+    o Improvement to progress reports.
+    
+    o Suppress annoying warnings.
+
+    o Further bug fix in quadratcount
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o distmap.owin
+    New argument 'connect'.
+
+    o progressreport
+    The estimated time of completion is also printed, if the remaining time
+    is longer than 10 minutes.
+    
+    o unnormdensity
+    Suppress annoying warning messages from density.default.
+    This affects many functions in the spatstat family of packages.
+
+BUG FIXES
+
+    o quadratcount
+    Crashed if argument 'tess' was a rectangular grid tessellation.
+    Fixed.
+    
         CHANGES IN spatstat.geom VERSION 3.2-4
 
 OVERVIEW
