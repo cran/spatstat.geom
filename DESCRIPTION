@@ -1,6 +1,6 @@
 Package: spatstat.geom
-Version: 3.2-5
-Date: 2023-09-05
+Version: 3.2-7
+Date: 2023-10-20
 Title: Geometrical Functionality of the 'spatstat' Family
 Authors@R: c(person("Adrian", "Baddeley", 
                     role = c("aut", "cre", "cph"),
@@ -8,7 +8,7 @@ Authors@R: c(person("Adrian", "Baddeley",
 		    comment = c(ORCID="0000-0001-9499-8382")),
 	     person("Rolf", "Turner", 
                     role = c("aut", "cph"),
- 	            email="r.turner@auckland.ac.nz",
+ 	            email="rolfturner@posteo.net",
 		    comment=c(ORCID="0000-0001-5521-5218")),
 	     person("Ege",   "Rubak", 
                     role = c("aut", "cph"),
@@ -29,8 +29,8 @@ Depends: R (>= 3.5.0), spatstat.data (>= 3.0), stats, graphics,
 Imports: spatstat.utils (>= 3.0-2), deldir (>= 1.0-2), polyclip (>=
         1.10-0)
 Suggests: spatstat.random, spatstat.explore, spatstat.model,
-        spatstat.linnet, maptools (>= 0.9-9), spatial, fftwtools (>=
-        0.9-8), spatstat (>= 3.0)
+        spatstat.linnet, spatial, fftwtools (>= 0.9-8), spatstat (>=
+        3.0)
 Description: Defines spatial data types and supports geometrical operations
 	     on them. Data types include point patterns, windows (domains),
 	     pixel images, line segment patterns, tessellations and hyperframes.
@@ -53,7 +53,7 @@ URL: http://spatstat.org/
 NeedsCompilation: yes
 ByteCompile: true
 BugReports: https://github.com/spatstat/spatstat.geom/issues
-Packaged: 2023-09-05 08:27:47 UTC; adrian
+Packaged: 2023-10-20 01:51:41 UTC; adrian
 Author: Adrian Baddeley [aut, cre, cph]
     (<https://orcid.org/0000-0001-9499-8382>),
   Rolf Turner [aut, cph] (<https://orcid.org/0000-0001-5521-5218>),
@@ -68,4 +68,4 @@ Author: Adrian Baddeley [aut, cre, cph]
   Dominic Schuhmacher [ctb],
   Rasmus Waagepetersen [ctb]
 Repository: CRAN
-Date/Publication: 2023-09-05 12:40:02 UTC
+Date/Publication: 2023-10-20 04:50:02 UTC

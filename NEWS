@@ -1,3 +1,22 @@
+        CHANGES IN spatstat.geom VERSION 3.2-7
+
+OVERVIEW
+
+    o Minor corrections to the help files.
+
+        CHANGES IN spatstat.geom VERSION 3.2-6
+
+OVERVIEW
+
+    o Minor improvements.
+
+    o spatstat.geom no longer suggests 'maptools'.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o as.im.tess
+    New argument 'values'.
+
         CHANGES IN spatstat.geom VERSION 3.2-5
 
 OVERVIEW
