@@ -304,6 +304,7 @@
 \alias{symbolmapdomain}
 \alias{symbolmapparnames}
 \alias{symbolmaptype}
+\alias{symbol.sizes.default}
 \alias{tail.hyperframe}
 \alias{thickSegments}
 \alias{tilecentroids}        
@@ -492,7 +493,7 @@ parbreak(terse)
 perspVisible(x, y, z, M)
 plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
                    started, map)
-pointweights(X, \dots, weights, parent)
+pointweights(X, \dots, weights, parent, dfok)
 polytileareaEngine(P, xrange, yrange, nx, ny, DivideByPixelArea)
 putSpatstatVariable(name, value)
 lookup.im(Z, x, y, naok, strict)
@@ -506,7 +507,10 @@ markformat(x)
 \method{markformat}{ppx}(x) 
 \method{markformat}{psp}(x) 
 \method{markformat}{default}(x) 
-mark.scale.default(marx, w, \dots, markscale, maxsize, meansize, characters)
+mark.scale.default(marx, w, \dots,
+                   markrange,
+                   markscale, maxsize, meansize,
+                   minsize, zerosize, characters)
 markspace.integral(X)
 \method{marks}{default}(x, \dots)
 \method{marks}{quad}(x, dfok=FALSE, \dots)
@@ -659,6 +663,7 @@ superimposeMarks(arglist, nobj)
 symbolmapdomain(x)
 symbolmapparnames(x)
 symbolmaptype(x)
+symbol.sizes.default(markvalues, \dots)
 \method{tail}{hyperframe}(x,n,\dots)
 thickSegments(x, widths, \dots,
              add, main, do.plot, show.all, show.window,
