@@ -100,9 +100,9 @@
   will only compare two points if they have different values of the
   identifier. See the Examples.
 }
-\section{Sorting data and pre-sorted data}{
+\section{Efficiency, sorting data, and pre-sorted data}{
   Read this section if you care about the speed of computation.
-  
+
   For efficiency, the algorithm sorts the point patterns \code{X} and \code{Y}
   into increasing order of the \eqn{x} coordinate
   or increasing order of the the \eqn{y} coordinate.

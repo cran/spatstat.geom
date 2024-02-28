@@ -1,7 +1,7 @@
 ##
 ## symbolmap.R
 ##
-##   $Revision: 1.47 $  $Date: 2024/01/15 05:34:44 $
+##   $Revision: 1.52 $  $Date: 2024/02/18 08:43:05 $
 ##
 
 symbolmap <- local({
@@ -728,37 +728,37 @@ plan.legend.layout <- function(B,
   switch(side,
          right={
            ## symbols to right of image
-           b <- owin(B$xrange[2] + sep + c(0, size),
+           b <- owinInternalRect(B$xrange[2] + sep + c(0, size),
                      B$yrange)
            ## text to right of symbols
-           tt <- owin(b$xrange[2] + sep + c(0, textwidth),
+           tt <- owinInternalRect(b$xrange[2] + sep + c(0, textwidth),
                       b$yrange)
            iside <- 4
          },
          left={
            ## symbols to left of image
-           b <- owin(B$xrange[1] - sep - c(size, 0),
+           b <- owinInternalRect(B$xrange[1] - sep - c(size, 0),
                      B$yrange)
            ## text to left of symbols
-           tt <- owin(b$xrange[1] - sep - c(textwidth, 0),
+           tt <- owinInternalRect(b$xrange[1] - sep - c(textwidth, 0),
                       b$yrange)
            iside <- 2
          },
          top={
            ## symbols above image
-           b <- owin(B$xrange,
+           b <- owinInternalRect(B$xrange,
                      B$yrange[2] + sep + c(0, size))
            ## text above symbols
-           tt <- owin(b$xrange,
+           tt <- owinInternalRect(b$xrange,
                       b$yrange[2] + 3* charsize + c(0, textheight))
            iside <- 3
          },
          bottom={
            ## symbols below image
-           b <- owin(B$xrange,
+           b <- owinInternalRect(B$xrange,
                      B$yrange[1] - sep - c(size, 0))
            ## text below symbols
-           tt <- owin(b$xrange,
+           tt <- owinInternalRect(b$xrange,
                       b$yrange[1] - 3 * charsize - c(textheight, 0))
            iside <- 1
          })
@@ -768,22 +768,88 @@ plan.legend.layout <- function(B,
 }
 
 
-as.colourmap.symbolmap <- function(x, ...) {
+as.colourmap.symbolmap <- function(x, ..., warn=TRUE) {
   ## extract only the colour map and plot it
   parlist <- attr(x, "stuff")$parlist
   iscol <- sapply(parlist, inherits, what="colourmap")
   nc <- sum(iscol)
   if(nc == 0) {
-    warning("No colour map information was detected", call.=FALSE)
+    if(warn) warning("No colour map information was detected", call.=FALSE)
     return(NULL)
   }
   used <- which(iscol)[[1L]]
   cmap <- parlist[[used]]
-  if(nc > 1) 
+  if(nc > 1 && warn)
     warning(paste("More than one colour map was detected;",
                   "using the colour map for",
                   sQuote(names(parlist)[used])),
             call.=FALSE)
   return(cmap)
+}
+
+summary.symbolmap <- function(object, ...) {
+  st <- attr(object, "stuff")
+  typ <- st[["type"]]
+  dom <- switch(typ,
+                constant = { integer(0) },
+                discrete = { st$inputs },
+                continuous = { st$range })
+  parlist <- st[["parlist"]]
+  parnames <- names(parlist)
+  iscolmap <- sapply(parlist, inherits, what="colourmap")
+  isatom <- sapply(parlist, is.atomic)
+  lenfs <- lengths(parlist)
+  isconstant <- isatom & (lenfs == 1)
+  if(any(iscolmap)) 
+    isconstant[iscolmap] <- (lengths(lapply(parlist[iscolmap], colouroutputs)) == 1)
+  z <- list(type      = typ,
+            domain    = dom, 
+            pars      = parnames,
+            colmaps   = parnames[iscolmap],
+            rangetype = if(typ == "continuous") st[["rangetype"]] else NULL,
+            range     = if(typ == "continuous") st[["range"]] else NULL,
+            isconstant = isconstant)
+  class(z) <- c("summary.symbolmap", class(z))
+  return(z)
+}
+
+print.summary.symbolmap <- function(x, ...) {
+  with(x, {
+    switch(type,
+           constant = {
+             if(length(pars) == 0) {
+               cat("Symbol map", "with no parameters", fill=TRUE)
+             } else {
+               cat("Symbol map", "with constant values", fill=TRUE)
+             }
+           },
+           discrete = {
+             cat("Symbol map", "for discrete inputs:", fill=TRUE)
+             print(domain)
+           },
+           continuous = {
+             cat("Symbol map", "for",
+                 switch(rangetype,
+                        numeric="real numbers",
+                        date = "dates",
+                        datetime = "date/time values",
+                        unknown = "unrecognised data"),
+                 if(!is.null(range)) paste("in", prange(range)) else NULL,
+                 fill=TRUE)
+           })
+    if(length(pars) > 0) {
+      splat("Graphics parameters defined:")
+      splat(paste("\t",
+                  sQuote(pars),
+                  "\t",
+                  paren(ifelse(isconstant, "constant", "variable")),
+                  "\t",
+                  ifelse(pars %in% colmaps, "(colour map)", ""),
+                  "\n"))
+      if(all(isconstant)) 
+        splat("All graphics parameters are constant")
+    }
+    return(invisible(NULL))
+  })
 }
 

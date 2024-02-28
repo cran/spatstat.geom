@@ -185,6 +185,9 @@
 \alias{numberwithunit}
 \alias{numeric.columns}
 \alias{onecolumn}
+\alias{owinInternalRect}
+\alias{owinInternalMask}
+\alias{owinInternalPoly}
 \alias{owinpolycheck}
 \alias{owinpoly2mask}
 \alias{owin2polypath}
@@ -233,6 +236,7 @@
 \alias{print.summary.solist}
 \alias{print.summary.splitppp}
 \alias{print.summary.splitppx}
+\alias{print.summary.symbolmap}       
 \alias{print.summary.unitname}
 \alias{print.symbolmap}       
 \alias{print.textstring}
@@ -300,6 +304,7 @@
 \alias{summary.pppmatching}
 \alias{summary.ppx}
 \alias{summary.splitppx}
+\alias{summary.symbolmap}
 \alias{superimposeMarks}
 \alias{symbolmapdomain}
 \alias{symbolmapparnames}
@@ -537,6 +542,12 @@ n.quad(Q)
 numberwithunit(x, u)
 numeric.columns(M, logical, others)
 onecolumn(m)
+owinInternalRect(xrange, yrange, \dots, unitname,
+                 check)
+owinInternalMask(xrange, yrange, \dots, mask, unitname, xy,
+                 check)
+owinInternalPoly(xrange, yrange, \dots, poly, unitname,
+                 check, calculate, strict, fix)
 owinpolycheck(W, verbose=TRUE)
 owinpoly2mask(w, rasta, check=TRUE)
 owin2polypath(w)
@@ -592,6 +603,7 @@ prepareTitle(main)
 \method{print}{summary.splitppp}(x, \dots)
 \method{print}{summary.solist}(x, \dots)
 \method{print}{summary.splitppx}(x, \dots)
+\method{print}{summary.symbolmap}(x, \dots)
 \method{print}{summary.unitname}(x, \dots)
 \method{print}{symbolmap}(x, \dots)
 \method{print}{textstring}(x, \dots)
@@ -659,6 +671,7 @@ store.versionstring.spatstat()
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{ppx}(object, \dots)
 \method{summary}{splitppx}(object, \dots)
+\method{summary}{symbolmap}(object, \dots)
 superimposeMarks(arglist, nobj)
 symbolmapdomain(x)
 symbolmapparnames(x)

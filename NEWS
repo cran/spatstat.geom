@@ -1,3 +1,28 @@
+        CHANGES IN spatstat.geom VERSION 3.2-9
+
+OVERVIEW
+
+    o Some geometry code accelerated.
+
+NEW FUNCTIONS
+
+    o summary.symbolmap, print.summary.symbolmap
+    Method for 'summary' for symbol maps.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o as.rectangle
+    Accelerated in many cases.
+
+    o diameter.owin
+    Accelerated when the window is a rectangle.
+
+    o nncross.ppp
+    Slightly accelerated.
+
+    o owin
+    Accelerated in many cases.
+
         CHANGES IN spatstat.geom VERSION 3.2-8
 
 OVERVIEW
