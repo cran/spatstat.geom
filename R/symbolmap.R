@@ -1,7 +1,7 @@
 ##
 ## symbolmap.R
 ##
-##   $Revision: 1.52 $  $Date: 2024/02/18 08:43:05 $
+##   $Revision: 1.58 $  $Date: 2024/07/01 05:57:44 $
 ##
 
 symbolmap <- local({
@@ -41,7 +41,7 @@ symbolmap <- local({
       lenfs <- lengths(parlist)
       constants <- atomic & (lenfs == 1)
       if(any(bad <- !(constants | functions))) {
-        if(type == "discrete" && any(repairable <- atomic[bad])) {
+        if(type == "discrete" && any(repairable <- atomic & bad)) {
           ## recycle data to desired length
           parlist[repairable] <- lapply(parlist[repairable],
                                         reptolength,
@@ -399,6 +399,20 @@ invoke.symbolmap <- local({
               arrowtype=arrowtype, ...)
   }
 
+  sanitycheck <- function(df, forbidden, kind) {
+    ## 'df' is the result of a symbol map
+    ##  (applies to numeric, factor, character)
+    bad <- sapply(lapply(df, forbidden), any)
+    if(any(bad)) {
+      stop(paste("Symbol map produced", kind, "values for",
+                 ngettext(sum(bad), "parameter", "parameters"),
+                 commasep(sQuote(colnames(df)[bad]))),
+           call.=FALSE)
+    }
+    return(NULL)
+  }
+    
+
   ## main function
 
   invoke.symbolmap <- function(map, values, x=NULL, y=NULL, ...,
@@ -420,6 +434,11 @@ invoke.symbolmap <- local({
     ## map numerical/factor values to graphical parameters
     g <- map(values)
     parnames <- colnames(g)
+    ## trap user coding errors etc
+    sanitycheck(g, is.na, "NA")
+    sanitycheck(g, is.nan, "NaN")
+    sanitycheck(g, is.infinite, "infinite")
+    ##
     if(do.plot) {
       ## add spatial coordinates
       xydf <- data.frame(x=x, y=y, angleref=angleref)
@@ -646,6 +665,13 @@ plot.symbolmap <- function(x, ..., main,
                    angleref=if(vertical) 90 else 0)
 
   ## ................. draw annotation ..................
+  dotargs <- list(...)
+  axiscol <- dotargs$col
+  nac <- length(axiscol)
+  if(nac > 0 && (!is.colour(axiscol) || nac > 1)) {
+    ## only a single colour is permitted for 'axis'
+    dotargs$col <- NULL
+  }
   if(annotate && length(ll) > 0) {
     if(vertical) {
       ## default axis position is to the right 
@@ -657,7 +683,7 @@ plot.symbolmap <- function(x, ..., main,
       pos <- c(ylim[1], xlim[1], ylim[2], xlim[2])[sidecode]
       ## draw axis
       do.call.matched(graphics::axis,
-                      resolve.defaults(list(...),
+                      resolve.defaults(dotargs,
                                        list(side=sidecode, pos=pos, at=yp,
                                             labels=ll, tick=FALSE, las=1)),
                       extrargs=graphicsPars("axis"))
@@ -671,7 +697,7 @@ plot.symbolmap <- function(x, ..., main,
       pos <- c(ylim[1], xlim[1], ylim[2], xlim[2])[sidecode]
       ## draw axis
       do.call.matched(graphics::axis,
-                      resolve.defaults(list(...),
+                      resolve.defaults(dotargs,
                                        list(side = sidecode, pos = pos,
                                             at = xp, labels=ll, tick=FALSE)),
                       extrargs=graphicsPars("axis"))
@@ -684,23 +710,23 @@ plan.legend.layout <- function(B,
                                ..., 
                                side=c("bottom", "left", "top", "right"),
                                sep=NULL,
-                               size=NULL,
+                               leg.size=NULL,
                                sep.frac=0.05,
                                size.frac=0.05,
                                started=FALSE,
                                map=NULL) {
   ## Determine size and position of a box containing legend or symbolmap
   ## attached to a plot in region 'B'.
-  ##   sep, size are absolute distances;
+  ##   sep, leg.size are absolute distances;
   ##   sep.frac, size.frac are fractions of the maximum sidelength of B.
   side <- match.arg(side)
   B <- as.rectangle(B)
   Bsize <- max(sidelengths(B))
-  if(is.null(size)) {
-    size <- size.frac * Bsize
+  if(is.null(leg.size)) {
+    leg.size <- size.frac * Bsize
   } else {
-    check.1.real(size)
-    stopifnot(size > 0)
+    check.1.real(leg.size)
+    stopifnot(leg.size > 0)
   }
   if(is.null(sep)) {
     sep <- sep.frac * Bsize
@@ -728,7 +754,7 @@ plan.legend.layout <- function(B,
   switch(side,
          right={
            ## symbols to right of image
-           b <- owinInternalRect(B$xrange[2] + sep + c(0, size),
+           b <- owinInternalRect(B$xrange[2] + sep + c(0, leg.size),
                      B$yrange)
            ## text to right of symbols
            tt <- owinInternalRect(b$xrange[2] + sep + c(0, textwidth),
@@ -737,7 +763,7 @@ plan.legend.layout <- function(B,
          },
          left={
            ## symbols to left of image
-           b <- owinInternalRect(B$xrange[1] - sep - c(size, 0),
+           b <- owinInternalRect(B$xrange[1] - sep - c(leg.size, 0),
                      B$yrange)
            ## text to left of symbols
            tt <- owinInternalRect(b$xrange[1] - sep - c(textwidth, 0),
@@ -747,7 +773,7 @@ plan.legend.layout <- function(B,
          top={
            ## symbols above image
            b <- owinInternalRect(B$xrange,
-                     B$yrange[2] + sep + c(0, size))
+                     B$yrange[2] + sep + c(0, leg.size))
            ## text above symbols
            tt <- owinInternalRect(b$xrange,
                       b$yrange[2] + 3* charsize + c(0, textheight))
@@ -756,7 +782,7 @@ plan.legend.layout <- function(B,
          bottom={
            ## symbols below image
            b <- owinInternalRect(B$xrange,
-                     B$yrange[1] - sep - c(size, 0))
+                     B$yrange[1] - sep - c(leg.size, 0))
            ## text below symbols
            tt <- owinInternalRect(b$xrange,
                       b$yrange[1] - 3 * charsize - c(textheight, 0))
@@ -764,7 +790,7 @@ plan.legend.layout <- function(B,
          })
   A <- boundingbox(B, b, tt)
   return(list(A=A, B=B, b=b, tt=tt,
-              iside=iside, side=side, size=size, charsize=charsize, sep=sep))
+              iside=iside, side=side, size=leg.size, charsize=charsize, sep=sep))
 }
 
 
@@ -779,12 +805,12 @@ as.colourmap.symbolmap <- function(x, ..., warn=TRUE) {
   }
   used <- which(iscol)[[1L]]
   cmap <- parlist[[used]]
-  if(nc > 1 && warn)
+  if(nc > 1 && warn && length(unique(parlist[iscol])) > 1)
     warning(paste("More than one colour map was detected;",
                   "using the colour map for",
                   sQuote(names(parlist)[used])),
             call.=FALSE)
-  return(cmap)
+    return(cmap)
 }
 
 summary.symbolmap <- function(object, ...) {
@@ -802,13 +828,32 @@ summary.symbolmap <- function(object, ...) {
   isconstant <- isatom & (lenfs == 1)
   if(any(iscolmap)) 
     isconstant[iscolmap] <- (lengths(lapply(parlist[iscolmap], colouroutputs)) == 1)
-  z <- list(type      = typ,
-            domain    = dom, 
-            pars      = parnames,
-            colmaps   = parnames[iscolmap],
-            rangetype = if(typ == "continuous") st[["rangetype"]] else NULL,
-            range     = if(typ == "continuous") st[["range"]] else NULL,
-            isconstant = isconstant)
+  colournames <- c("col", "cols", "fg", "bg", "border", "fill")
+  shapenames <- c("shape", "pch", "chars", "direction", "arrowtype", "headlength", "headangle", "etch")
+  sizenames <- c("size", "cex", "headlength")
+  physicalsizenames <- c("size", "headlength")
+  iscolour <- iscolmap | (parnames %in% colournames)
+  isshape <- parnames %in% shapenames
+  issize <- parnames %in% sizenames
+  isphysical <- parnames %in% physicalsizenames
+  fixedcolour <- all(isconstant[iscolour])
+  fixedshape <- all(isconstant[isshape])
+  fixedsize <- all(isconstant[issize])
+  z <- list(type        = typ,
+            domain      = dom, 
+            pars        = parnames,
+            colmaps     = parnames[iscolmap],
+            rangetype   = if(typ == "continuous") st[["rangetype"]] else NULL,
+            range       = if(typ == "continuous") st[["range"]] else NULL,
+            isconstant  = isconstant, # vector
+            iscolour    = iscolour, # vector
+            issize      = issize, # vector
+            isshape     = isshape, # vector
+            isphysical  = isphysical, # vector
+            fixedshape  = fixedshape, # logical(1)
+            fixedsize   = fixedsize,  # logical(1)
+            fixedcolour = fixedcolour # logical(1)
+            )
   class(z) <- c("summary.symbolmap", class(z))
   return(z)
 }
@@ -846,10 +891,27 @@ print.summary.symbolmap <- function(x, ...) {
                   "\t",
                   ifelse(pars %in% colmaps, "(colour map)", ""),
                   "\n"))
-      if(all(isconstant)) 
+      if(all(isconstant)) {
         splat("All graphics parameters are constant")
+      } else {
+        att <- c("size", "shape", "colour")
+        fux <- c(fixedsize, fixedshape, fixedcolour)
+        attfux <- att[fux]
+        attnon <- att[!fux]
+        blurb <- "Symbols have"
+        if(length(attfux))
+          blurb <- paste(blurb, "fixed", commasep(attfux, " and "))
+        if(length(attnon)) {
+          if(length(attfux)) blurb <- paste0(blurb, ", but")
+          blurb <- paste(blurb, "variable", commasep(attnon, " and "))
+        }
+        splat(blurb)
+      }
     }
     return(invisible(NULL))
   })
 }
 
+default.symbolmap <- function(x, ...) {
+  UseMethod("default.symbolmap")
+}

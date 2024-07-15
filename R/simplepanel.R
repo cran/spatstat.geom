@@ -4,7 +4,7 @@
 #  A simple, robust point & click interface
 #     used in rmh visual debugger.
 #
-#  $Revision: 1.17 $  $Date: 2024/02/04 08:04:51 $
+#  $Revision: 1.20 $  $Date: 2024/04/25 01:23:23 $
 #
 
 simplepanel <- function(title, B, boxes, clicks, redraws=NULL, exit=NULL, env) {
@@ -113,12 +113,14 @@ redraw.simplepanel <- function(P, verbose=FALSE) {
     for(j in seq_along(nama)) 
       (redraws[[j]])(boxes[[j]], nama[j], env)
   })
+  dev.flush()
   invisible(NULL)
 }
 
 clear.simplepanel <- function(P) {
   verifyclass(P, "simplepanel")
   plot(P$B, main="")
+  dev.flush()
   invisible(NULL)
 }
                              
@@ -127,14 +129,14 @@ run.simplepanel <- function(P, popup=TRUE, verbose=FALSE) {
   if(popup) dev.new()
   ntitle <- sum(nzchar(P$title))
   opa <- par(mar=c(0,0,ntitle+0.2,0),ask=FALSE)
-  on.exit(par(opa))
+  if(!popup) on.exit(par(opa))
   with(P, {
     # interaction loop
     more <- TRUE
     while(more) {
       redraw.simplepanel(P, verbose=verbose)
       xy <- spatstatLocator(1)
-      if(is.null(xy)) {
+      if(is.null(xy) || length(xy$x) == 0) {
         if(verbose) cat("No (x,y) coordinates\n")
         break
       }
@@ -179,10 +181,16 @@ layout.boxes <- function(B, n, horizontal=FALSE, aspect=0.5, usefrac=0.9){
   stopifnot(n > 0)
   width <- sidelengths(B)[1]
   height <- sidelengths(B)[2]
+  if(is.finite(aspect) && aspect > 0) {
+    recip.aspect <- 1/aspect
+  } else {
+    aspect <- Inf
+    recip.aspect <- Inf
+  }
   if(!horizontal) {
     heightshare <- height/n
-    useheight <- min(width * aspect, heightshare * usefrac)
-    usewidth <-  min(useheight /aspect, width * usefrac)
+    useheight <- min(heightshare * usefrac,  width * aspect)
+    usewidth <-  min(width * usefrac,        useheight * recip.aspect)
     lostwidth <- width - usewidth
     lostheightshare <- heightshare - useheight
     template <- owinInternalRect(c(0, usewidth), c(0, useheight))
@@ -195,7 +203,8 @@ layout.boxes <- function(B, n, horizontal=FALSE, aspect=0.5, usefrac=0.9){
         boxes[[j]] <- shift(boxes[[j-1]], c(0, heightshare))
   } else {
     boxes <- layout.boxes(flipxy(B), n,
-                            horizontal=FALSE, aspect=1/aspect, usefrac=usefrac)
+                          horizontal=FALSE,
+                          aspect=recip.aspect, usefrac=usefrac)
     boxes <-  lapply(boxes, flipxy)
   }
   return(boxes)
@@ -206,6 +215,7 @@ layout.boxes <- function(B, n, horizontal=FALSE, aspect=0.5, usefrac=0.9){
 dflt.redraw <- function(button, name, env) {
   plot(button, add=TRUE, border="pink")
   text(centroid.owin(button), labels=name)
+  return(TRUE)
 }
 
 print.simplepanel <- function(x, ...) {

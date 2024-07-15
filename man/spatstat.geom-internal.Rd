@@ -1,11 +1,13 @@
 \name{spatstat.geom-internal} 
 \title{Internal spatstat.geom functions}
+\alias{spatstat.geom-internal} %DoNotExport
 \alias{[.diagramobj}
 \alias{[.pp3}
 \alias{[.splitppx}
 \alias{[<-.splitppx}
 \alias{acedist.show}
 \alias{acedist.noshow}
+\alias{affine.diagramobj}
 \alias{affinexy}
 \alias{affinexypolygon}
 \alias{allElementsIdentical}
@@ -18,7 +20,6 @@
 \alias{areaLoss.grid}
 \alias{areaLoss.poly}
 \alias{AsymmDistance.psp}
-\alias{as.breakpts}
 \alias{as.character.unitname}
 \alias{as.data.frame.ppplist}
 \alias{as.double.im}
@@ -34,15 +35,12 @@
 \alias{boundingbox.list}
 \alias{bounding.box3}
 \alias{break.holes}
-\alias{breakpts}
-\alias{breakpts.from.r}
 \alias{cartesian}
 \alias{cellmiddles}
 \alias{checkbigmatrix}          
 \alias{checkfields}          
 \alias{check.arc}
 \alias{check.finespacing}
-\alias{check.hist.lengths}
 \alias{circunion}
 \alias{clip.psp}
 \alias{cliprect.psp}
@@ -84,6 +82,7 @@
 \alias{fft2D}
 \alias{fftwAvailable}
 \alias{fillNA}
+\alias{flipxy.diagramobj}
 \alias{flipxypolygon}
 \alias{format.numberwithunit}
 \alias{framebottomleft}
@@ -98,8 +97,6 @@
 \alias{handle.r.b.args}
 \alias{head.hyperframe}
 \alias{hsvNA}
-\alias{IdenticalRowPair}
-\alias{IdenticalRows}
 \alias{idorempty}
 \alias{imageOp}
 \alias{imagelistOp}
@@ -146,7 +143,6 @@
 \alias{putSpatstatVariable}
 \alias{lookup.im}
 \alias{majorminorversion}
-\alias{make.even.breaks}
 \alias{makeunitname}
 \alias{markappend}
 \alias{markcbind}
@@ -200,6 +196,7 @@
 \alias{plotWidthMap}
 \alias{plot.barplotdata}
 \alias{plot.indicfun}
+\alias{pointgrid}
 \alias{ppllengine}
 \alias{pppdist.mat}
 \alias{pppdist.prohorov}
@@ -208,7 +205,6 @@
 \alias{print.anylist}    
 \alias{print.colourmap}
 \alias{print.distfun}
-\alias{print.ewcdf}
 \alias{print.funxy}       
 \alias{print.hyperframe}
 \alias{print.indicfun}       
@@ -248,19 +244,9 @@
 \alias{putlastshift}
 \alias{qtPrepareCoordinate}
 \alias{quad}
-\alias{quantilefun.interpolatedCDF}
-\alias{rasterfilter}
-\alias{recognise.spatstat.type}
-\alias{rectquadrat.breaks}
-\alias{rectquadrat.countEngine}
-\alias{remove.identical.pairs}
-\alias{repair.image.xycoords}
-\alias{resolve.stringsAsFactors}
-\alias{rgbNA}
-\alias{ruletextline}
 \alias{quadscheme.replicated}
 \alias{quadscheme.spatial}
-\alias{pointgrid}
+\alias{rasterfilter}
 \alias{rastersample}
 \alias{rasterx.mask}
 \alias{rastery.mask}
@@ -273,13 +259,23 @@
 \alias{rebound.ppp}
 \alias{rebound.psp}
 \alias{rebound.owin}
+\alias{recognise.spatstat.type}
+\alias{rectquadrat.breaks}
+\alias{rectquadrat.countEngine}
+\alias{reflect.diagramobj}
+\alias{remove.identical.pairs}
+\alias{repair.image.xycoords}
 \alias{repair.old.factor.image}
+\alias{resolve.stringsAsFactors}
 \alias{restrict.mask}
 \alias{reversePolyclipArgs}
+\alias{rgbNA}
+\alias{rotate.diagramobj}
 \alias{rotxy}
 \alias{rotxypolygon}
 \alias{row.names.hyperframe}
 \alias{row.names<-.hyperframe}
+\alias{ruletextline}
 \alias{safedeldir}
 \alias{safeDevCapabilities}
 \alias{safelookup}
@@ -359,6 +355,7 @@
 \method{[}{splitppx}(x, \dots) <- value
 acedist.show(X, Y, n, d, timelag)
 acedist.noshow(X, Y, n, d)
+\method{affine}{diagramobj}(X, \dots)
 affinexy(X, mat, vec, invert)
 affinexypolygon(p, mat, vec, detmat)
 allElementsIdentical(x, entry)
@@ -374,7 +371,6 @@ areaLoss.grid(X, r, \dots, W, subset,
                          exact = FALSE)
 areaLoss.poly(X, r, \dots, W, subset, splitem)
 AsymmDistance.psp(X, Y, metric, method)
-as.breakpts(\dots)
 \method{as.character}{unitname}(x, \dots)
 \method{as.data.frame}{ppplist}(x, row.names, \dots)
 \method{as.double}{im}(x, \dots)
@@ -390,15 +386,12 @@ bdry.mask(W)
 \method{boundingbox}{list}(\dots)
 bounding.box3(\dots)
 break.holes(x, splitby, depth, maxdepth)
-breakpts(val, maxi, even = FALSE, npos = NULL, step = NULL)
-breakpts.from.r(r)
 cartesian(pp, markset, fac = TRUE)
 cellmiddles(W, nx, ny, npix, distances)
 checkbigmatrix(n, m, fatal, silent)
 checkfields(X,L)
 check.arc(arc, fatal)
 check.finespacing(r, eps, win, rmaxdefault, context, action, rname)
-check.hist.lengths(hist,breaks)
 circunion(arcs)
 clip.psp(x, window, check, fragments)
 cliprect.psp(x, window, fragments)
@@ -440,6 +433,7 @@ fakemaintitle(bb, main, \dots)
 fft2D(z, inverse, west)
 fftwAvailable()
 fillNA(x, value)
+\method{flipxy}{diagramobj}(X)
 flipxypolygon(p)
 \method{format}{numberwithunit}(x, \dots, collapse, modifier)
 framebottomleft(w)
@@ -454,8 +448,6 @@ grow.mask(M, xmargin=0, ymargin=xmargin)
 handle.r.b.args(r = NULL, breaks = NULL, window, pixeps = NULL, rmaxdefault)
 \method{head}{hyperframe}(x,n,\dots)
 hsvNA(h, s, v, alpha)
-IdenticalRowPair(i,j,a,b)
-IdenticalRows(i,j,a,b)
 idorempty(w, r, caller)
 imageOp(e1, e2, op)
 imagelistOp(e1, e2, op)
@@ -496,14 +488,13 @@ markvaluetype(x)
 packupNNdata(NND, NNW, what, k)
 parbreak(terse)
 perspVisible(x, y, z, M)
-plan.legend.layout(B, \dots, side, sep, size, sep.frac, size.frac,
+plan.legend.layout(B, \dots, side, sep, leg.size, sep.frac, size.frac,
                    started, map)
 pointweights(X, \dots, weights, parent, dfok)
 polytileareaEngine(P, xrange, yrange, nx, ny, DivideByPixelArea)
 putSpatstatVariable(name, value)
 lookup.im(Z, x, y, naok, strict)
 majorminorversion(v)
-make.even.breaks(bmax, npos, bstep)
 makeunitname(sing, plur, mul)
 markappend(\dots)
 markcbind(\dots)
@@ -565,6 +556,7 @@ plotPolygonBdry(x, \dots)
 plotWidthMap(bb.leg, zlim, phys.scale, leg.scale, leg.side, leg.args, grafpar)
 \method{plot}{barplotdata}(x, \dots)
 \method{plot}{indicfun}(x, W, \dots, main)
+pointgrid(W, ngrid)
 ppllengine(X, Y, action="project", check=FALSE)
 pppdist.mat(X, Y, cutoff = 1, q = 1, matching = TRUE,
             precision = 9, approximation = 10)
@@ -575,7 +567,6 @@ prepareTitle(main)
 \method{print}{anylist}(x, \dots)
 \method{print}{colourmap}(x, \dots)
 \method{print}{distfun}(x, \dots)
-\method{print}{ewcdf}(x, digits, \dots)
 \method{print}{funxy}(x, \dots)
 \method{print}{hyperframe}(x, \dots)
 \method{print}{indicfun}(x, \dots)
@@ -615,19 +606,9 @@ project3Dhom(xyz, eye, org, vert)
 putlastshift(X, vec)
 qtPrepareCoordinate(covname, W, origin)
 quad(data, dummy, w, param)
-\method{quantilefun}{interpolatedCDF}(x, \dots, type)
-rasterfilter(X, f)
-recognise.spatstat.type(x)
-rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
-rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
-remove.identical.pairs(cl, imap, jmap)
-repair.image.xycoords(x)
-resolve.stringsAsFactors(stringsAsFactors)
-rgbNA(red, green, blue, alpha, maxColorValue)
-ruletextline(ch, n, terse)
 quadscheme.replicated(data, dummy, method, \dots)
 quadscheme.spatial(data, dummy, method, \dots)
-pointgrid(W, ngrid)
+rasterfilter(X, f)
 rastersample(X, Y)
 rasterx.mask(w, drop)
 rastery.mask(w, drop)
@@ -640,13 +621,23 @@ rebound(x, rect)
 \method{rebound}{ppp}(x, rect) 
 \method{rebound}{psp}(x, rect) 
 \method{rebound}{owin}(x, rect)
+recognise.spatstat.type(x)
+rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
+rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
+\method{reflect}{diagramobj}(X)
+remove.identical.pairs(cl, imap, jmap)
+repair.image.xycoords(x)
 repair.old.factor.image(x)
+resolve.stringsAsFactors(stringsAsFactors)
 restrict.mask(M, W)
 reversePolyclipArgs(x, p)
+rgbNA(red, green, blue, alpha, maxColorValue)
+\method{rotate}{diagramobj}(X, \dots)
 rotxy(X, angle = pi/2)
 rotxypolygon(p, angle = pi/2)
 \method{row.names}{hyperframe}(x)
 \method{row.names}{hyperframe}(x) <- value
+ruletextline(ch, n, terse)
 safedeldir(X)
 safeDevCapabilities()
 safelookup(Z, x, factor, warn)

@@ -1,273 +1,26 @@
 #
 #	plot.ppp.R
 #
-#	$Revision: 1.117 $	$Date: 2024/01/22 08:13:33 $
+#	$Revision: 1.123 $	$Date: 2024/06/26 06:56:32 $
 #
 #
 #--------------------------------------------------------------------------
 
-plot.ppp <- local({
-
-  default.transparency <- function(n) {
-    if(n <= 100) 1 else (0.2 + 0.8 * exp(-(n-100)/1000))
-  }
-  
-  ## determine symbol map for marks of points
-  default.symap.points <- function(x, ..., 
-                                   chars=NULL, cols=NULL, col=NULL, 
-                                   maxsize=NULL, meansize=NULL, markscale=NULL,
-                                   minsize=NULL, zerosize=NULL,
-                                   markrange=NULL, marklevels=NULL,
-                                   marktransform=NULL) {
-    marx <- marks(x)
-    if(is.null(marx)) {
-      ## null or constant symbol map
-      ## consider using transparent colours
-      if(is.null(cols) && is.null(col) && 
-         !any(c("fg", "bg") %in% names(list(...))) &&
-         (nx <- npoints(x)) > 100 &&
-         spatstat.options("transparent") &&
-         isTRUE(safeDevCapabilities()$semiTransparency))
-        cols <- rgb(0,0,0, default.transparency(nx))
-      if(!is.null(cols) && !is.null(col)) col <- NULL
-      symap <- symbolmap(..., chars=chars, cols=cols, col=col)
-      pnames <- symbolmapparnames(symap)
-      if("shape" %in% pnames && !("size" %in% pnames)) {
-        ## symbols require a size parameter
-        m <- symbol.sizes.default(rep(1, npoints(x)), Window(x),
-                                  maxsize=maxsize, meansize=meansize,
-                                  minsize=minsize,
-                                  zerosize=zerosize)
-        symap <- update(symap, size=m)
-      }
-      return(symap)
-    }
-    if(!is.null(dim(marx)))
-      stop("Internal error: multivariate marks in default.symap.points")
-
-    argnames <- names(list(...))
-    shapegiven <- "shape" %in% argnames
-    chargiven <- (!is.null(chars)) || ("pch" %in% argnames)
-    assumecircles <- !(shapegiven || chargiven)
-    sizegiven <- ("size" %in% argnames) ||
-                 (("cex" %in% argnames) && !shapegiven)
-
-
-    ## pre-transformation of mark values
-    transforming <- is.function(marktransform)
-    Tmarx <- if(transforming) marktransform(marx) else marx
-
-    transformedsizeargs <- list()
-    if(transforming && sizegiven) {
-      ## Given arguments 'size' or 'cex'
-      ## are meant to apply to the transformed mark values.
-      ## Insert the transformation 
-      if("size" %in% argnames) {
-        siz <- list(...)$size
-        if(is.function(siz)) {
-          newsiz <- function(x, tra=marktransform, oldsize=siz) {
-            oldsize(tra(x))
-          }
-          transformedsizeargs$size <- newsiz
-        }
-      }
-      if(("cex" %in% argnames) && !shapegiven) {
-        cx <- list(...)$cex
-        if(is.function(cx)) {
-          newcex <- function(x, tra=marktransform, oldcex=cx) {oldcex(tra(x))}
-          transformedsizeargs$cex <- newcex
-        }
-      }
-    }
-    
-    
-    if(inherits(marx, c("Date", "POSIXt"))) {
-      ## ......... marks are dates or date/times .....................
-      timerange <- range(marx, na.rm=TRUE)
-      shapedefault <- if(!assumecircles) list() else list(shape="circles")
-      if(sizegiven) {
-        g <- do.call(symbolmap,
-          resolve.defaults(list(range=timerange),
-                           transformedsizeargs,
-                           list(...),
-                           shapedefault,
-                           list(chars=chars, cols=cols)))
-        return(g)
-      }
-      ## attempt to determine a scale for the marks
-      if(transforming)
-        stop("Argument marktransform is not yet supported for Date-time values")
-      y <- scaletointerval(marx, 0, 1, timerange)
-      y <- y[is.finite(y)]
-      if(length(y) == 0) return(symbolmap(..., chars=chars, cols=cols))
-      scal <- mark.scale.default(y, as.owin(x), markrange=c(0,1),
-                                 markscale=markscale, maxsize=maxsize,
-                                 meansize=meansize, 
-                                 characters=chargiven)
-      if(is.na(scal)) return(symbolmap(..., chars=chars, cols=cols))
-      ## scale determined
-      sizefun <- function(x, scal=1, timerange=NULL) {
-        (scal/2) * scaletointerval(x, 0, 1, timerange)
-      }
-      formals(sizefun)[[2]] <- scal  ## ensures value of 'scal' is printed
-      formals(sizefun)[[3]] <- timerange
-      ##
-      g <- do.call(symbolmap,
-                   resolve.defaults(list(range=timerange),
-                                    list(...),
-                                    shapedefault,
-                                    list(size=sizefun)))
-      return(g)
-    }
-    if(is.numeric(marx)) {
-      ## ............. marks are numeric values ...................
-      marx <- marx[is.finite(marx)]
-      if(is.null(markrange)) {
-        #' usual case
-        if(length(marx) == 0)
-          return(symbolmap(..., chars=chars, cols=cols))
-        markrange <- range(marx)
-      } else {
-        if(!all(inside.range(marx, markrange)))
-          warning("markrange does not encompass the range of mark values",
-                  call.=FALSE)
-      }
-      ## 
-      if(sizegiven) {
-        ## size function is given
-        g <- do.call(symbolmap,
-          resolve.defaults(list(range=markrange),
-                           transformedsizeargs,
-                           list(...),
-                           if(assumecircles) list(shape="circles") else list(),
-                           list(chars=chars, cols=cols)))
-        return(g)
-      }
-      ## attempt to determine a scale for the (transformed) marks 
-      if(transforming) {
-        if(!is.numeric(Tmarx))
-          stop(paste("Function", sQuote("marktransform"),
-                     "should map numeric values to numeric values"),
-               call.=FALSE)
-        Tmarkrange <- range(Tmarx, marktransform(markrange))
-      } else Tmarkrange <- markrange
-      ## degenerate?
-      if(all(Tmarkrange == 0))
-        return(symbolmap(..., chars=chars, cols=cols))
-      ## try scaling
-      scal <- mark.scale.default(Tmarx, as.owin(x), markrange=Tmarkrange,
-                                 markscale=markscale, maxsize=maxsize,
-                                 meansize=meansize,
-                                 minsize=minsize, zerosize=zerosize,
-                                 characters=chargiven)
-      if(is.na(scal)) return(symbolmap(..., chars=chars, cols=cols))
-      ## scale determined
-      zerosize <- attr(scal, "zerosize") %orifnull% 0
-      scal <- as.numeric(scal)
-      if(Tmarkrange[1] >= 0) {
-        ## all (transformed) marks are nonnegative
-        shapedefault <-
-          if(!assumecircles) list() else list(shape="circles")
-        cexfun <- function(x, scal=1, zerosize=0, tra=I) { zerosize + scal * tra(x) }
-        circfun <- function(x, scal=1, zerosize=0, tra=I) { zerosize + scal * tra(x) }
-        formals(cexfun)[[2]] <- formals(circfun)[[2]] <- scal
-        formals(cexfun)[[3]] <- formals(circfun)[[3]] <- zerosize
-        if(transforming)
-          formals(cexfun)[[4]] <- formals(circfun)[[4]] <- marktransform
-        sizedefault <-
-          if(sizegiven) list() else
-          if(chargiven) list(cex=cexfun) else list(size=circfun)
-      } else {
-        ## some marks are negative
-        shapedefault <-
-          if(!assumecircles) list() else
-          list(shape=function(x) { ifelse(x >= 0, "circles", "squares") })
-        cexfun <- function(x, scal=1, zerosize=0, tra=I) { zerosize + scal * abs(tra(x)) }
-        circfun <- function(x, scal=1, zerosize=0, tra=I) { zerosize + scal * abs(tra(x)) }
-        formals(cexfun)[[2]] <- formals(circfun)[[2]] <- scal
-        formals(cexfun)[[3]] <- formals(circfun)[[3]] <- zerosize
-        if(transforming)
-          formals(cexfun)[[4]] <- formals(circfun)[[4]] <- marktransform
-        sizedefault <-
-          if(sizegiven) list() else
-          if(chargiven) list(cex=cexfun) else list(size=circfun)
-      }
-      g <- do.call(symbolmap,
-                   resolve.defaults(list(range=markrange),
-                                    list(...),
-                                    shapedefault,
-                                    sizedefault,
-                                    list(chars=chars, cols=cols)))
-      return(g)
-    }
-    ##  ...........  non-numeric marks .........................
-    if(transforming)
-      stop(paste("Argument", sQuote("marktransform"),
-                 "is not yet supported for non-numeric marks"),
-           call.=FALSE)
-    um <- marklevels %orifnull%
-          if(is.factor(marx)) levels(marx) else sortunique(marx)
-    ntypes <- length(um)
-    if(!is.null(cols))
-      cols <- rep.int(cols, ntypes)[1:ntypes]
-    if(shapegiven && sizegiven) {
-      #' values mapped to symbols (shape and size specified)
-      g <- symbolmap(inputs=um, ..., cols=cols)
-    } else if(!shapegiven) {
-      #' values mapped to 'pch'
-      chars <- default.charmap(ntypes, chars)
-      g <- symbolmap(inputs=um, ..., chars=chars, cols=cols)
-    } else {
-      #' values mapped to symbols
-      #' determine size
-      scal <- symbol.sizes.default(rep(1, npoints(x)),
-                                   Window(x), 
-                                   maxsize=maxsize,
-                                   meansize=meansize,
-                                   minsize=minsize,
-                                   zerosize=zerosize,
-                                   characters=FALSE)
-      g <- symbolmap(inputs=um, ..., size=scal, cols=cols)
-    }
-    return(g)
-  }
-                                  
-  default.charmap <- function(n, ch=NULL) {
-    if(!is.null(ch))
-      return(rep.int(ch, n)[1:n])
-    if(n <= 25)
-      return(1:n)
-    ltr <- c(letters, LETTERS)
-    if(n <= 52)
-      return(ltr[1:n])
-    ## wrapped sequence of letters
-    warning("Too many types to display every type as a different character")
-    return(ltr[1 + (0:(n - 1) %% 52)])
-  }
-
-  ## main function
-  plot.ppp <-
-    function(x, main, ..., clipwin=NULL,
-             chars=NULL, cols=NULL, use.marks=TRUE,
-             which.marks=NULL, add=FALSE, type=c("p", "n"), 
-             legend=TRUE, leg.side=c("left", "bottom", "top", "right"),
-             leg.args=list(),
-             symap=NULL, maxsize=NULL, meansize=NULL, markscale=NULL,
-             minsize=NULL, zerosize=NULL, zap=0.01, 
-             show.window=show.all, show.all=!add, do.plot=TRUE,
-             multiplot=TRUE)
+plot.ppp <- function(x, main, ..., clipwin=NULL,
+                     chars=NULL, cols=NULL, use.marks=TRUE,
+                     which.marks=NULL, add=FALSE, type=c("p", "n"), 
+                     legend=TRUE, leg.side=c("left", "bottom", "top", "right"),
+                     leg.args=list(),
+                     symap=NULL, maxsize=NULL, meansize=NULL, markscale=NULL,
+                     minsize=NULL, zerosize=NULL, zap=0.01, 
+                     show.window=show.all, show.all=!add, do.plot=TRUE,
+                     multiplot=TRUE)
 {
   if(missing(main))
     main <- short.deparse(substitute(x))
 
   type <- match.arg(type)
   if(missing(legend)) legend <- (type == "p")
-
-#  if(!missing(maxsize) || !missing(markscale) || !missing(meansize))
-#    warn.once("circlescale",
-#              "Interpretation of arguments maxsize and markscale",
-#              "has changed (in spatstat version 1.37-0 and later).",
-#              "Size of a circle is now measured by its diameter.")
 
   if(clipped <- !is.null(clipwin)) {
     stopifnot(is.owin(clipwin))
@@ -283,20 +36,6 @@ plot.ppp <- local({
     vertical <- (leg.side %in% c("left", "right"))
   }
   
-#  if(type == "n" || npoints(x) == 0) {
-#    ## plot the window only
-#    xwindow <- x$window
-#    if(do.plot) 
-#      do.call(plot.owin,
-#              resolve.defaults(list(quote(xwindow)),
-#                               list(...),
-#                               list(main=main, invert=TRUE, add=add,
-#                                    type=if(show.window) "w" else "n")))
-#    if(is.null(symap)) symap <- symbolmap()
-#    attr(symap, "bbox") <- as.rectangle(xwindow)
-#    return(invisible(symap))
-#  }
-
   ## ................................................................
   ## Handle multiple columns of marks as separate plots
   ##  (unless add=TRUE or which.marks selects a single column
@@ -343,7 +82,7 @@ plot.ppp <- local({
     ## Marks are not mapped.
     marx <- NULL
     if(is.null(symap))
-      symap <- default.symap.points(unmark(x), ..., chars=chars, cols=cols)
+      symap <- default.symbolmap(unmark(x), ..., chars=chars, cols=cols)
   } else {
     ## Marked point pattern
     marx <- marks(y, dfok=TRUE)
@@ -357,7 +96,7 @@ plot.ppp <- local({
       if(!any(ok)) {
         warning("All mark values are NA; plotting locations only.")
         if(is.null(symap))
-          symap <- default.symap.points(unmark(x), ..., chars=chars, cols=cols)
+          symap <- default.symbolmap(unmark(x), ..., chars=chars, cols=cols)
       } else if(any(!ok)) {
         warning(paste("Some marks are NA;",
                       "corresponding points are omitted."))
@@ -368,11 +107,11 @@ plot.ppp <- local({
     }
     ## apply default symbol map
     if(is.null(symap))
-      symap <- default.symap.points(y, chars=chars, cols=cols, 
-                                    maxsize=maxsize, meansize=meansize,
-                                    markscale=markscale,
-                                    minsize=minsize, zerosize=zerosize,
-                                    ...)
+      symap <- default.symbolmap(y, chars=chars, cols=cols, 
+                                 maxsize=maxsize, meansize=meansize,
+                                 markscale=markscale,
+                                 minsize=minsize, zerosize=zerosize,
+                                 ...)
   }
 
   ## Determine bounding box for main plot
@@ -409,12 +148,22 @@ plot.ppp <- local({
   ## Augment bounding box with space for legend, if appropriate
   legend <- legend && (symbolmaptype(symap) != "constant") 
   if(legend) {
-    ## guess maximum size of symbols
-    maxsize <- invoke.symbolmap(symap, symbolmapdomain(symap),
-                                corners(as.rectangle(x)),
-                                add=add, do.plot=FALSE)
-    sizeguess <- if(maxsize <= 0) NULL else (1.5 * maxsize)
     leg.args <- append(list(side=leg.side, vertical=vertical), leg.args)
+    if(isTRUE(leg.args$colour.only)) {
+      ## only the colour map will be plotted
+      ## use layout similar to plot.im
+      sizeguess <- NULL
+      leg.args <- resolve.defaults(leg.args, list(sep.frac=0.15,
+                                                  size.frac=0.05,
+                                                  las=1))
+    } else {
+      ## symbols will be plotted
+      ## guess maximum size of symbols
+      maxsize <- invoke.symbolmap(symap, symbolmapdomain(symap),
+                                  corners(as.rectangle(x)),
+                                  add=add, do.plot=FALSE)
+      sizeguess <- if(maxsize > 0) (1.5 * maxsize) else NULL
+    }
     ## draw up layout
     layoutboxes <- do.call.matched(plan.legend.layout,
                                   append(list(B=quote(BB), size = sizeguess,
@@ -508,14 +257,313 @@ plot.ppp <- local({
                         xlim=legbox$xrange, ylim=legbox$yrange),
                    leg.args))
   }
-  
   return(invisible(symap))
 }
 
-plot.ppp
+## determine symbol map for marks of points
+default.symbolmap.ppp <- local({
 
+  default.symbolmap.ppp <- function(x, ..., 
+                                    chars=NULL, cols=NULL, 
+                                    fixsize=FALSE,
+                                    maxsize=NULL, meansize=NULL, markscale=NULL,
+                                    minsize=NULL, zerosize=NULL,
+                                    marktransform=NULL) {
+    Y <- lapply(unstack(x),
+                dsmEngine,
+                ...,
+                chars=chars,
+                cols=cols,
+                fixsize=fixsize,
+                maxsize=maxsize,
+                meansize=meansize,
+                markscale=markscale,
+                minsize=minsize,
+                zerosize=zerosize,
+                marktransform=marktransform)
+    if(length(Y) == 1)
+      Y <- Y[[1L]]
+    return(Y)
+  }
+
+  ## full argument list
+  dsmEngine <- function(x, ..., 
+                        chars=NULL,
+                        cols=NULL,
+                        col=NULL,
+                        fixsize=FALSE,
+                        maxsize=NULL,
+                        meansize=NULL,
+                        markscale=NULL,
+                        minsize=NULL,
+                        zerosize=NULL,
+                        markrange=NULL,
+                        marklevels=NULL,
+                        marktransform=NULL) {
+    marx <- marks(x)
+    if(is.null(marx)) {
+      ## null or constant symbol map
+      ## consider using transparent colours
+      if(is.null(cols) && is.null(col) && 
+         !any(c("fg", "bg") %in% names(list(...))) &&
+         (nx <- npoints(x)) > 100 &&
+         spatstat.options("transparent") &&
+         isTRUE(safeDevCapabilities()$semiTransparency))
+        cols <- rgb(0,0,0, default.transparency(nx))
+      if(!is.null(cols) && !is.null(col)) col <- NULL
+      symap <- symbolmap(..., chars=chars, cols=cols, col=col)
+      pnames <- symbolmapparnames(symap)
+      if("shape" %in% pnames && !("size" %in% pnames)) {
+        ## symbols require a size parameter
+        m <- symbol.sizes.default(rep(1, npoints(x)), Window(x),
+                                  maxsize=maxsize, meansize=meansize,
+                                  minsize=minsize,
+                                  zerosize=zerosize)
+        symap <- update(symap, size=m)
+      }
+      return(symap)
+    }
+    if(!is.null(dim(marx)))
+      stop("Internal error: multivariate marks in default.symap.points")
+
+    ## understand user's wishes
+    argnames <- names(list(...))
+    shapegiven <- "shape" %in% argnames
+    chargiven <- (!is.null(chars)) || ("pch" %in% argnames)
+    sizegiven <- ("size" %in% argnames) ||
+                 (("cex" %in% argnames) && !shapegiven)
+    assumecircles <- !(shapegiven || chargiven)
+    sizeconstrained <- !all(sapply(list(maxsize, minsize, meansize, zerosize),
+                                   is.null))
+
+    ## set defaults
+    shapedefault <- if(!assumecircles) list() else list(shape="circles")
+
+    ## pre-transformation of mark values
+    transforming <- is.function(marktransform) && !fixsize
+    Tmarx <- if(transforming) marktransform(marx) else marx
+
+    transformedsizeargs <- list()
+    if(transforming && sizegiven) {
+      ## Given arguments 'size' or 'cex'
+      ## are meant to apply to the transformed mark values.
+      ## Insert the transformation 
+      if("size" %in% argnames) {
+        siz <- list(...)$size
+        if(is.function(siz)) {
+          newsiz <- function(x, tra=marktransform, oldsize=siz) {
+            oldsize(tra(x))
+          }
+          transformedsizeargs$size <- newsiz
+        }
+      }
+      if(("cex" %in% argnames) && !shapegiven) {
+        cx <- list(...)$cex
+        if(is.function(cx)) {
+          newcex <- function(x, tra=marktransform, oldcex=cx) {oldcex(tra(x))}
+          transformedsizeargs$cex <- newcex
+        }
+      }
+    }
+    
+    
+    if(inherits(marx, c("Date", "POSIXt"))) {
+      ## ......... marks are dates or date/times .....................
+      timerange <- range(marx, na.rm=TRUE)
+      if(sizegiven) {
+        g <- do.call(symbolmap,
+          resolve.defaults(list(range=timerange),
+                           transformedsizeargs,
+                           list(...),
+                           shapedefault,
+                           list(chars=chars, cols=cols)))
+        return(g)
+      }
+      ## attempt to determine a scale for the marks
+      if(transforming)
+        stop("Argument marktransform is not yet supported for Date-time values")
+      y <- scaletointerval(marx, 0, 1, timerange)
+      y <- y[is.finite(y)]
+      if(length(y) == 0) return(symbolmap(..., chars=chars, cols=cols))
+      scal <- mark.scale.default(y, as.owin(x), markrange=c(0,1),
+                                 markscale=markscale, maxsize=maxsize,
+                                 meansize=meansize, 
+                                 characters=chargiven)
+      if(is.na(scal)) return(symbolmap(..., chars=chars, cols=cols))
+      ## scale determined
+      sizefun <- function(x, scal=1, timerange=NULL) {
+        (scal/2) * scaletointerval(x, 0, 1, timerange)
+      }
+      formals(sizefun)[[2]] <- scal  ## ensures value of 'scal' is printed
+      formals(sizefun)[[3]] <- timerange
+      ##
+      g <- do.call(symbolmap,
+                   resolve.defaults(list(range=timerange),
+                                    list(...),
+                                    shapedefault,
+                                    list(size=sizefun)))
+      return(g)
+    }
+    if(is.numeric(marx)) {
+      ## ............. marks are numeric values ...................
+      marx <- marx[is.finite(marx)]
+      if(is.null(markrange)) {
+        #' usual case
+        if(length(marx) == 0)
+          return(symbolmap(..., chars=chars, cols=cols))
+        markrange <- range(marx)
+      } else {
+        if(!all(inside.range(marx, markrange)))
+          warning("markrange does not encompass the range of mark values",
+                  call.=FALSE)
+      }
+      ## 
+      if(sizegiven) {
+        ## size function is given
+        g <- do.call(symbolmap,
+          resolve.defaults(list(range=markrange),
+                           transformedsizeargs,
+                           list(...),
+                           shapedefault,
+                           list(chars=chars, cols=cols)))
+        return(g)
+      } else if(fixsize) {
+        ## require symbols of equal size
+        ## determine fixed physical size
+        if(!is.null(meansize)) {
+          size <- meansize
+        } else if(!is.null(minsize) && !is.null(maxsize)) {
+          size <- (minsize+maxsize)/2
+        } else if(!is.null(minsize)) {
+          size <- minsize
+        } else if(!is.null(maxsize)) {
+          size <- maxsize
+        } else if(!is.null(zerosize) && zerosize > 0) {
+          size <- zerosize
+        } else {
+          ## choose suitable size
+          bb <- Frame(x)
+          nn <- nndist(x)
+          nn <- nn[nn > 0]
+          size1 <- 1.4/sqrt(pi * length(marx)/area(bb))
+          size2 <- 0.07 * diameter(bb)
+          size3 <- if(length(nn)) median(nn) else Inf
+          size <- min(size1, size2, size3)
+        }
+        g <- do.call(symbolmap,
+                     resolve.defaults(list(range=markrange),
+                                      list(...),
+                                      list(size=size, chars=chars, cols=cols),
+                                      shapedefault))
+        return(g)
+      }
+      ## attempt to determine a scale for the (transformed) marks 
+      if(transforming) {
+        if(!is.numeric(Tmarx))
+          stop(paste("Function", sQuote("marktransform"),
+                     "should map numeric values to numeric values"),
+               call.=FALSE)
+        Tmarkrange <- range(Tmarx, marktransform(markrange))
+      } else Tmarkrange <- markrange
+      ## degenerate?
+      if(all(Tmarkrange == 0))
+        return(symbolmap(..., chars=chars, cols=cols))
+      ## try scaling
+      scal <- mark.scale.default(Tmarx, as.owin(x),
+                                 markrange=Tmarkrange,
+                                 markscale=markscale, maxsize=maxsize,
+                                 meansize=meansize,
+                                 minsize=minsize, zerosize=zerosize,
+                                 characters=chargiven)
+      if(is.na(scal)) return(symbolmap(..., chars=chars, cols=cols))
+      ## scale determined
+      zerosize <- attr(scal, "zerosize") %orifnull% 0
+      scal <- as.numeric(scal)
+      if(Tmarkrange[1] >= 0) {
+        ## all (transformed) marks are nonnegative
+        cexfun <- function(x, scal=1, zerosize=0, tra=I) { zerosize + scal * tra(x) }
+        circfun <- function(x, scal=1, zerosize=0, tra=I) { zerosize + scal * tra(x) }
+        formals(cexfun)[[2]] <- formals(circfun)[[2]] <- scal
+        formals(cexfun)[[3]] <- formals(circfun)[[3]] <- zerosize
+        if(transforming)
+          formals(cexfun)[[4]] <- formals(circfun)[[4]] <- marktransform
+        sizedefault <-
+          if(sizegiven) list() else
+          if(chargiven) list(cex=cexfun) else list(size=circfun)
+      } else {
+        ## some marks are negative
+        shapedefault <-
+          if(!assumecircles) list() else
+          list(shape=function(x) { ifelse(x >= 0, "circles", "squares") })
+        cexfun <- function(x, scal=1, zerosize=0, tra=I) { zerosize + scal * abs(tra(x)) }
+        circfun <- function(x, scal=1, zerosize=0, tra=I) { zerosize + scal * abs(tra(x)) }
+        formals(cexfun)[[2]] <- formals(circfun)[[2]] <- scal
+        formals(cexfun)[[3]] <- formals(circfun)[[3]] <- zerosize
+        if(transforming)
+          formals(cexfun)[[4]] <- formals(circfun)[[4]] <- marktransform
+        sizedefault <-
+          if(sizegiven) list() else
+          if(chargiven) list(cex=cexfun) else list(size=circfun)
+      }
+      g <- do.call(symbolmap,
+                   resolve.defaults(list(range=markrange),
+                                    list(...),
+                                    shapedefault,
+                                    sizedefault,
+                                    list(chars=chars, cols=cols)))
+      return(g)
+    }
+    ##  ...........  non-numeric marks .........................
+    if(transforming)
+      stop(paste("Argument", sQuote("marktransform"),
+                 "is not yet supported for non-numeric marks"),
+           call.=FALSE)
+    um <- marklevels %orifnull%
+          if(is.factor(marx)) levels(marx) else sortunique(marx)
+    ntypes <- length(um)
+    if(!is.null(cols))
+      cols <- rep.int(cols, ntypes)[1:ntypes]
+    if(shapegiven && sizegiven) {
+      #' values mapped to symbols (shape and size specified)
+      g <- symbolmap(inputs=um, ..., cols=cols)
+    } else if(!shapegiven) {
+      #' values mapped to 'pch'
+      chars <- default.charmap(ntypes, chars)
+      g <- symbolmap(inputs=um, ..., chars=chars, cols=cols)
+    } else {
+      #' values mapped to symbols of equal size
+      #' determine size
+      scal <- symbol.sizes.default(rep(1, npoints(x)),
+                                   Window(x), 
+                                   maxsize=maxsize,
+                                   meansize=meansize,
+                                   minsize=minsize,
+                                   zerosize=zerosize,
+                                   characters=FALSE)
+      g <- symbolmap(inputs=um, ..., size=scal, cols=cols)
+    }
+    return(g)
+  }
+                                  
+  default.charmap <- function(n, ch=NULL) {
+    if(!is.null(ch))
+      return(rep.int(ch, n)[1:n])
+    if(n <= 25)
+      return(1:n)
+    ltr <- c(letters, LETTERS)
+    if(n <= 52)
+      return(ltr[1:n])
+    ## wrapped sequence of letters
+    warning("Too many types to display every type as a different character")
+    return(ltr[1 + (0:(n - 1) %% 52)])
+  }
+
+  default.transparency <- function(n) {
+    if(n <= 100) 1 else (0.2 + 0.8 * exp(-(n-100)/1000))
+  }
+  
+  default.symbolmap.ppp
 })
-
 
 ## utility function to determine mark scale 
 ## (factor converting mark values to physical sizes on the plot)
@@ -542,7 +590,7 @@ mark.scale.default <- function(marx, w, ...,
     maxsize   <- pop$maxsize
     meansize  <- pop$meansize
   }
-  ng <- !is.null(minsize) + !is.null(zerosize)
+  ng <- (!is.null(minsize)) + (!is.null(zerosize))
   if(ng > 1)
     stop("Arguments minsize and zerosize are incompatible", call.=FALSE)
   if(ng == 0) {
