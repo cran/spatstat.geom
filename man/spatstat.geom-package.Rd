@@ -46,6 +46,8 @@
     \item \pkg{spatstat.utils} containing basic utilities
     \item \pkg{spatstat.data} containing datasets
     \item \pkg{spatstat.sparse} containing linear algebra utilities
+    \item \pkg{spatstat.univar} containing functions for estimating
+    probability distributions of random variables
     \item \pkg{spatstat.geom} containing geometrical objects
     and geometrical operations
     \item \pkg{spatstat.random} containing code for generating
@@ -145,6 +147,8 @@
 	plot a point pattern (e.g. \code{plot(X)}) \cr
 	\code{spatstat.gui::iplot} \tab
 	plot a point pattern interactively \cr 
+	\code{\link{persp.ppp}} \tab
+	perspective plot of marked point pattern \cr
 	\code{\link{edit.ppp}} \tab interactive text editor \cr
 	\code{\link{[.ppp}} \tab 
 	extract or replace a subset of a point pattern \cr
