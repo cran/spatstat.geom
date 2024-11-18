@@ -5,18 +5,22 @@
 #'  Copyright (C) Adrian Baddeley 2024
 #'  GPL Public Licence >= 2.0
 #'
-#' $Revision: 1.3 $ $Date: 2024/09/07 01:34:04 $
+#' $Revision: 1.5 $ $Date: 2024/10/28 06:10:01 $
 
 persp.ppp <- local({
   
-  persp.ppp <- function(x, ..., main, grid=TRUE, ngrid=10,
+  persp.ppp <- function(x, ..., main, type=c("l", "b"), grid=TRUE, ngrid=10,
                         col.grid="grey", col.base="white",
                         win.args=list(),
-                        spike.args=list(),
-                        neg.args=list(), which.marks=1,
+                        spike.args=list(), 
+                        neg.args=list(), point.args=list(), which.marks=1,
                         zlab=NULL, zlim=NULL,
-                        zadjust=1) {
+                        zadjust=1,
+                        legend=TRUE, legendpos="bottomleft",
+                        leg.args=list(lwd=4),
+                        leg.col=c("black", "orange")) {
     if(missing(main)) main <- short.deparse(substitute(x))
+    type <- match.arg(type)
     W <- Window(x)
     R <- Frame(x)
     marx <- marks(x)
@@ -50,16 +54,21 @@ persp.ppp <- local({
            stop("marks should be a vector or a data frame", call.=FALSE)
            )
     marx <- as.numeric(marx)
+    if(is.null(zlim)) zlim <- range(marx, 0)
     #' rescale marks to a scale commensurate with window
     #'  (to achieve appropriate default scale in persp.default)
     maxmark <- max(abs(marx))
     if(maxmark > .Machine$double.eps) {
-      marx <- marx * (max(sidelengths(R))/maxmark)
+      scal <- max(sidelengths(R))/maxmark
+      scaled.marx <- scal * marx
+      scaled.zlim <- scal * zlim
+    } else {
+      scaled.marx <- marx
+      scaled.zlim <- zlim
     }
     #' set up perspective transformation and plot horizontal plane
     Rplus <- grow.rectangle(R, fraction=1/(2*ngrid))
     Z <- as.im(0, W=Rplus, dimyx=rev(ngrid)+1)
-    if(is.null(zlim)) zlim <- range(marx, 0)
     check.range(zlim)
     col.grid.used <- if(grid && (zlim[1] >= 0)) col.grid else NA
     argh <- resolve.defaults(list(x=Z, main=main,
@@ -67,7 +76,7 @@ persp.ppp <- local({
                                   col=col.base),
                              dotargs,
                              list(axes=FALSE, box=FALSE,
-                                  zlim=zlim, zlab=zlab,
+                                  zlim=scaled.zlim, zlab=zlab,
                                   #' do not independently rescale x & y
                                   scale=FALSE,
                                   #' expand=0.1 is default in persp.default
@@ -76,15 +85,24 @@ persp.ppp <- local({
                          funargs=graphicsPars("persp"))
     #' create spikes
     S <- xyzsegmentdata(x$x, x$y, 0,
-                        x$x, x$y, marx)
+                        x$x, x$y, scaled.marx)
+    #' and bubbles
+    if(type == "b")
+      P <- data.frame(x=x$x, y=x$y, z=scaled.marx)
+    
     if(grid) {
-      if(zlim[1] < 0) {
+      if(scaled.zlim[1] < 0) {
         #' first draw downward spikes
-        downward <- (marx < 0)
+        downward <- (scaled.marx < 0)
         if(any(downward)) {
           SD <- S[downward, , drop=FALSE]
-          spectiveSegments(SD, neg.args, spike.args, ..., M=M)
+          spectiveSegments(SD, neg.args, spike.args, dotargs, M=M)
           S <- S[!downward, , drop=FALSE]
+          if(type == "b") {
+            PD <- P[downward, , drop=FALSE]
+            spectivePoints(PD, point.args, dotargs, M=M)
+            P <- P[!downward, , drop=FALSE]
+          }
         }
         #' plot baseline grid 
         spectiveFlatGrid(R, ngrid, M, col=col.grid)
@@ -97,8 +115,41 @@ persp.ppp <- local({
     #' draw upward spikes
     if(nrow(S) > 0) {
       spectiveSegments(S, spike.args, dotargs, M=M)
+      if(type == "b")
+        spectivePoints(P, point.args, dotargs, M=M)
     }
-    #'   
+    #'
+    if(legend) {
+      #' draw a reference scale as another spike
+      #' determine spike position
+      if(is.character(legendpos)) {
+        legendpos <- match.arg(legendpos, c("bottomleft", "bottomright",
+                                            "topleft", "topright",
+                                            "bottom", "left", "top", "right"))
+        B <- Frame(x)
+        xr <- B$xrange
+        yr <- B$yrange
+        legxy <- switch(legendpos,
+                        bottomleft = c(xr[1], yr[1]),
+                        bottomright = c(xr[2], yr[1]),
+                        topleft = c(xr[1], yr[2]),
+                        topright = c(xr[2], yr[2]),
+                        bottom = c(mean(xr), yr[1]),
+                        left = c(xr[1], mean(yr)),
+                        top = c(mean(xr), yr[2]),
+                        right = c(xr[2], mean(yr)))
+      } else legxy <- ensure2vector(unlist(legendpos))
+      #' determine tickmarks
+      tix <- unique(sort(c(zlim, prettyinside(zlim))))
+      ntix <- length(tix)
+      scaled.tix <- scal * tix
+      tixseg <- xyzsegmentdata(legxy[1], legxy[2], scaled.tix[-ntix],
+                               legxy[1], legxy[2], scaled.tix[-1])
+      tixcol <- rep(leg.col, ntix)[1:ntix]
+      spectiveSegments(tixseg, list(col=tixcol), leg.args, M=M)
+      spectiveText(legxy[1], legxy[2], scaled.tix[-c(1,ntix)],
+                   labels=tix[-c(1,ntix)], pos=4, M=M)
+    }
     invisible(M)
   }
 
@@ -154,6 +205,21 @@ persp.ppp <- local({
                            y1=a1$y),
                       ...))
     invisible(NULL)
+  }
+
+  spectivePoints <- function(df, ..., M) {
+    ## arguments ... should be lists of parameters
+    p <- with(df, trans3dz(x, y, z, M))
+    do.call.matched(points.default,
+                    resolve.defaults(
+                      list(x=p$x, y=p$y),
+                      ...),
+                    extrargs=graphicsPars("points"))
+  }
+  
+  spectiveText <- function(x,y,z, ..., M) {
+    p <- trans3dz(x, y, z, M)
+    text(p$x, p$y, ...)
   }
 
   persp.ppp

@@ -1,3 +1,36 @@
+        CHANGES IN spatstat.geom VERSION 3.3-4
+
+OVERVIEW
+
+    o Tessellations can have any kind of marks.
+
+    o More control over default colours.
+
+    o Minor improvements.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o default.image.colours, reset.default.image.colours
+    Control the default colours used for plotting images in spatstat.
+    
+    o tess, marks<-.tess
+    A tessellation can now have any kind of marks
+    (vector, list, data frame or hyperframe).
+
+    o intersect.tess
+    Now handles marks of any kind (vector, list, data frame or hyperframe).
+
+    o pixelquad
+    Now accepts arguments passed to 'as.mask' to control the pixel resolution.
+
+    o persp.ppp
+    Now draws a reference scale bar for the vertical scale, by default.
+    New arguments 'legend', 'legendpos', 'leg.args', 'leg.col'.
+    
+    o persp.ppp
+    Optionally draws a symbol at the top of each spike.
+    New arguments 'type', 'point.args'.
+    
         CHANGES IN spatstat.geom VERSION 3.3-3
 
 OVERVIEW
