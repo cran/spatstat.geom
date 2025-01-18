@@ -3,7 +3,7 @@
 #
 # support for colour maps and other lookup tables
 #
-# $Revision: 1.52 $ $Date: 2024/05/02 06:19:31 $
+# $Revision: 1.63 $ $Date: 2024/12/02 01:41:18 $
 #
 
 colourmap <- function(col, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1) {
@@ -224,8 +224,9 @@ plot.colourmap <- local({
       stopifnot(side %in% 1:4)
       sidecode <- side
     } else if(is.character(side)) {
-      stopifnot(side %in% c("bottom", "left", "top", "right"))
-      sidecode <- match(side, c("bottom", "left", "top", "right"))
+      nama <- c("bottom", "left", "top", "right")
+      side <- match.arg(side, nama)
+      sidecode <- match(side, nama)
     } else stop("Unrecognised format for 'side'")
     return(sidecode)
   }
@@ -245,11 +246,21 @@ plot.colourmap <- local({
 
     
   plot.colourmap <- function(x, ..., main,
-                             xlim=NULL, ylim=NULL, vertical=FALSE, axis=TRUE,
+                             xlim=NULL, ylim=NULL,
+                             vertical=FALSE,
+                             axis=TRUE,
+                             side = if(vertical) "right" else "bottom",
                              labelmap=NULL, gap=0.25, add=FALSE,
                              increasing=NULL, nticks=5, box=NULL) {
     if(missing(main))
       main <- short.deparse(substitute(x))
+    if(missing(vertical) && !missing(side)) 
+      vertical <- (sideCode(side) %in% c(2, 4))
+    
+    dotargs <- list(...)
+    if(inherits(dotargs$col, "colourmap"))
+      dotargs <- dotargs[names(dotargs) != "col"]
+    
     stuff <- attr(x, "stuff")
     col <- stuff$outputs
     n   <- stuff$n
@@ -325,7 +336,7 @@ plot.colourmap <- local({
                                             type="n", main=main,
                                             axes=FALSE, xlab="", ylab="",
                                             asp=1.0),
-                                       list(...)))
+                                       dotargs))
 
     if(separate) {
       # ................ plot separate blocks of colour .................
@@ -342,11 +353,11 @@ plot.colourmap <- local({
           do.call.matched(image.default,
                           resolve.defaults(list(x=ensurenumeric(x),
                                                 y=ensurenumeric(y),
-                                                z=z, add=TRUE),
-                                       list(...),
-                                       list(col=col[i])),
-                      extrargs=imageparams)
-                          
+                                                z=z,
+                                                add=TRUE,
+                                                col=col[i]),
+                                           dotargs),
+                          extrargs=imageparams)
         }
       } else {
         # vertical arrangement of blocks
@@ -359,11 +370,11 @@ plot.colourmap <- local({
           do.call.matched(image.default,
                           resolve.defaults(list(x=ensurenumeric(x),
                                                 y=ensurenumeric(y),
-                                                z=z, add=TRUE),
-                                       list(...),
-                                       list(col=col[i])),
-                      extrargs=imageparams)
-                          
+                                                z=z,
+                                                add=TRUE,
+                                                col=col[i]),
+                                           dotargs),
+                          extrargs=imageparams)
         }
       }
     } else {
@@ -397,10 +408,11 @@ plot.colourmap <- local({
       if(reverse)
         col <- rev(col)
       do.call.matched(image.default,
-                      resolve.defaults(list(x=x, y=y, z=z, add=TRUE),
-                                       list(...),
-                                       list(breaks=ensurenumeric(bks),
-                                            col=col)),
+                      resolve.defaults(list(x=x, y=y, z=z,
+                                            add=TRUE,
+                                            breaks=ensurenumeric(bks),
+                                            col=col),
+                                       dotargs),
                       extrargs=imageparams)
     }
     #' draw box around colours?
@@ -424,20 +436,21 @@ plot.colourmap <- local({
         if(reverse)
           at <- rev(at)
         # default axis position is below the ribbon (side=1)
-        side <- resolve.1.default("side", list(...), list(side=1L))
         sidecode <- sideCode(side)
         if(!(sidecode %in% c(1L,3L)))
-          warning(paste("side =", sidecode,
+          warning(paste("side =", 
+                        if(is.character(side)) sQuote(side) else side,
                         "is not consistent with horizontal orientation"))
         pos <- c(ylim[1L], xlim[1L], ylim[2L], xlim[2L])[sidecode]
         # don't draw axis lines if plotting separate blocks
         lwd0 <- if(separate) 0 else 1
         # draw axis
         do.call.matched(graphics::axis,
-                        resolve.defaults(list(...),
-                                         list(side = 1L, pos = pos,
-                                              at = ensurenumeric(at)),
-                                         list(labels=la, lwd=lwd0)),
+                        resolve.defaults(dotargs,
+                                         list(side = sidecode,
+                                              pos = pos,
+                                              at = ensurenumeric(at),
+                                              labels=la, lwd=lwd0)),
                         extrargs=axisparams)
       } else {
         # add vertical axis
@@ -452,10 +465,10 @@ plot.colourmap <- local({
         if(reverse)
           at <- rev(at)
         # default axis position is to the right of ribbon (side=4)
-        side <- resolve.1.default("side", list(...), list(side=4))
         sidecode <- sideCode(side)
         if(!(sidecode %in% c(2L,4L)))
-          warning(paste("side =", sidecode,
+          warning(paste("side =",
+                        if(is.character(side)) sQuote(side) else side,
                         "is not consistent with vertical orientation"))
         pos <- c(ylim[1L], xlim[1L], ylim[2L], xlim[2L])[sidecode]
         # don't draw axis lines if plotting separate blocks
@@ -464,10 +477,11 @@ plot.colourmap <- local({
         las0 <- if(separate) 1 else 0
         # draw axis
         do.call.matched(graphics::axis,
-                        resolve.defaults(list(...),
-                                         list(side=4, pos=pos,
-                                              at=ensurenumeric(at)),
-                                         list(labels=la, lwd=lwd0, las=las0)),
+                        resolve.defaults(dotargs,
+                                         list(side=sidecode,
+                                              pos=pos,
+                                              at=ensurenumeric(at),
+                                              labels=la, lwd=lwd0, las=las0)),
                         extrargs=axisparams)
       }
     }
@@ -614,6 +628,11 @@ colouroutputs <- function(x) {
   st$outputs[] <- value
   attr(x, "stuff") <- st
   assign("stuff", st, envir=environment(x))
+  return(x)
+}
+
+rev.colourmap <- function(x) {
+  colouroutputs(x) <- rev(colouroutputs(x))
   return(x)
 }
 

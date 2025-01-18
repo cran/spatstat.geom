@@ -9,9 +9,11 @@
   \method{plot}{im}(x, \dots,
                    main,
                    add=FALSE, clipwin=NULL,
-                   col=NULL, valuesAreColours=NULL, log=FALSE,
+                   col=NULL, reverse.col=FALSE,
+                   valuesAreColours=NULL, log=FALSE,
                    ncolours=256, gamma=1, 
                    ribbon=show.all, show.all=!add,
+                   drop.ribbon=FALSE,
                    ribside=c("right", "left", "bottom", "top"),
                    ribsep=0.15, ribwid=0.05, ribn=1024,
                    ribscale=1, ribargs=list(), riblab=NULL, colargs=list(),
@@ -22,9 +24,11 @@
   \method{image}{im}(x, \dots,
                    main,
                    add=FALSE, clipwin=NULL,
-                   col=NULL, valuesAreColours=NULL, log=FALSE, 
+                   col=NULL, reverse.col=FALSE,
+                   valuesAreColours=NULL, log=FALSE, 
                    ncolours=256, gamma=1, 
                    ribbon=show.all, show.all=!add,
+                   drop.ribbon=FALSE,
                    ribside=c("right", "left", "bottom", "top"),
                    ribsep=0.15, ribwid=0.05, ribn=1024,
                    ribscale=1, ribargs=list(), riblab=NULL, colargs=list(),
@@ -57,6 +61,10 @@
     an object of class \code{\link{colourmap}},
     or a \code{function} as described under Details.
   }
+  \item{reverse.col}{
+    Logical value. If \code{TRUE}, the sequence of colour values
+    specified by \code{col} will be reversed.
+  }
   \item{valuesAreColours}{
     Logical value. If \code{TRUE}, the pixel values of \code{x}
     are to be interpreted as colour values.
@@ -82,6 +90,10 @@
     Logical value indicating whether to display all plot elements
     including the main title and colour ribbon. Default is \code{TRUE}
     for new plots and \code{FALSE} for added plots.
+  }
+  \item{drop.ribbon}{
+    Logical value. If \code{TRUE}, then a ribbon will not be displayed
+    if all pixel values are equal.
   }
   \item{ribside}{
     Character string indicating where to display the ribbon
@@ -304,6 +316,9 @@
   
   If \code{spatstat.options("monochrome")} has been set to \code{TRUE}
   then \bold{all colours will be converted to grey scale values}.
+
+  If \code{reverse.col=TRUE}, the sequence of colour values specified
+  by \code{col} will be reversed (unless \code{valuesAreColours=TRUE}).
   
   Other graphical parameters controlling the display of both the pixel image
   and the ribbon can be passed through the \code{...} arguments
@@ -349,10 +364,21 @@
   If pixel values are interpreted as colours, 
   the arguments \code{col} and \code{ribbon} will be ignored,
   and a ribbon will not be plotted.
-
+}
+\section{Adding contour lines}{
   If \code{addcontour=TRUE}, contour lines will be superimposed on the
   image. Lines will also be superimposed on the colour ribbon at the
-  corresponding positions. 
+  corresponding positions.
+  The display of the contour lines can be controlled by
+  arguments specified in \code{contourargs}.
+}
+\section{Main title, box and white space}{
+  The left-right placement of the main title is controlled by the
+  argument \code{adj.main} passed to \code{\link[spatstat.geom]{plot.owin}}.
+  A rectangular box surrounding the image domain is drawn by default; it can be
+  suppressed by setting \code{box=FALSE}.
+  White space around the plot is controlled by
+  \code{\link[graphics]{par}('mar')}.
 }
 \section{Complex-valued images}{
   If the pixel values in \code{x} are complex numbers,
