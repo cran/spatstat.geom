@@ -1,6 +1,6 @@
-e2022d5798096eadbf23b41f16a94847 *DESCRIPTION
-4a318d6199e90e249dda3cc678c9bf91 *NAMESPACE
-d24b222db79eb7fcb165d10b4f4cda8e *NEWS
+e966e9d4d98e6a7028ec8c5bb3ace615 *DESCRIPTION
+04bcf7466d43ed922a3dd095ef5e4bcb *NAMESPACE
+858a5392b9b931308ee0fd1e11a1ba5e *NEWS
 61e66e2561a8a0e89e9c9d0fa32ff495 *R/First.R
 7b5da2ffbcca4f497eb3c33f786306e3 *R/Math.im.R
 44f8a71ab76fed0cb52bcee94c0262f8 *R/Math.imlist.R
@@ -32,7 +32,7 @@ dd5451066df5ffab2ccb336f7d1e8f0d *R/covering.R
 dd44ac026abb8668e5e832c2ce4c9e32 *R/cut.ppp.R
 8d9c5b273d9d9450b69adfccbdc2e428 *R/deldir.R
 3ba4635fd03cab726544deee31fbc704 *R/deltametric.R
-05da64f6c34bbab2cc780b2293c25ed9 *R/diagram.R
+e68f9edd40ef7792cf6c4f8d3870a07f *R/diagram.R
 80c76f7820b0f468d4b9a4d81c0d9f46 *R/disc.R
 5c17de60e3b9536db49b784bbfa9fc96 *R/discarea.R
 932e89eef43d606759d6dc6766df9787 *R/dist2dpath.R
@@ -135,7 +135,8 @@ fd8885ecb274bfdae6fee1249fa65c2d *R/summary.quad.R
 1cadd7278ca066ef831d2a47676f06e4 *R/superimpose.R
 2608344c257a99866c7f025f73fe01ee *R/symbolmap.R
 50b78af7927164f523baa8152a0b149a *R/terse.R
-f6e527dcb96dbe7b576fa3f5141759f7 *R/tess.R
+c92f7668a21a3b8ca407fcd1bc92924c *R/tess.R
+b2f7eb1b1b1ee8cf40b3953c4620cc34 *R/tessfun.R
 a75061ccee5791f1e6533161159530b3 *R/texture.R
 c3032a7090caf3ec6606ec27f85a6772 *R/timed.R
 7143eaf3c90beea6b15d60fc9fb65c77 *R/transmat.R
@@ -147,12 +148,12 @@ cd8109217761fcfb6adcf72eeca2bfc5 *R/units.R
 6a1628c2cc4c675dc0d26729aeab2b3e *R/util.R
 998db506a27ed60542581bf4cbfd0b66 *R/versions.R
 b1333ff8439dfd41629fdf56be763bea *R/weights.R
-eeb4ae351b77c1582ac5a5805eafbb64 *R/window.R
+c657d62d3f88d66bd77b735a2209bd33 *R/window.R
 6541b37bf673aad264f2ce1569e8c4e8 *R/wingeom.R
 f2d49fc8f50fef7f76bcb3fc7f34efb4 *inst/CITATION
 ac6aa02ee30a52f0a13abc4a17ff0174 *inst/doc/downstream.txt
-ce4af5ea215b1486b930538b1714326e *inst/doc/packagesizes.txt
-ce4af5ea215b1486b930538b1714326e *inst/info/packagesizes.txt
+22383696995cd63f61a0ca5edccfb7d9 *inst/doc/packagesizes.txt
+22383696995cd63f61a0ca5edccfb7d9 *inst/info/packagesizes.txt
 12e68895fef0d3aa0bde45a0ddbadfa4 *inst/ratfor/Makefile
 22e8a5189942ba190c13475b35459c7f *inst/ratfor/dppll.r
 6d471ec061ea91398ba16323de56b9db *inst/ratfor/inxypOld.r
@@ -202,7 +203,7 @@ dec6385234ae397eaac223d97a806866 *man/as.data.frame.psp.Rd
 619c05471b5ecce3f2f4b146ffe1ac3c *man/as.data.frame.tess.Rd
 bab4007f09e5570091a2801947a50940 *man/as.function.im.Rd
 c6228a5d9a3b4ec1a6934b027cc8d1f3 *man/as.function.owin.Rd
-665493ed71eb9ed07fb6ec0edfae2f96 *man/as.function.tess.Rd
+dfb015ff88cacc15da0d99ec1c4331e4 *man/as.function.tess.Rd
 9741be58acd0c68e0282000682a0260e *man/as.hyperframe.Rd
 d03abf7731ca84359964a1b0e20e77e6 *man/as.hyperframe.ppx.Rd
 19ec587df0573946b99d0826e7469ca8 *man/as.im.Rd
@@ -293,7 +294,7 @@ b34619466b312659e35efced730c8c89 *man/disc.Rd
 4c4218514e71a0fcf58e752e8786fa69 *man/discpartarea.Rd
 5f89a05ae2f87e01d71b709ebcf018b5 *man/discretise.Rd
 34db2e9ea39424273e0420ca2bb93068 *man/discs.Rd
-4309e5b9b67ba12923b9c10ece4ac464 *man/distfun.Rd
+dc4915b12efbc451c48be424854f147c *man/distfun.Rd
 af98debd7a3a66429a5c7b0b455fb712 *man/distmap.Rd
 0ce4bda3332fc82b7624e3370b5aab7e *man/distmap.owin.Rd
 885dd3b0a4c9a8ccd4f3085ba8d37cf7 *man/distmap.ppp.Rd
@@ -342,6 +343,7 @@ fbb05bfe93cb434d601445c3caecdcd1 *man/infline.Rd
 71852805127b4b97debe4dc1758eea9b *man/inside.boxx.Rd
 94fd8bc363797a02244d547178fcb092 *man/inside.owin.Rd
 306469f71751bf5ff13bb3870ddcb2d7 *man/integral.im.Rd
+f579a5bef82926c3d089e28ea457b081 *man/integral.tessfun.Rd
 1008f8b942e0353e36c9f3ad816e4743 *man/intensity.Rd
 c9a5fb1ef03237c65ec5d29c1c9195b9 *man/intensity.ppp.Rd
 5460b9db190b08032b212593e6575759 *man/intensity.ppx.Rd
@@ -377,7 +379,7 @@ a8cda00ce5ed48007e36636c52f828f9 *man/layout.boxes.Rd
 088137135052fd2e866d3a0372e5ba19 *man/lengths_psp.Rd
 210fc7aaf9caf507e3a1fe5364b1cab4 *man/levelset.Rd
 39f9d1446f83aa9f00e775ffc4df2b3c *man/lut.Rd
-1ac6f0faf463fc5c6d189b778ea36fc3 *man/macros/defns.Rd
+86394a54d161a4823e3defc3a7180c9d *man/macros/defns.Rd
 d2a9ee8b6a6e538dbf76f281f811f7da *man/marks.Rd
 cbe8805c7a3c8b2b452921800ab86f4e *man/marks.psp.Rd
 2018946a1b50c71e54f53360e375311a *man/marks.tess.Rd
@@ -389,7 +391,7 @@ d7deffaef7f7438de2c1fb8b261838e7 *man/mergeLevels.Rd
 652cccb76fedb05e50bca84ef9ffeae0 *man/methods.box3.Rd
 e63cc45947cf033f30ead672a8bba620 *man/methods.boxx.Rd
 99a7dc9da5d2d6c05e2704af4420aadf *man/methods.distfun.Rd
-db210f5aed0d8b4cadcb87dab3d567f6 *man/methods.funxy.Rd
+9e8dfbdd28a7d4f99df870996cd2a8bb *man/methods.funxy.Rd
 1ea46d68fdbb3cf71c03e2f482879f61 *man/methods.layered.Rd
 71b5c324e5ede61a861cda98d7a555b7 *man/methods.pp3.Rd
 5f3151c03841f8155df261ae2465ab01 *man/methods.ppx.Rd
@@ -463,7 +465,7 @@ fea2d89deff7100d2e1b478b4be5d562 *man/plot.quadratcount.Rd
 76589da08f3dd3db5c2618142b9206fb *man/plot.tess.Rd
 803bba4ce84252fe7e91661b36ea472f *man/plot.textstring.Rd
 10f37bfd9e89ca620ee4a153f19b61bb *man/plot.texturemap.Rd
-9eaa193b31b3538c61dfc1d41f0686d6 *man/plot.yardstick.Rd
+00eb5d5a66b9ee3edd85814d350f0c94 *man/plot.yardstick.Rd
 8eef4f9476af3bb9ce9644e314b181f0 *man/pointsOnLines.Rd
 dd629ce9d14a4eae6bf7d2c45ca44d97 *man/polartess.Rd
 50515851b9951cf9a9ee2429345a66d0 *man/pp3.Rd
@@ -545,8 +547,8 @@ bd0c088722b2ab0ed1f888fff75139e4 *man/solist.Rd
 8a06c516216701c55b29d991c9deb5a1 *man/solutionset.Rd
 2f2b1a7f76f1ad52fd10304afc65186b *man/spatdim.Rd
 95b6c4119e63b2b47e30758d05e8d081 *man/spatstat.geom-deprecated.Rd
-ed0a02bc2ade888e46757154c72bd4eb *man/spatstat.geom-internal.Rd
-09da53936f96ff2bf328a5d5e33309ef *man/spatstat.geom-package.Rd
+a647f97e01b9ffbee9123b2d17b2a88d *man/spatstat.geom-internal.Rd
+9fb1f330715103b78cae0eea981dd656 *man/spatstat.geom-package.Rd
 c27b57ffa272542e5afc9b8865157162 *man/spatstat.options.Rd
 c542af7c96e45067fd97f43574d48da6 *man/split.hyperframe.Rd
 292f195808fc9d04a39941d200831aaa *man/split.im.Rd
