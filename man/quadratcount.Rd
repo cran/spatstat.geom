@@ -11,7 +11,8 @@
   quadratcount(X, \dots)
 
   \method{quadratcount}{ppp}(X, nx=5, ny=nx, \dots,
-               xbreaks=NULL, ybreaks=NULL, tess=NULL)
+               xbreaks=NULL, ybreaks=NULL, left.open=TRUE,
+               tess=NULL)
 
   \method{quadratcount}{splitppp}(X, \dots)
 }
@@ -37,6 +38,11 @@
     Tessellation (object of class \code{"tess"} or something acceptable
     to \code{\link{as.tess}}) determining the quadrats. Incompatible
     with \code{nx,ny,xbreaks,ybreaks}.
+  }
+  \item{left.open}{
+    Logical value specifying whether rectangular quadrats are left-open and
+    right-closed (\code{left.open=TRUE}, the default) or
+    left-closed and right-open (\code{left.open=FALSE}).
   }
 }
 \value{
@@ -110,7 +116,17 @@
   first separate the different points using \code{\link{split.ppp}},
   then apply \code{quadratcount.splitppp}. See the Examples.
 }
-\note{
+\section{Treament of data points on the boundary}{
+  If the quadrats are rectangular, they are assumed to be 
+  left-open and right-closed, by default (\code{left.open=TRUE}).
+  Alternatively if \code{left.open=FALSE} then rectangular quadrats are
+  left-closed and right-open.
+
+  If the quadrats are not rectangular, the treatment of points which lie
+  on the boundary of two quadrats is undefined, and may depend on the
+  hardware.
+}
+\section{Hypothesis testing}{
   To perform a chi-squared test based on the quadrat counts,
   use \code{\link[spatstat.explore]{quadrat.test}}.
 }

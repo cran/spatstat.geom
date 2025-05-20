@@ -8,7 +8,8 @@
   graphical symbols.
 }
 \usage{
-symbolmap(\dots, range = NULL, inputs = NULL)
+symbolmap(\dots, range = NULL, inputs = NULL,
+                 transform = NULL, compress = transform, decompress = NULL)
 }
 \arguments{
   \item{\dots}{
@@ -25,6 +26,23 @@ symbolmap(\dots, range = NULL, inputs = NULL)
     Optional. A vector containing all the data values
     that will be mapped to symbols.
     Incompatible with \code{range}.
+  }
+  \item{transform}{
+    Optional. Experimental.
+    An \R function which should applied to input data for the symbol map
+    before the graphics parameters \code{\dots} are determined.
+    See section on \emph{Nonlinear transformation}.
+  }
+  \item{compress}{
+    Optional. Experimental.
+    An \R function determining a nonlinear transformation of the
+    domain of the symbol map, to be used when the symbol map is plotted.
+    See section on \emph{Nonlinear transformation}.
+  }
+  \item{decompress}{
+    Experimental.
+    An \R function giving the inverse function of \code{compress},
+    if \code{compress} is specified.
   }
 }
 \details{
@@ -122,6 +140,67 @@ symbolmap(\dots, range = NULL, inputs = NULL)
   \code{col,cols,fg,bg} if
   \code{range} is specified.
 }
+\section{Nonlinear transformation}{
+  \itemize{
+    \item The argument \code{transform} defines a transformation that
+    will be applied to the input data for the symbol map.
+
+    If \code{transform} is given, it should be an \R function.
+    All input data for the symbol map will first be transformed by this
+    function, before the graphical parameters specified by \code{\dots}
+    are determined.
+
+    A typical example would be a logarithmic symbol map
+    defined by \code{transform = log10} together with something like
+    \code{size = function(x) { 3 * x }}. This would mean that a numerical
+    value \code{z} will be represented on the plot by a circle of diameter
+    \code{size(transform(z)) = 3 * log10(z)} on the physical scale of
+    the plot.
+    \item 
+    The arguments \code{compress} and \code{decompress}
+    define a transformation of the range of numbers
+    that is used only when the symbol map is plotted.
+  
+    A typical example would be a logarithmic symbol map defined
+    by \code{compress = log10} and
+    \code{decompress = function(x) { 10^x }}.
+
+    The arguments \code{compress} and \code{decompress}
+    have no effect on the interpretation of the
+    other arguments. They only affect the way
+    in which the symbol map is plotted by \code{\link{plot.symbolmap}}.
+    For a continuous symbol map, the range of input values is plotted on
+    the compressed scale, but annotated on the original scale.
+    See the Examples.
+  }
+
+  If \code{transform} is given, then the default value of
+  \code{compress} is the same function \code{transform}. This reflects
+  the fact that, when the user has specified that the input data
+  should be transformed to another scale in order to determine their
+  graphical representation, it would
+  usually be appropriate to display the symbol map legend on the same
+  transformed scale. However this can be overridden by specifying
+  another value for \code{compress}, including \code{NULL}.
+  
+  The arguments \code{transform}, \code{compress} and \code{decompress}
+  should be functions which are vectorised (i.e. if \code{x} is a
+  vector then \code{compress(x)} and
+  \code{decompress(x)} are also vectors of the same length as \code{x})
+  and increasing (if \code{x < y} then \code{compress(x) < compress(y)}
+  and \code{decompress(x) < decompress(y)}.
+
+  The argument \code{decompress} is not needed in the following cases:
+  \itemize{
+    \item If \code{compress} is the function \code{log10},
+    then \code{decompress} is taken to be its inverse
+    \code{function(x) { 10^x }}.
+    \item If \code{compress} is a cumulative distribution function
+    (of class \code{"ecdf"}, \code{"ewcdf"} or \code{"interpolatedCDF"})
+    then \code{decompress} is taken to be its inverse function
+    \code{decompress = \link[spatstat.univar]{quantilefun}(compress)}.
+  }
+}
 \value{
   An object of class \code{"symbolmap"}.
 }
@@ -143,13 +222,35 @@ symbolmap(\dots, range = NULL, inputs = NULL)
 
   g1 <- symbolmap(range=c(0,100), size=function(x) x/50)
 
+  ## squares and circles with area proportional to |x|
+  ## For 'squares', size is side length; size = sqrt(area)
+  ## For 'circles', size is diameter;    size = sqrt(area * 4/pi)
   g2 <- symbolmap(shape=function(x) ifelse(x > 0, "circles", "squares"),
-                    size=function(x) sqrt(ifelse(x > 0, x/pi, -x)),
-                    bg = function(x) ifelse(abs(x) < 1, "red", "black"))
+                  size=function(x) sqrt(ifelse(x > 0,
+                                               abs(x)*4/pi,
+                                               abs(x))),
+                  bg = function(x) ifelse(abs(x) < 1, "red", "black"))
 
   colmap <- colourmap(topo.colors(20), range=c(0,10))
   g3 <- symbolmap(pch=21, bg=colmap, range=c(0,10))
   plot(g3)
+
+  ## logarithmic symbol map
+  gm <- symbolmap(range=c(1,1000), pch=21, transform=log10,
+                  size=function(x) { x + 1 })
+  ## input value x is plotted as a circle of diameter = log10(x) + 1.
+  gm(100)
+  plot(gm, nsymbols=4)
+  ## note logarithmic scale of legend, because compress=transform by default.
+  
+  ## logarithmic display scale only
+  gl <- symbolmap(range=c(1,1000), pch=21, compress=log10)
+  gl(10)
+  plot(gl, nsymbols=4)
+  gu <- symbolmap(range=c(1,1000), pch=21)
+  gu(10)
+  plot(gu, nsymbols=4)
+  ## log transformation 'compress' does not affect symbol map itself
 }
 \keyword{spatial}
 \keyword{hplot}

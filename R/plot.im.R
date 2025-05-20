@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.161 $   $Date: 2024/12/03 01:19:40 $
+#  $Revision: 1.169 $   $Date: 2025/04/22 01:31:45 $
 #
 #  Plotting code for pixel images
 #
@@ -214,7 +214,7 @@ plot.im <- local({
     return(y)
   }
 
-  Ticks <- function(usr, log=FALSE, nint=NULL, ..., clip=TRUE) {
+  Ticks <- function(usr, log=FALSE, nint=NULL, ..., clip=TRUE, deco=identity) {
     #' modification of grDevices::axisTicks
     #'      constrains ticks to be inside the specified range if clip=TRUE
     #'      accepts nint=NULL as if it were missing
@@ -224,6 +224,7 @@ plot.im <- local({
       zlimits <- if(log) 10^usr else usr
       z <- z[inside.range(z, zlimits)]
     }
+    if(!log) z <- deco(z)
     return(unique(z))
   }
 
@@ -255,7 +256,8 @@ plot.im <- local({
                      ribscale=1, ribargs=list(), riblab=NULL, colargs=list(),
                      useRaster=NULL, workaround=FALSE, zap=1,
                      do.plot=TRUE,
-                     addcontour=FALSE, contourargs=list()) {
+                     addcontour=FALSE, contourargs=list(),
+                     background=NULL, clip.background=FALSE) {
     if(missing(main)) main <- short.deparse(substitute(x))
     verifyclass(x, "im")
     if(x$type == "complex") {
@@ -292,6 +294,9 @@ plot.im <- local({
       stop(paste("Log transform is undefined for an image of type",
                  sQuote(xtype)))
 
+    ## secret interface for handling log-transformed data
+    already.log <- identical(log, "already")
+    
     # determine whether pixel values are to be treated as colours
     if(!is.null(valuesAreColours)) {
       # argument given - validate
@@ -368,17 +373,27 @@ plot.im <- local({
                         "omitted from logarithmic colour map;",
                         "range of values =", prange(rx)),
                   call.=FALSE)
-        if(do.plot && !all(rx < 0))
+        if(do.plot && !all(rx > 0))
           warning("Zero pixel values omitted from logarithmic colour map",
                   call.=FALSE)
         x <- eval.im(log10orNA(x))
       } 
       xtype <- x$type
+      values.are.log <- TRUE
+      ## functions 'Log' and 'Exp' are used to determine tick marks and labels
       Log <- log10
-      Exp <- function(x) { 10^x }
+      Exp <- TenPower
+      if(!is.null(zlim))
+        dotargs$zlim <- zlim <- log10(zlim)
+    } else if(already.log) {
+      values.are.log <- TRUE
+      Log <- log10
+      Exp <- TenPower
     } else {
-      Log <- Exp <- function(x) { x }
+      values.are.log <- FALSE
+      Log <- Exp <- identity
     }
+    compress <- decompress <- identity
     
     imagebreaks <- NULL
 #    ribbonvalues <- ribbonbreaks <- NULL
@@ -414,12 +429,21 @@ plot.im <- local({
              if(!is.null(colmap)) {
                # explicit colour map
                s <- summary(colmap)
+               col <- s$outputs
                if(s$discrete)
                  stop("Discrete colour map is not applicable to real values")
                imagebreaks <- s$breaks
+               if(is.function(s$compress)) {
+                 ## remember these transformations
+                 compress <- s$compress
+                 decompress <- s$decompress
+                 ## transform pixel values to the compressed scale
+                 x <- eval.im(compress(x))
+                 imagebreaks <- compress(imagebreaks)
+                 values.are.log <- samefunction(compress, log10)
+               }
                vrange <- range(imagebreaks)
-               col <- s$outputs
-             } 
+             }
              trivial <- (diff(vrange) <= zap * .Machine$double.eps)
              #' ribbonvalues: a sequence of pixel values, mapped to colours
              #' ribbonrange:  (min, max) of pixel values mapped by ribbon
@@ -427,34 +451,60 @@ plot.im <- local({
              #' nominalmarks: (scaled) values shown on ribbon at tick marks
              #' ribbonticks: pixel values corresponding to tick marks 
              #' ribbonlabels: text displayed at tick marks
+             #' reusableticks: reusable value of user.ticks
              if(trivial) {
                ribbonvalues <- mean(vrange)
-               nominalmarks <- Log(ribscale * Exp(ribbonvalues))
+               nominalmarks <- compress(Log(ribscale * Exp(decompress(ribbonvalues))))
              } else {
                ribbonvalues <- seq(from=vrange[1L], to=vrange[2L],
                                    length.out=ribn)
                ribbonrange <- vrange
-               nominalrange <- Log(ribscale * Exp(ribbonrange))
+               nominalrange <- compress(Log(ribscale * Exp(decompress(ribbonrange))))
                nominalmarks <- user.ticks %orifnull% Ticks(nominalrange,
-                                                         log=do.log,
-                                                         nint=user.nint)
+                                                           log=values.are.log,
+                                                           nint=user.nint,
+                                                           deco=decompress)
              }
-             ribbonticks <- Log(nominalmarks/ribscale)
+             ribbonticks <- compress(Log(nominalmarks/ribscale))
              ribbonlabels <- user.ribbonlabels %orifnull% paste(nominalmarks)
+             reusableticks <- nominalmarks
            },
            integer = {
              vrange <- numericalRange(x, zlim)
-             trivial <- (diff(vrange) < 1)
+             if(!is.null(colmap)) {
+               # explicit colour map
+               s <- summary(colmap)
+               col <- s$outputs
+               if(s$discrete) {
+                 imagebreaks <- c(s$inputs[1] - 0.5, s$inputs + 0.5)
+               } else {
+                 imagebreaks <- s$breaks
+                 if(is.function(s$compress)) {
+                   ## remember these transformations
+                   compress <- s$compress
+                   decompress <- s$decompress
+                   ## transform pixel values to the compressed scale
+                   x <- eval.im(compress(x))
+                   imagebreaks <- compress(imagebreaks)
+                   vrange <- range(imagebreaks)
+                   values.are.log <- samefunction(compress, log10)
+                 }
+               }
+             } 
+             trivial <- (diff(vrange) < sqrt(.Machine$double.eps))
              nominalrange <- Log(ribscale * Exp(vrange))
              if(!is.null(user.ticks)) {
                nominalmarks <- user.ticks
              } else {
                nominalmarks <- Ticks(nominalrange,
                                      log=do.log,
-                                     nint = user.nint)
+                                     nint = user.nint,
+                                     deco = decompress)
                nominalmarks <- nominalmarks[nominalmarks %% 1 == 0]
+               nominalmarks <- decompress(nominalmarks)
              }
-             ribbonticks <- Log(nominalmarks/ribscale)
+             reusableticks <- nominalmarks
+             ribbonticks <- compress(Log(nominalmarks/ribscale))
              ribbonlabels <- user.ribbonlabels %orifnull% paste(nominalmarks)
              if(!do.log && isTRUE(all.equal(ribbonticks,
                                             vrange[1]:vrange[2]))) {
@@ -471,14 +521,6 @@ plot.im <- local({
                                    length.out=ribn)
                ribbonrange <- vrange
              }
-             if(!is.null(colmap)) {
-               # explicit colour map
-               s <- summary(colmap)
-               imagebreaks <-
-                 if(!s$discrete) s$breaks else
-                 c(s$inputs[1] - 0.5, s$inputs + 0.5)
-               col <- s$outputs
-             }
            },
            logical = {
              vrange <- c(0,1)
@@ -489,6 +531,7 @@ plot.im <- local({
 #             ribbonbreaks <- imagebreaks
              ribbonticks <- user.ticks %orifnull% ribbonvalues
              ribbonlabels <- user.ribbonlabels %orifnull% c("FALSE", "TRUE")
+             reusableticks <- ribbonticks
              if(!is.null(colmap)) 
                col <- colmap(c(FALSE,TRUE))
            },
@@ -505,6 +548,7 @@ plot.im <- local({
 #             ribbonbreaks <- imagebreaks
              ribbonticks <- user.ticks %orifnull% ribbonvalues
              ribbonlabels <- user.ribbonlabels %orifnull% paste(lev)
+             reusableticks <- ribbonticks
              vrange <- range(intlev)
              if(!is.null(colmap) && !valuesAreColours) 
                col <- colmap(fac)
@@ -523,6 +567,7 @@ plot.im <- local({
 #             ribbonbreaks <- imagebreaks
              ribbonticks <- user.ticks %orifnull% ribbonvalues
              ribbonlabels <- user.ribbonlabels %orifnull% paste(lev)
+             reusableticks <- ribbonticks
              vrange <- range(intlev)
              if(!is.null(colmap)) 
                col <- colmap(fac)
@@ -573,13 +618,30 @@ plot.im <- local({
     output.colmap <-
       if(is.null(i.col)) NULL else
       if(inherits(i.col, "colourmap")) i.col else
+      if(inherits(colmap, "colourmap")) colmap else
       if(valuesAreColours) colourmap(col=i.col, inputs=i.col) else
       switch(xtype,
              integer=,
              real= {
-               if(!is.null(i.bks)) {
-                 colourmap(col=i.col, breaks=i.bks)
-               } else colourmap(col=i.col, range=vrange, gamma=gamma)
+               if(!do.log) {
+                 ## linear colour map 
+                 if(!is.null(i.bks)) {
+                   ## possibly uneven breaks
+                   colourmap(col=i.col, breaks=i.bks)
+                 } else {
+                   colourmap(col=i.col, range=vrange, gamma=gamma)
+                 }
+               } else {
+                 ## logarithmic colour map
+                 if(!is.null(i.bks)) {
+                   colourmap(col=i.col, breaks=TenPower(i.bks),
+                             compress=log10, decompress=TenPower)
+                 } else {
+                   colourmap(col=i.col, range=TenPower(vrange),
+                             gamma=gamma,
+                             compress=log10, decompress=TenPower)
+                 }
+               }
              },
              logical={
                colourmap(col=i.col, inputs=c(FALSE,TRUE))
@@ -590,6 +652,9 @@ plot.im <- local({
              },
              NULL)
 
+    ## save tickmark values
+    attr(output.colmap, "at") <- reusableticks
+    
     ## gamma correction
     soc <- summary(output.colmap)
     if(!is.null(gamma <- soc$gamma) && gamma != 1)
@@ -621,15 +686,37 @@ plot.im <- local({
 
     ## ........ catch old usage (undocumented ) ................
     contourargs <- resolve.defaults(contourargs, dotargs$args.contour)
+
+    ## ........ background object ..............................
+    if(!is.null(background)) {
+      if(isTRUE(clip.background)) {
+        bkg <- try(background[as.rectangle(x), drop=FALSE], silent=TRUE)
+        if(inherits(bkg, "try-error")) {
+          warning("Unable to clip the background object", call.=FALSE)
+        } else {
+          background <- bkg
+        }
+      }
+      backbox <- Frame(background)
+    } else {
+      backbox <- NULL
+    }
     
     ## ........ start plotting .................
 
     if(!isTRUE(ribbon) || (trivial && isTRUE(drop.ribbon))) {
       ## no ribbon wanted
 
-      attr(output.colmap, "bbox") <- as.rectangle(x)
+      attr(output.colmap, "bbox") <- boundingbox(as.rectangle(x), backbox)
       if(!do.plot)
         return(output.colmap)
+
+      ## plot background if specified
+      if(!is.null(background)) {
+        plot(background, main=main)
+        add <- TRUE
+        main <- ""
+      }
 
       ## plot image without ribbon
       image.doit(imagedata=list(x=cellbreaks(x$xcol, x$xstep),
@@ -646,7 +733,7 @@ plot.im <- local({
                  list(useRaster=useRaster),
                  colourinfo,
                  list(zlim=vrange, asp = 1, main = main),
-                 list(values.are.log=do.log))
+                 list(values.are.log=values.are.log))
 ##      if(add && show.all)
 ##        fakemaintitle(x, main, dotargs)
 
@@ -685,7 +772,7 @@ plot.im <- local({
                             bb$yrange[1] - c(ribsep+ribwid, ribsep) * Size)
              rib.iside <- 1
            })
-    bb.all <- boundingbox(bb.rib, bb)
+    bb.all <- boundingbox(bb.rib, bb, backbox)
 
     attr(output.colmap, "bbox") <- bb.all
     attr(output.colmap, "bbox.legend") <- bb.rib
@@ -716,6 +803,10 @@ plot.im <- local({
                       extrargs=graphicsPars("owin"))
       main <- ""
     }
+    if(!is.null(background)) {
+      ## plot background
+      plot(background, add=TRUE)
+    }
     # plot image
     image.doit(imagedata=list(x=cellbreaks(x$xcol, x$xstep),
                               y=cellbreaks(x$yrow, x$ystep),
@@ -731,7 +822,7 @@ plot.im <- local({
                list(useRaster=useRaster),
                colourinfo,
                list(zlim=vrange, asp = 1, main = main),
-               list(values.are.log=do.log))
+               list(values.are.log=values.are.log))
 
 ##    if(add && show.all)
 ##      fakemaintitle(bb.all, main, ...)
@@ -777,7 +868,7 @@ plot.im <- local({
                list(main="", sub="", xlab="", ylab=""),
                dotargs,
                colourinfo,
-               list(values.are.log=do.log))
+               list(values.are.log=values.are.log))
     # box around ribbon?
     resol <- resolve.defaults(ribargs, dotargs)
     if(!identical(resol$box, FALSE))
@@ -1056,7 +1147,10 @@ contour.im <- function (x, ..., main, axes=FALSE, add=FALSE,
   return(invisible(result))
 }
 
+
 ## not exported:
+
+TenPower <- function(x) { 10^x }
 
 log10orNA <- function(x) {
   y <- rep(NA_real_, length(x))

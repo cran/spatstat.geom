@@ -5,6 +5,7 @@
 \alias{[.pp3}
 \alias{[.splitppx}
 \alias{[<-.splitppx}
+\alias{ImApplyEngine}
 \alias{acedist.show}
 \alias{acedist.noshow}
 \alias{affine.diagramobj}
@@ -358,6 +359,7 @@
 \method{[}{pp3}(x, i, drop, \dots)
 \method{[}{splitppx}(x, \dots)
 \method{[}{splitppx}(x, \dots) <- value
+ImApplyEngine(vals, fun, funtype, fun.handles.na, \dots, na.rm)
 acedist.show(X, Y, n, d, timelag)
 acedist.noshow(X, Y, n, d)
 \method{affine}{diagramobj}(X, \dots)
@@ -632,7 +634,7 @@ rebound(x, rect)
 \method{rebound}{owin}(x, rect)
 recognise.spatstat.type(x)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
-rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights)
+rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights, left.open)
 \method{reflect}{diagramobj}(X)
 remove.identical.pairs(cl, imap, jmap)
 repair.image.xycoords(x)

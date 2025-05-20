@@ -3,10 +3,11 @@
 #
 # support for colour maps and other lookup tables
 #
-# $Revision: 1.63 $ $Date: 2024/12/02 01:41:18 $
+# $Revision: 1.69 $ $Date: 2025/04/21 09:14:24 $
 #
 
-colourmap <- function(col, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1) {
+colourmap <- function(col, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1,
+                      compress=NULL, decompress=NULL) {
   if(nargs() == 0) {
     ## null colour map
     f <- lut()
@@ -14,13 +15,15 @@ colourmap <- function(col, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1) {
     ## validate colour data 
     col2hex(col)
     ## store without conversion
-    f <- lut(col, ..., range=range, breaks=breaks, inputs=inputs, gamma=gamma)
+    f <- lut(col, ..., range=range, breaks=breaks, inputs=inputs, gamma=gamma,
+             compress=compress, decompress=decompress)
   }
   class(f) <- c("colourmap", class(f))
   f
 }
 
-lut <- function(outputs, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1) {
+lut <- function(outputs, ..., range=NULL, breaks=NULL, inputs=NULL,
+                gamma=1, compress=NULL, decompress=NULL) {
   if(nargs() == 0) {
     ## null lookup table
     f <- function(x, what="value"){NULL}
@@ -29,6 +32,27 @@ lut <- function(outputs, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1) {
     return(f)
   }
   if(is.null(gamma)) gamma <- 1
+  if(is.null(compress)) {
+    decompress <- NULL
+  } else {
+    stopifnot(is.function(compress))
+    if(!is.null(decompress)) {
+      stopifnot(is.function(decompress))
+    } else {
+      ## Argument decompress is missing
+      ## Try to construct it from 'compress'
+      if(is.primitive(compress) && samefunction(compress, log10)) {
+        ## logarithmic lookup table
+        decompress <- TenPower
+      } else if(inherits(compress, c("ecdf", "ewcdf", "interpolatedCDF"))) {
+        ## histogram-equalised lookup table
+        decompress <- quantilefun(compress)
+      } else {
+        ## not recognised
+        stop("Argument 'decompress' is required", call.=FALSE)
+      }
+    } 
+  }
   n <- length(outputs)
   given <- c(!is.null(range), !is.null(breaks), !is.null(inputs))
   names(given) <- nama <- c("range", "breaks", "inputs")
@@ -50,9 +74,15 @@ lut <- function(outputs, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1) {
       n <- length(inputs)
       outputs <- rep(outputs, n)
     } else stopifnot(length(inputs) == length(outputs))
-    stuff <- list(n=n, discrete=TRUE, inputs=inputs, outputs=outputs)
+    stuff <- list(n=n, discrete=TRUE, inputs=inputs, outputs=outputs,
+                  compress=compress, decompress=decompress)
     f <- function(x, what="value") {
-      m <- match(x, stuff$inputs)
+      inputs <- stuff$inputs
+      if(is.function(compress <- stuff$compress)) {
+        x <- compress(x)
+        inputs <- compress(inputs)
+      }
+      m <- match(x, inputs)
       if(what == "index")
         return(m)
       cout <- stuff$outputs[m]
@@ -63,11 +93,16 @@ lut <- function(outputs, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1) {
     #' determine type of domain
     timeclasses <- c("Date", "POSIXt")
     is.time <- inherits(range, timeclasses) || inherits(breaks, timeclasses)
-    #' determine breaks
     if(is.null(breaks)) {
-      breaks <- gammabreaks(range, n + 1L, gamma)
+      #' determine breaks
+      if(is.null(compress)) {
+        breaks <- gammabreaks(range, n + 1L, gamma)
+      } else {
+        breaks <- decompress(gammabreaks(compress(range), n + 1L, gamma))
+      }
       gamma.used <- gamma
     } else {
+      #' check user-specified breaks
       stopifnot(length(breaks) >= 2)
       if(length(outputs) == 1L) {
         n <- length(breaks) - 1L
@@ -78,12 +113,17 @@ lut <- function(outputs, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1) {
       gamma.used <- NULL
     }
     stuff <- list(n=n, discrete=FALSE, breaks=breaks, outputs=outputs,
-                  gamma=gamma.used)
+                  gamma=gamma.used, compress=compress, decompress=decompress)
     #' use appropriate function
     if(is.time) {
       f <- function(x, what="value") {
+        breaks <- stuff$breaks
+        if(is.function(compress <- stuff$compress)) {
+          x <- compress(x)
+          breaks <- compress(breaks)
+        }
         x <- as.vector(as.numeric(x))
-        z <- findInterval(x, stuff$breaks, rightmost.closed=TRUE)
+        z <- findInterval(x, breaks, rightmost.closed=TRUE)
         oo <- stuff$outputs
         z[z <= 0 | z > length(oo)] <- NA
         if(what == "index")
@@ -93,10 +133,14 @@ lut <- function(outputs, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1) {
       }
     } else {
       f <- function(x, what="value") {
+        breaks <- stuff$breaks
+        if(is.function(compress <- stuff$compress)) {
+          x <- compress(x)
+          breaks <- compress(breaks)
+        }
         stopifnot(is.numeric(x))
         x <- as.vector(x)
-        z <- findInterval(x, stuff$breaks,
-                          rightmost.closed=TRUE)
+        z <- findInterval(x, breaks, rightmost.closed=TRUE)
         oo <- stuff$outputs
         z[z <= 0 | z > length(oo)] <- NA
         if(what == "index")
@@ -140,7 +184,15 @@ print.lut <- function(x, ...) {
   colnames(out)[2L] <- outputname
   print(out)
   if(!is.null(gamma <- stuff$gamma) && gamma != 1)
-    cat(paste("Generated using gamma =", gamma, "\n"))
+    splat("Generated using gamma =", gamma)
+  if(!is.null(compress <- stuff$compress)) {
+    if(samefunction(compress, log10)) {
+      splat("Logarithmic", tolower(tablename))
+    } else {
+      splat("Input compression map:")
+      print(stuff$compress)
+    }
+  }
   invisible(NULL)
 }
 
@@ -180,6 +232,15 @@ print.summary.lut <- function(x, ...) {
   }
   colnames(out)[2L] <- x$outputname
   print(out)  
+  if(!is.null(compress <- x$compress)) {
+    if(samefunction(compress, log10)) {
+      splat("Logarithmic", tolower(x$tablename))
+    } else {
+      splat("Input compression map:")
+      print(compress)
+    }
+  }
+  return(invisible(NULL))
 }
 
 plot.colourmap <- local({
@@ -251,7 +312,7 @@ plot.colourmap <- local({
                              axis=TRUE,
                              side = if(vertical) "right" else "bottom",
                              labelmap=NULL, gap=0.25, add=FALSE,
-                             increasing=NULL, nticks=5, box=NULL) {
+                             increasing=NULL, nticks=5, at=NULL, box=NULL) {
     if(missing(main))
       main <- short.deparse(substitute(x))
     if(missing(vertical) && !missing(side)) 
@@ -274,12 +335,20 @@ plot.colourmap <- local({
       explain.ifnot(gap >= 0, "In plot.colourmap")
     }
     separate <- discrete && (gap > 0)
+
+    compress <- stuff$compress %orifnull% identity
+    decompress <- stuff$decompress %orifnull% identity
+    is.log <- samefunction(compress, log10)
+
     if(is.null(labelmap)) {
-      labelmap <- function(x) x
+      labelmap <- identity
     } else if(is.numeric(labelmap) && length(labelmap) == 1L && !discrete) {
       labscal <- labelmap
       labelmap <- function(x) { x * labscal }
     } else stopifnot(is.function(labelmap))
+
+    #' map values back to original scale
+    Labelmap <- function(x) { labelmap(decompress(x)) }
 
     if(is.null(increasing))
       increasing <- !(discrete && vertical)
@@ -290,7 +359,7 @@ plot.colourmap <- local({
     trivial <- FALSE
     if(!discrete) {
       # real numbers: continuous ribbon
-      bks <- stuff$breaks
+      bks <- compress(stuff$breaks)
       rr <- range(bks)
       trivial <- (diff(rr) == 0)
       v <- if(trivial) rr[1] else
@@ -426,12 +495,12 @@ plot.colourmap <- local({
       if(!vertical) {
           # add horizontal axis/annotation
         if(discrete) {
-          la <- paste(labelmap(stuff$inputs))
+          la <- paste(Labelmap(stuff$inputs))
           at <- linmap(v, rr, xlim)
         } else {
-          la <- Ticks(rr, nint=nticks)
-          at <- linmap(la, rr, xlim)
-          la <- labelmap(la)
+          atpos <- compress(at %orifnull% Ticks(rr, log=is.log, nint=nticks))
+          at <- linmap(atpos, rr, xlim)
+          la <- Labelmap(atpos)
         }
         if(reverse)
           at <- rev(at)
@@ -455,12 +524,12 @@ plot.colourmap <- local({
       } else {
         # add vertical axis
         if(discrete) {
-          la <- paste(labelmap(stuff$inputs))
+          la <- paste(Labelmap(stuff$inputs))
           at <- linmap(v, rr, ylim)
         } else {
-          la <- Ticks(rr, nint=nticks)
-          at <- linmap(la, rr, ylim)
-          la <- labelmap(la)
+          atpos <- compress(at %orifnull% Ticks(rr, log=is.log, nint=nticks))
+          at <- linmap(atpos, rr, ylim)
+          la <- Labelmap(atpos)
         }
         if(reverse)
           at <- rev(at)
@@ -538,7 +607,8 @@ interp.colourmap <- function(m, n=512) {
     yy <- hsv(yy.hue, yy.sat, yy.val, yy.alpha)    
   }
   # done
-  f <- colourmap(yy, breaks=xbreaks)
+  f <- colourmap(yy, breaks=xbreaks,
+                 compress=st$compress, decompress=st$decompress)
   return(f)
 }
 
@@ -660,7 +730,9 @@ restrict.colourmap <- function(x, ..., range=NULL, breaks=NULL, inputs=NULL) {
     m <- match(inputs, oldinputs)
     if(any(is.na(m)))
       stop("New inputs are not a subset of the old inputs", call.=FALSE)
-    result <- colourmap(oldoutputs[m], inputs=inputs)
+    result <- colourmap(oldoutputs[m], inputs=inputs,
+                        compress=stuff$compress,
+                        decompress=stuff$decompress)
   } else if(!is.null(range)) {
     ## colour map for continuous domain
     ## range specified
@@ -677,7 +749,9 @@ restrict.colourmap <- function(x, ..., range=NULL, breaks=NULL, inputs=NULL) {
     ## evaluate current colour at midpoint of each new interval
     newmid <- newbreaks[-length(newbreaks)] + diff(newbreaks)/2
     newout <- x(newmid)
-    result <- colourmap(newout, breaks=newbreaks)
+    result <- colourmap(newout, breaks=newbreaks,
+                        compress=stuff$compress,
+                        decompress=stuff$decompress)
   } else {
     ## colour map for continuous domain
     ## breaks specified
@@ -690,7 +764,9 @@ restrict.colourmap <- function(x, ..., range=NULL, breaks=NULL, inputs=NULL) {
            call.=FALSE)
     newmid <- breaks[-length(breaks)] + diff(breaks)/2
     newout <- x(newmid)
-    result <- colourmap(newout, breaks=breaks)
+    result <- colourmap(newout, breaks=breaks,
+                        compress=stuff$compress,
+                        decompress=stuff$decompress)
   }
   return(result)
 }
@@ -699,5 +775,10 @@ as.colourmap <- function(x, ...) {
   UseMethod("as.colourmap")
 }
 
-as.colourmap.colourmap <- function(x, ...) { x }
+as.colourmap.colourmap <- function(x, ...) {
+  #' remove attributes which are not part of class 'colourmap'
+  atr <- attributes(x)
+  attributes(x) <- atr[names(atr) %in% c("stuff", "class")]
+  return(x)
+}
 

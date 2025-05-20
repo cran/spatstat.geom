@@ -4,7 +4,7 @@
 ##  Plotting functions for 'solist', 'anylist', 'imlist'
 ##       and legacy class 'listof'
 ##
-##  $Revision: 1.39 $ $Date: 2024/11/28 01:15:40 $
+##  $Revision: 1.43 $ $Date: 2025/04/20 09:37:01 $
 ##
 
 plot.anylist <- plot.solist <- plot.listof <-
@@ -591,7 +591,7 @@ plot.imlist <- local({
 
   imagecommon <- function(x, ...,
                           xname,
-                          zlim=NULL,
+                          zlim=NULL, log=FALSE,
                           equal.scales=FALSE,
                           ribbon=TRUE,
                           ribside=c("right", "left", "bottom", "top"),
@@ -621,7 +621,8 @@ plot.imlist <- local({
       if(is.null(zlim))
         zlim <- range(unlist(lapply(x, range)))
       ## determine common colour map based on zlim
-      imcolmap <- plot.im(x[[1L]], do.plot=FALSE, zlim=zlim, ..., ribn=ribn)
+      imcolmap <- plot.im(x[[1L]], do.plot=FALSE, zlim=zlim, ...,
+                          log=log, ribn=ribn)
     } else if(all(isfactor)) {
       x <- harmoniseLevels(x)
       ## determine common colour map based on factor levels
@@ -686,7 +687,7 @@ plot.imlist <- local({
   factorimage <- function(X, levels=NULL) {
     eval.im(factor(X, levels=levels))
   }
-  
+
   plot.imlist
 })
 

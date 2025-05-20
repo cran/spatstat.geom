@@ -1,7 +1,7 @@
 ##
 ## symbolmap.R
 ##
-##   $Revision: 1.60 $  $Date: 2024/11/28 00:24:01 $
+##   $Revision: 1.68 $  $Date: 2025/04/26 09:57:55 $
 ##
 
 symbolmap <- local({
@@ -17,7 +17,8 @@ symbolmap <- local({
     try(colourmap(...), silent=TRUE)
   }
 
-  symbolmap <- function(..., range=NULL, inputs=NULL) {
+  symbolmap <- function(..., range=NULL, inputs=NULL,
+                        transform=NULL, compress=transform, decompress=NULL) {
     if(!is.null(range) && !is.null(inputs))
       stop("Arguments range and inputs are incompatible")
     ## graphics parameters
@@ -32,6 +33,16 @@ symbolmap <- local({
     parnames <- names(parlist)
     type <- if(is.null(inputs) && is.null(range)) "constant" else
             if(!is.null(inputs)) "discrete" else "continuous"
+    ## transformation applied to input data
+    if(!is.null(transform)) {
+      if(type != "continuous") {
+        warning(paste("Argument 'transform' is ignored for",
+                      type, "symbol maps"), call.=FALSE)
+        transform <- NULL
+      } else stopifnot(is.function(transform))
+    }
+    Transform <- transform %orifnull% identity
+    ## 
     if(got.pars) {
       ## validate parameters
       if(is.null(parnames) || !all(nzchar(parnames)))
@@ -54,7 +65,8 @@ symbolmap <- local({
             (names(parlist) %in% c("cols", "col", "fg", "bg"))
           ## convert colour values to colour map
           if(any(iscol)) {
-            cmap <- lapply(parlist[iscol], trycolourmap, range=range)
+            Trange <- Transform(range)
+            cmap <- lapply(parlist[iscol], trycolourmap, range=Trange)
             success <- sapply(cmap, inherits, what="colourmap")
             iscol[iscol] <- success
             if(any(iscol)) {
@@ -73,7 +85,7 @@ symbolmap <- local({
       }
       if(type == "constant" && any(functions))
         type <- "continuous"
-    } 
+    }
     switch(type,
            constant ={
              ## set of constant graphics parameters defining a single symbol
@@ -106,6 +118,32 @@ symbolmap <- local({
                            parlist=parlist)
              f <- function(x) ApplyContinuousSymbolMap(x, stuff)
            })
+    ## nonlinear transformation for display
+    if(is.null(compress)) {
+      decompress <- NULL
+    } else {
+      stopifnot(is.function(compress))
+      if(!is.null(decompress)) {
+        stopifnot(is.function(decompress))
+      } else {
+        ## Argument decompress is missing
+        ## Try to construct it from 'compress'
+        if(is.primitive(compress) && samefunction(compress, log10)) {
+          ## logarithmic lookup table
+          decompress <- TenPower
+        } else if(inherits(compress, c("ecdf", "ewcdf", "interpolatedCDF"))) {
+          ## histogram-equalised lookup table
+          decompress <- quantilefun(compress)
+        } else {
+          ## not recognised
+          stop("Argument 'decompress' is required", call.=FALSE)
+        }
+      } 
+    }
+    stuff <- append(stuff,
+                    list(transform=transform,
+                         compress=compress,
+                         decompress=decompress))
     attr(f, "stuff") <- stuff
     class(f) <- c("symbolmap", class(f))
     f
@@ -123,6 +161,7 @@ symbolmap <- local({
 
   ApplyContinuousSymbolMap <- function(x, stuff) {
     with(stuff, {
+      if(is.function(transform)) x <- transform(x)
       y <- as.data.frame(lapply(parlist, MapContinuous, x=x),
                          stringsAsFactors=FALSE)
       return(y)
@@ -157,8 +196,9 @@ symbolmapparnames <- function(x) { names(attr(x, "stuff")[["parlist"]]) }
 
 update.symbolmap <- function(object, ...) {
   y <- attr(object, "stuff")
-  oldargs <- append(y[["parlist"]], y[c("inputs", "range")])
-  do.call(symbolmap, resolve.defaults(list(...), oldargs))
+  gpars <- y[["parlist"]]
+  oldargs <- y[names(y) %in% names(formals(symbolmap))]
+  do.call(symbolmap, resolve.defaults(list(...), append(oldargs, gpars)))
 }
 
 print.symbolmap <- function(x, ...) {
@@ -185,6 +225,13 @@ print.symbolmap <- function(x, ...) {
                  if(!is.null(range)) paste("in", prange(range)) else NULL,
                  fill=TRUE)
            })
+    if(!is.null(transform)) {
+      parbreak()
+      PrintTransformation("Transformation of input values:", transform)
+      parbreak()
+    }
+
+    ## print graphics parameters
     if(length(parlist) > 0) {
       for(i in seq_along(parlist)) {
         cat(paste0(names(parlist)[i], ": "))
@@ -193,9 +240,30 @@ print.symbolmap <- function(x, ...) {
           cat(pari, fill=TRUE) else print(pari)
       }
     }
-    return(invisible(NULL))
+
+    if(!is.null(compress)) {
+      parbreak()
+      PrintTransformation("Scale compression for legend:", compress)
+    }
   })
+  return(invisible(NULL))
 }
+
+PrintTransformation <- function(header, f) {
+  cdfclasses <- c("interpolatedCDF", "ewcdf", "ecdf")
+  if(samefunction(f, log10)) {
+    splat(header, "log10")
+  } else if(inherits(f, cdfclasses)) {
+    hit <- (inherits(f, cdfclasses, which=TRUE) != 0)
+    classname <- cdfclasses[which(hit)][1L]
+    splat(header, paren(classname, "["))
+  } else {
+    splat(header)
+    print(f)
+  }
+  invisible(NULL)
+}
+  
 
 ## Function which actually plots the symbols.
 ## Called by plot.ppp and plot.symbolmap
@@ -470,7 +538,7 @@ invoke.symbolmap <- local({
                                      list(do.plot=do.plot)))
       ## value is max(cex)
       ## guess size of one character
-      charsize <- if(started) max(par('cxy')) else
+      charsize <- if(started || do.plot) max(par('cxy')) else
                   if(hasxy) max(sidelengths(boundingbox(x,y))/40) else 1/40
       maxsize <- max(maxsize, charsize * ms)
     }
@@ -546,6 +614,7 @@ plot.symbolmap <- function(x, ..., main,
          },
          continuous = {
            ra <- stuff$range
+           vv <- NULL
            if(!is.null(representatives)) {
              vv <- representatives
              if(!all(ok <- inside.range(vv, ra))) {
@@ -562,10 +631,36 @@ plot.symbolmap <- function(x, ..., main,
                        call.=FALSE)
              }
            } else {
-             if(is.null(ra))
-               stop("Cannot plot symbolmap with an infinite range")
-             vv <- if(is.null(nsymbols)) prettyinside(ra) else
-                 prettyinside(ra, n = nsymbols)
+             compress <- stuff$compress
+             decompress <- stuff$decompress
+             ## check for colour map information 
+             if(!is.null(cmap <- as.colourmap(x, warn=FALSE))) {
+               st <- attr(cmap, "stuff")
+               if(st$discrete) {
+                 ## use discrete inputs as representative values
+                 vv <- st$inputs
+               } else {
+                 ## use colour map to determine default range and transformation
+                 if(is.null(ra)) ra <- range(st$breaks)
+                 if(is.null(compress) && !is.null(st$compress)) {
+                   ## nonlinear colour map
+                   compress <- st$compress 
+                   decompress <- st$decompress
+                 }
+               }
+             }
+             if(is.null(vv)) {
+               ## representative values not yet determined
+               if(is.null(ra))
+                 stop("Cannot plot symbolmap with an infinite range")
+               if(is.null(compress)) {
+                 ## representative values evenly spaced 
+                 vv <- prettyinside(ra, n = nsymbols)
+               } else {
+                 ## representative values evenly spaced on compressed scale
+                 vv <- decompress(prettyinside(compress(ra), n = nsymbols))
+               }
+             }
              if(is.numeric(vv))
                vv <- signif(vv, 4)
            }
