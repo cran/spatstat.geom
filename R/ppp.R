@@ -4,7 +4,7 @@
 #	A class 'ppp' to define point patterns
 #	observed in arbitrary windows in two dimensions.
 #
-#	$Revision: 4.118 $	$Date: 2024/06/16 02:03:00 $
+#	$Revision: 4.123 $	$Date: 2025/06/30 12:03:33 $
 #
 #	A point pattern contains the following entries:	
 #

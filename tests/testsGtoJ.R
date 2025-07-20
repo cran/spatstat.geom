@@ -17,7 +17,7 @@ cat(paste("--------- Executing",
 #
 # test "[.hyperframe" etc
 #
-#  $Revision: 1.11 $  $Date: 2023/02/03 06:17:16 $
+#  $Revision: 1.15 $  $Date: 2025/07/07 06:41:24 $
 #
 
 if(FULLTEST) {
@@ -79,10 +79,79 @@ local({
   a <- junk[[10,"Neurons"]] 
 })
 }
+
+if(FULLTEST) {
+  local({
+    ## NA entries in hyperframes and solists
+    h <- hyperframe(A=1:4,
+                    B=rep(list(cells), 4),
+                    C=letters[1:4],
+                    D=rep(list(redwood), 4))
+    ## check that column entries all have the same class
+    ck <- function(context, x, cls) {
+      xname <- deparse(substitute(x))
+      if(!all(sapply(x, inherits, what=cls)))
+        stop(paste(paste0(context, ","),
+                   "some entries of", xname,
+                   "do not belong to class", sQuote(cls)))
+      invisible(NULL)
+    }
+    ## cases of "$<-.hyperframe" 
+    h$A[2] <- NA
+    h$A[2:3] <- NA
+    h$B[[2]] <- NA
+    ck("After h$B[[2]] <- NA", h$B, "ppp")
+    h$B[[2]] <- cells
+    ck("After h$B[[2]] <- NA and h$B[[2]] <- cells", h$B, "ppp")
+    h$B[2:3] <- NA
+    ck("After h$B[2:3] <- NA", h$B, "ppp")
+    ## cases of "[<-.hyperframe"
+    h[2,"A"] <- NA
+    h[2:3, "A"] <- NA
+    h[2,"B"] <- NA
+    ck("After h[2, 'B'] <- NA", h$B, "ppp")
+    h[2,"B"] <- cells
+    ck("After h[2, 'B'] <- NA and <- cells", h$B, "ppp")
+    h[2:3,"B"] <- NA
+    ck("After h[2:3, 'B'] <- NA", h$B, "ppp")
+    h[3,] <- NA
+    ck("After h[3, ] <- NA", h$B, "ppp")
+    stopifnot(all(sapply(h$B, is.ppp)))
+    ## cases of solist() and "[<-.solist" and "[[<-.solist"
+    x <- solist(cells, NA, cells)
+    x[[1]] <- NA
+    stopifnot(all(sapply(x, is.ppp)))
+    y <- solist(NA, NA, cells)
+    stopifnot(all(sapply(y, is.ppp)))
+    DC <- as.im(function(x,y){x}, owin())
+    z <- solist(DC, DC, NA)
+    stopifnot(all(sapply(z, is.im)))
+    u <- solist(NA, DC, DC)
+    stopifnot(all(sapply(u, is.im)))
+    u[[2]] <- NA
+    ck("After u[[2]] <- NA", u, "im")
+    ## 
+    h <- hyperframe(A=1:4,
+                    B=rep(list(cells), 4),
+                    C=letters[1:4],
+                    D=rep(list(redwood), 4))
+    shouldfail <- function(words, expr) {
+      a <- try(eval(expr), silent=TRUE)
+      if(!inherits(a, "try-error"))
+        stop(paste(words, "did not generate an error"), call.=FALSE)
+      invisible(NULL)
+    }
+    shouldfail("Assigning an owin into a ppp column",
+               {h$B[[2]] <- owin()})
+    shouldfail("Assigning two owins into two entries in a ppp column",
+               {h$B[2:3] <- rep(list(owin()), 2)})
+    
+  })
+}
 #
 #  tests/imageops.R
 #
-#   $Revision: 1.44 $   $Date: 2025/04/05 05:47:54 $
+#   $Revision: 1.45 $   $Date: 2025/07/03 02:00:14 $
 #
 
 
@@ -271,6 +340,12 @@ local({
   #' pairs.im 
   pairs(solist(Z))
   pairs(solist(A=Z))
+
+  #' harmonise.im (cases)
+  H <- harmonise(A=Z)
+  H <- harmonise(A=Z, B=Z)
+  Zcoarse <- as.im(Z, dimyx=16)
+  H <- harmonise(A=Z, B=Zcoarse, D=Z)
   
   #' handling and plotting of character and factor images
   Afactor    <- as.im(col2hex("green"), letterR, na.replace=col2hex("blue"))

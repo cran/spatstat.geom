@@ -38,6 +38,8 @@
 \alias{boundingbox.list}
 \alias{bounding.box3}
 \alias{break.holes}
+\alias{can.be.dfcolumn}
+\alias{can.be.hypercolumn}
 \alias{cartesian}
 \alias{cellmiddles}
 \alias{checkbigmatrix}          
@@ -45,12 +47,14 @@
 \alias{check.arc}
 \alias{check.finespacing}
 \alias{circunion}
+\alias{classIgnoringNA}
 \alias{clip.psp}
 \alias{cliprect.psp}
 \alias{clippoly.psp}
 \alias{closethresh}
 \alias{cocoEngine}
 \alias{coerce.marks.numeric}
+\alias{coerceNAtoObject}
 \alias{crosspairquad}
 \alias{cobble.xy}
 \alias{codetime}
@@ -72,6 +76,7 @@
 \alias{do.call.plotfun}
 \alias{drawSignedPoly}
 \alias{emptywindow}
+\alias{ensureModelSupport}
 \alias{equalpairs.quad}          
 \alias{equals.quad}          
 \alias{equalsfun.quad}          
@@ -93,6 +98,7 @@
 \alias{genericNNdistBy}
 \alias{getfields}
 \alias{getlastshift}
+\alias{getrasterinfo}
 \alias{getSpatstatVariable}
 \alias{gridindex}            
 \alias{grid1index}
@@ -180,6 +186,7 @@
 \alias{names<-.hyperframe}
 \alias{nearest.pixel}
 \alias{nearest.valid.pixel}
+\alias{needpackage}
 \alias{n.quad}
 \alias{numberwithunit}
 \alias{numeric.columns}
@@ -199,6 +206,7 @@
 \alias{plotWidthMap}
 \alias{plot.barplotdata}
 \alias{plot.indicfun}
+\alias{plot.NAobject}
 \alias{plot.tessfun}
 \alias{pointgrid}
 \alias{ppllengine}
@@ -216,6 +224,7 @@
 \alias{print.lut}
 \alias{print.metric}
 \alias{print.metricfun}
+\alias{print.NAobject}
 \alias{print.nnfun}
 \alias{print.numberwithunit}
 \alias{print.onearrow}
@@ -230,6 +239,7 @@
 \alias{print.summary.listof}
 \alias{print.summary.logiquad}
 \alias{print.summary.lut}
+\alias{print.summary.NAobject}
 \alias{print.summary.owin}
 \alias{print.summary.ppp}
 \alias{print.summary.psp}
@@ -302,6 +312,7 @@
 \alias{summary.logiquad}
 \alias{summary.lut}
 \alias{summary.metric}
+\alias{summary.NAobject}
 \alias{summary.pppmatching}
 \alias{summary.ppx}
 \alias{summary.splitppx}
@@ -344,6 +355,11 @@
 \alias{XDtoNN}
 \alias{xypolygon2psp}
 \alias{xypolyselfint}
+\alias{xypolycomponents}
+\alias{xypoly2owin}
+\alias{xypolysub2owin}
+\alias{xypolyNesting}
+\alias{xypolycoco}
 \alias{ZeroValue}
 \alias{ZeroValue.im}
 
@@ -384,7 +400,7 @@ AsymmDistance.psp(X, Y, metric, method)
 \method{as.double}{im}(x, \dots)
 as.imlist(x, check)
 as.linimlist(x, check)
-\method{as.list}{hyperframe}(x, \dots)
+\method{as.list}{hyperframe}(x, \dots, expandatoms)
 as.listof(x)
 as.ppplist(x, check)
 \method{as.tess}{tessfun}(X)
@@ -395,6 +411,8 @@ bdry.mask(W)
 \method{boundingbox}{list}(\dots)
 bounding.box3(\dots)
 break.holes(x, splitby, depth, maxdepth)
+can.be.dfcolumn(x)
+can.be.hypercolumn(x)
 cartesian(pp, markset, fac = TRUE)
 cellmiddles(W, nx, ny, npix, distances)
 checkbigmatrix(n, m, fatal, silent)
@@ -402,12 +420,14 @@ checkfields(X,L)
 check.arc(arc, fatal)
 check.finespacing(r, eps, win, rmaxdefault, context, action, rname)
 circunion(arcs)
+classIgnoringNA(x, first)
 clip.psp(x, window, check, fragments)
 cliprect.psp(x, window, fragments)
 clippoly.psp(s, window, fragments)
 closethresh(X,R,S,twice,\dots)
 cocoEngine(nv, ie, je, algoname)
 coerce.marks.numeric(X, warn)
+coerceNAtoObject(x, cls)
 crosspairquad(Q,rmax,what)
 cobble.xy(x, y, f, fatal, \dots)
 codetime(x, hms, what)
@@ -429,6 +449,7 @@ do.as.im(x, action, \dots, W, eps, dimyx, xy, rule.eps, na.replace)
 do.call.plotfun(fun, arglist, \dots, envir)
 drawSignedPoly(x,y,pars,sgn)
 emptywindow(w)
+ensureModelSupport(model, loaded)
 equalpairs.quad(Q)
 equals.quad(Q)          
 equalsfun.quad(Q)
@@ -450,6 +471,7 @@ gammabreaks(ra, n, gamma)
 genericNNdistBy(X, by, k)
 getfields(X, L, fatal = TRUE)
 getlastshift(X)
+getrasterinfo(x, exclude)
 getSpatstatVariable(name, default)
 gridindex(x, y, xrange, yrange, nx, ny)            
 grid1index(x, xrange, nx)
@@ -538,6 +560,7 @@ na.handle.im(X, na.replace)
 \method{names}{hyperframe}(x) <- value
 nearest.pixel(x, y, Z)
 nearest.valid.pixel(x, y, Z, method, nsearch)
+needpackage(pkg, loaded, fatal, purpose)
 n.quad(Q)
 numberwithunit(x, u)
 numeric.columns(M, logical, others)
@@ -565,6 +588,7 @@ plotPolygonBdry(x, \dots)
 plotWidthMap(bb.leg, zlim, phys.scale, leg.scale, leg.side, leg.args, grafpar)
 \method{plot}{barplotdata}(x, \dots)
 \method{plot}{indicfun}(x, W, \dots, main)
+\method{plot}{NAobject}(x, \dots)
 \method{plot}{tessfun}(x, \dots)
 pointgrid(W, ngrid)
 ppllengine(X, Y, action="project", check=FALSE)
@@ -584,6 +608,7 @@ prepareTitle(main)
 \method{print}{lut}(x, \dots)
 \method{print}{metric}(x, \dots)
 \method{print}{metricfun}(x, \dots)
+\method{print}{NAobject}(x, \dots)
 \method{print}{nnfun}(x, \dots)
 \method{print}{numberwithunit}(x, \dots)
 \method{print}{onearrow}(x, \dots)
@@ -598,6 +623,7 @@ prepareTitle(main)
 \method{print}{summary.listof}(x, \dots)
 \method{print}{summary.logiquad}(x, \dots, dp=3)
 \method{print}{summary.lut}(x, \dots)
+\method{print}{summary.NAobject}(x, \dots)
 \method{print}{summary.owin}(x, \dots)
 \method{print}{summary.ppp}(x, \dots, dp)
 \method{print}{summary.psp}(x, \dots)
@@ -670,6 +696,7 @@ store.versionstring.spatstat()
 \method{summary}{logiquad}(object, \dots, checkdup=FALSE)
 \method{summary}{lut}(object, \dots)
 \method{summary}{metric}(object, \dots)
+\method{summary}{NAobject}(object, \dots)
 \method{summary}{pppmatching}(object, \dots)
 \method{summary}{ppx}(object, \dots)
 \method{summary}{splitppx}(object, \dots)
@@ -713,9 +740,14 @@ x.quad(Q)
 y.quad(Q)
 xy.grid(xr, yr, nx, ny, dx, dy)
 \method{xtfrm}{im}(x)
-xypolyselfint(p, eps, proper, yesorno, checkinternal)
 XDtoNN(d, what, iX, iY, k, \dots)
 xypolygon2psp(p, w, check)
+xypolyselfint(p, eps, proper, yesorno, checkinternal)
+xypolycomponents(W)
+xypoly2owin(p, check, \dots)
+xypolysub2owin(i, B, \dots)
+xypolyNesting(W)
+xypolycoco(M, h, id)
 ZeroValue(x)
 \method{ZeroValue}{im}(x)
 

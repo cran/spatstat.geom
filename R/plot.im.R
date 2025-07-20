@@ -1,7 +1,7 @@
 #
 #   plot.im.R
 #
-#  $Revision: 1.169 $   $Date: 2025/04/22 01:31:45 $
+#  $Revision: 1.176 $   $Date: 2025/06/30 04:12:26 $
 #
 #  Plotting code for pixel images
 #
@@ -260,6 +260,8 @@ plot.im <- local({
                      background=NULL, clip.background=FALSE) {
     if(missing(main)) main <- short.deparse(substitute(x))
     verifyclass(x, "im")
+    force(show.all)
+    force(ribbon)
     if(x$type == "complex") {
       cl <- match.call()
       cl$x <- solist(Re=Re(x), Im=Im(x), Mod=Mod(x), Arg=Arg(x))
@@ -713,9 +715,25 @@ plot.im <- local({
 
       ## plot background if specified
       if(!is.null(background)) {
-        plot(background, main=main)
+        plot(background, main="")
         add <- TRUE
+      }
+
+      ## plot title centred over main image area
+      if(show.all && sum(nzchar(main))) {
+        mainargnames <- c("cex.main", "adj.main", "col.main")
+        mainargs <- dotargs[names(dotargs) %in% mainargnames]
+        do.call.plotfun(plot.owin,
+                        resolve.defaults(list(x=quote(xbox),
+                                              type="n",
+                                              main=main,
+                                              add=add,
+                                              show.all=TRUE),
+                                         mainargs,
+                                         list(claim.title.space=TRUE)),
+                        extrargs=graphicsPars("owin"))
         main <- ""
+        add <- TRUE
       }
 
       ## plot image without ribbon
@@ -790,6 +808,7 @@ plot.im <- local({
                                             main=pt$blank),
                                        dotargs),
                       extrargs=graphicsPars("owin"))
+      add <- TRUE
     }
     if(show.all) {
       ## plot title centred over main image area 'bb'
@@ -797,11 +816,13 @@ plot.im <- local({
                       resolve.defaults(list(x=quote(bb),
                                             type="n",
                                             main=main,
-                                            add=TRUE,
+                                            add=add,
                                             show.all=TRUE),
-                                       dotargs),
+                                       dotargs,
+                                       list(claim.title.space=TRUE)),
                       extrargs=graphicsPars("owin"))
       main <- ""
+      add <- TRUE
     }
     if(!is.null(background)) {
       ## plot background
@@ -934,10 +955,50 @@ plot.im <- local({
                       resolve.defaults(axisargs, ribargs, dotargs, posargs),
                       extrargs=graphicsPars("axis"))
     }
+    ## label next to ribbon
     if(!is.null(riblab)) {
-      riblabel <- if(is.list(riblab)) riblab else list(text=riblab)
-      riblabel$side <- rib.iside
-      do.call(mtext, riblabel)
+      ## assemble arguments
+      if(!is.list(riblab)) riblab <- list(text=riblab)
+      riblab <- resolve.defaults(riblab, list(side=rib.iside))
+      ## temporarily suppress clipping 
+      opa <- par(xpd=NA)
+      on.exit(par(opa))
+      if(sideCode(riblab$side) == sideCode(rib.iside)) {
+        ## use 'mtext'
+        do.call(mtext, riblab)
+      } else {
+        ## will use 'text'
+        rls <- sideCode(riblab$side, "word")
+        ## conform to formal arguments of 'text'
+        riblab <- riblab[names(riblab) != "side"]
+        names(riblab) <- sub("text", "labels", names(riblab))
+        ## determine spatial position arguments for 'text'
+        switch(rls,
+               bottom = {
+                 x0 <- mean(bb.rib$xrange)
+                 y0 <- bb.rib$yrange[1L]
+                 srt <- 0
+               },
+               left = {
+                 x0 <- bb.rib$xrange[1L]
+                 y0 <- mean(bb.rib$yrange)
+                 srt <- 90
+               },
+               top = {
+                 x0 <- mean(bb.rib$xrange)
+                 y0 <- bb.rib$yrange[2L]
+                 srt <- 0
+               },
+               right = {
+                 x0 <- bb.rib$xrange[2L]
+                 y0 <- mean(bb.rib$yrange)
+                 srt <- -90
+               })
+        rlpos <- sideCode(rls)
+        do.call(text,
+                resolve.defaults(riblab,
+                                 list(x=x0, y=y0, pos=rlpos, srt=srt)))
+      }
     }
     #
     return(invisible(output.colmap))

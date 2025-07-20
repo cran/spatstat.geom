@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.114 $ $Date: 2025/03/15 02:34:37 $
+#   $Revision: 1.120 $ $Date: 2025/06/17 07:37:21 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL, marks=NULL, keepempty=FALSE,
@@ -1214,3 +1214,91 @@ connected.tess <- function(X, ...) {
   result <- tess(tiles=shards, window=as.owin(Xim))
   result
 }
+
+identify.tess <- function(x, ..., labels=tilenames(x),
+                          n=nobjects(x), plot=TRUE,
+                          paint=plot, paint.args=list()) {
+  verifyclass(x, "tess")
+  if (dev.cur() == 1 && interactive()) {
+    eval(substitute(plot(X), list(X = substitute(x))))
+  }
+  if(!missing(labels)) {
+    if(!is.null(dim(labels))) labels <- labels[,1]
+    labels <- unname(unlist(labels))
+    if(length(labels) != nobjects(x))
+      stop(paste("The number of", sQuote("labels"),
+                 "should equal the number of tiles"),
+           call.=FALSE)
+  }
+  ## Find a representative point for each tile for plotting labels
+  til <- tiles(x)
+  incircles <- lapply(til, incircle)
+  xc <- sapply(incircles, getElement, name="x")
+  yc <- sapply(incircles, getElement, name="y")
+  gpo <- graphicsPars("owin")
+  gpt <- graphicsPars("text")
+  ## start loop
+  id <- integer(0)
+  while(length(id) < n) {
+    mouse <- spatstatLocator(1, type="n")
+    ## check for interrupt exit
+    if(length(mouse$x) == 0)
+      break
+    ## determine tile
+    ident <- as.integer(tileindex(mouse$x, mouse$y, x))
+    if(length(ident) == 0) {
+      cat("Query location is too far away\n")
+    } else if(ident %in% id) {
+      cat(paste("Tile", ident, "already selected\n"))
+    } else {
+      ## add to list
+      if(plot || paint) {
+        ## Plot label
+        mix <- xc[ident]
+        miy <- yc[ident]
+        li <- labels[ident]
+        dont.complain.about(li, mix, miy)
+        tili <- til[[ident]]
+        if(paint) {
+          if(is.rectangle(tili) || is.polygonal(tili)) {
+            do.call.matched(plot.owin,
+                            resolve.defaults(list(x=tili, add=TRUE),
+                                             paint.args,
+                                             list(...),
+                                             list(col="#AAAAE6"),
+                                             list(border=1, lwd=2)),
+                            extrargs=gpo)
+          } else {
+            do.call.matched(plot.owin,
+                            resolve.defaults(list(x=tili, add=TRUE),
+                                             paint.args,
+                                             list(...),
+                                             list(col="#AAAAE6")),
+                            extrargs=gpo)
+            plot(edges(tili), add=TRUE, col=1, lwd=2)
+          }
+        }
+        if(plot) 
+          do.call.matched(graphics::text.default,
+                          resolve.defaults(list(x=quote(mix), 
+                                                y=quote(miy), 
+                                                labels=quote(li)),
+                                           list(...)),
+                          extrargs=gpt)
+      }
+      id <- c(id, ident)
+    }
+  }
+  marx <- marks(x)
+  out <- data.frame(id=id, name=tilenames(x)[id])
+  switch(markformat(marx),
+         vector = {
+           out <- cbind(out, data.frame(marks=marx[id]))
+         },
+         dataframe = {
+           out <- cbind(out, marx[id, , drop=FALSE])
+         },
+         {})
+  return(out)
+}
+

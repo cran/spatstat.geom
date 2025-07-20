@@ -1,3 +1,112 @@
+        CHANGES IN spatstat.geom VERSION 3.5-0
+
+OVERVIEW
+
+    o Missing or unavailable (NA) spatial objects.
+
+    o Interactively identify tiles of a tessellation.
+
+    o Remove small holes from a window.
+
+    o New options for defining nearest neighbours.
+
+    o im.apply handles vector-valued functions.
+
+    o Backgrounds for plots of point patterns.
+
+    o Concatenate layered objects.
+
+    o Connected components of polygonal windows.
+    
+    o Bug fixes and minor improvements.
+
+NEW FUNCTIONS
+
+    o fillholes.owin
+    Remove small holes from a window.
+    
+    o identify.tess
+    Interactively identify tiles of a tessellation.
+
+    o NAobject
+    Create an NA object of a specified class.
+
+    o is.NAobject
+    Recognise whether an object is a missing or unavailable (NA) object.
+
+    o is.na.hyperframe
+    Returns a logical matrix indicating which entries of the hyperframe
+    are NA values or NA objects.
+
+    o c.layered
+    Method for the generic 'c' for layered objects.
+    Enables two or more layered objects to be concatenated,
+    correctly retaining their plot arguments.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o compatible.im
+    Accelerated in the common case where all rasters are identical.
+
+    o connected.owin
+    New argument 'polygonal' allows calculation of connected components
+    using polygonal geometry instead of pixel-based algorithm.
+    
+    o harmonise.im
+    Accelerated in the common case where all rasters are identical.
+
+    o identify.psp
+    New arguments 'paint' and 'paint.args'.
+
+    o im.apply
+    Now handles vector-valued functions.
+    
+    o nnmark
+    New arguments 'ties' and 'proper'.
+
+    o nndist
+    New argument 'proper'.
+
+    o nnwhich
+    New argument 'proper'.
+
+    o pixellate.psp
+    New option: what='indicator'
+
+    o plot.im
+    The position of text next to the colour ribbon can now be
+    controlled by 'riblab$side'.
+
+    o plot.im
+    Placement of main title improved, in some cases.
+
+    o plot.ppp
+    New arguments 'background' and 'clip.background' allow the user to specify
+    an object that will be plotted before the point pattern x, and will
+    therefore appear underneath it.
+    
+    o "[<-.hyperframe"
+    In an assignment like x[i,j] <- NA, if column j contains
+    spatial objects, the NA value will be coerced to an 'NAobject'
+    of the appropriate class.
+
+BUG FIXES
+
+    o delaunay
+    Crashed in some cases when X contained exactly 3 points.
+    Fixed.
+
+    o plot.im
+    riblab$side was ignored.
+    Fixed.
+
+    o "[<-.hyperframe"
+    Results of x[i,j] <- value were malformed if i and j were
+    single numeric values equivalent to integers but not stored as integers,
+    i.e. values with is.integer(i) = FALSE.
+    Fixed.
+
+
         CHANGES IN spatstat.geom VERSION 3.4-1
 
 OVERVIEW

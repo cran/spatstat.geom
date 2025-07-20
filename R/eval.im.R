@@ -1,15 +1,17 @@
-#
-#     eval.im.R
-#
-#        eval.im()             Evaluate expressions involving images
-#
-#        compatible.im()       Check whether two images are compatible
-#
-#        harmonise.im()       Harmonise images
-#        commonGrid()
-#
-#     $Revision: 1.57 $     $Date: 2025/04/05 05:34:56 $
-#
+#'
+#'     eval.im.R
+#'
+#'        eval.im()             Evaluate expressions involving images
+#'
+#'        compatible.im()       Check whether two images are compatible
+#'
+#'        harmonise.im()       Harmonise images
+#'        commonGrid()
+#'
+#'        im.apply()           Pixelwise 'apply'
+#' 
+#'     $Revision: 1.60 $     $Date: 2025/07/03 01:55:43 $
+#'
 
 eval.im <- local({
 
@@ -82,27 +84,40 @@ eval.im <- local({
 })
 
 compatible.im <- function(A, B, ..., tol=1e-6) {
-  verifyclass(A, "im")
-  if(missing(B)) return(TRUE)
-  verifyclass(B, "im")
-  if(!all(A$dim == B$dim))
-    return(FALSE)
-  xdiscrep <- max(abs(A$xrange - B$xrange),
-                 abs(A$xstep - B$xstep),
-                 abs(A$xcol - B$xcol))
-  ydiscrep <- max(abs(A$yrange - B$yrange),
-                 abs(A$ystep - B$ystep),
-                 abs(A$yrow - B$yrow))
-  xok <- (xdiscrep < tol * min(A$xstep, B$xstep))
-  yok <- (ydiscrep < tol * min(A$ystep, B$ystep))
-  uok <- compatible.unitname(unitname(A), unitname(B))
-  if(!(xok && yok && uok))
-    return(FALSE)
-  ## A and B are compatible
-  if(length(list(...)) == 0)
+  AllArgs <- if(missing(B)) list(A, ...) else list(A, B, ...)
+  ## expand any argument which is a list of images
+  AllArgs <- unname(expandSpecialLists(AllArgs))
+  ## check all arguments are images
+  if(!all(sapply(AllArgs, is.im)))
+    stop("Some arguments are not pixel images", call.=FALSE)
+  ## trivial cases
+  nA <- length(AllArgs)
+  if(nA <= 1)
     return(TRUE)
-  ## recursion
-  return(compatible.im(B, ..., tol=tol))
+  ## extract raster information 
+  rasterstuff <- lapply(AllArgs, getrasterinfo, exclude="type")
+  ## quick check for completely identical rasters (frequent case)
+  if(length(unique(rasterstuff)) == 1)
+    return(TRUE)
+  ## not exactly identical rasters
+  A <- rasterstuff[[1]]
+  for(i in 2:nA) {
+    B <- rasterstuff[[i]]
+    if(!all(A$dim == B$dim))
+      return(FALSE)
+    xdiscrep <- max(abs(A$xrange - B$xrange),
+                    abs(A$xstep - B$xstep),
+                    abs(A$xcol - B$xcol))
+    ydiscrep <- max(abs(A$yrange - B$yrange),
+                    abs(A$ystep - B$ystep),
+                    abs(A$yrow - B$yrow))
+    xok <- (xdiscrep < tol * min(A$xstep, B$xstep))
+    yok <- (ydiscrep < tol * min(A$ystep, B$ystep))
+    uok <- compatible.unitname(A$units, B$units)
+    if(!(xok && yok && uok))
+      return(FALSE)
+  }
+  return(TRUE)
 }
 
 ## force a list of images to be compatible
@@ -123,18 +138,24 @@ harmonize.im <- harmonise.im <- function(...) {
   ## if any windows are present, extract bounding box
   iswin <- unlist(lapply(argz, is.owin))
   bb0 <- if(!any(iswin)) NULL else do.call(boundingbox, unname(argz[iswin]))
+  imgrasters <- lapply(imgs, getrasterinfo, exclude="type")
   if(length(imgs) == 1L && is.null(bb0)) {
     ## only one 'true' image: use it as template.
     result[isim] <- imgs
     Wtemplate <- imgs[[1L]]
+  } else if(length(unique(imgrasters)) == 1) {
+    ## all rasters are completely identical
+    result[isim] <- imgs
+    Wtemplate <- imgs[[1L]]
   } else {
+    ## rasters are not completely identical - harmonisation required
     ## test for compatible units
-    un <- lapply(imgs, unitname)
-    uok <- unlist(lapply(un, compatible.unitname, y=un[[1L]]))
+    un <- lapply(imgrasters, getElement, name="units")
+    uok <- sapply(un, compatible.unitname, y=un[[1L]])
     if(!all(uok))
       stop("Images have incompatible units of length")
     ## find the image with the highest resolution
-    xsteps <- unlist(lapply(imgs, getElement, name="xstep"))
+    xsteps <- unlist(lapply(imgrasters, getElement, name="xstep"))
     which.finest <- which.min(xsteps)
     finest <- imgs[[which.finest]]
     ## get the bounding box
@@ -247,10 +268,21 @@ im.apply <- function(X, FUN, ...,
     ## apply function pixelwise
     y <- ImApplyEngine(vals, fun, funtype, fun.handles.na, ...)
     ## pack up (preserving type of 'y')
-    result <- im(y,
-                 xcol=template$xcol, yrow=template$yrow,
-                 xrange=template$xrange, yrange=template$yrange,
-                 unitname=template$unitname)
+    if(single <- is.null(dim(y))) {
+      ## one numeric value per pixel
+      result <- im(y,
+                   xcol=template$xcol, yrow=template$yrow,
+                   xrange=template$xrange, yrange=template$yrange,
+                   unitname=template$unitname)
+    } else {
+      ## rows are pixels, columns are different values
+      result <- vector(mode="list", length=ncol(y))
+      for(j in 1:ncol(y))
+        result[[j]] <- im(y[,j],
+                          xcol=template$xcol, yrow=template$yrow,
+                          xrange=template$xrange, yrange=template$yrange,
+                          unitname=template$unitname)
+    }
   } else {
     ## Memory limit is exceeded
     ## Split raster into pieces and process piecewise
@@ -262,17 +294,16 @@ im.apply <- function(X, FUN, ...,
     rowpieces <- unique(rowpiecemap)
     colpieces <- unique(colpiecemap)
     npieces <- length(rowpieces) * length(colpieces)
-    if(verbose)
+    if(verbose) {
       message(paste("Large array",
                     paren(paste(d[1], "rows x",
                                 d[2], "columns x",
                                 length(X), "images")),
                     "broken into", npieces, "pieces to avoid memory limits"))
-    if(verbose) 
       message(paste("Each piece of the raster consists of",
                     rowblocksize, "rows and",
                     colblocksize, "columns"))
-                          
+    }
     result <- NULL
     for(currentrowpiece in rowpieces) {
       ii <- (rowpiecemap == currentrowpiece)
@@ -282,18 +313,33 @@ im.apply <- function(X, FUN, ...,
         vsub <- sapply(X, function(z) as.vector(z[ii, jj, drop=FALSE]))
         #' apply function
         ysub <- ImApplyEngine(vsub, fun, funtype, fun.handles.na, ...)
-        #' save 
+        single <- is.null(dim(ysub))
+        ny <- ncol(ysub) %orifnull% 1
         if(is.null(result)) {
-          ## create space for result (preserving type of 'y')
+          ## create space for result (preserving type of 'ysub')
           result <- im(rep(RelevantNA(ysub), prod(d)),
                        xcol=template$xcol, yrow=template$yrow,
                        xrange=template$xrange, yrange=template$yrange,
                        unitname=template$unitname)
+          if(!single)
+            result <- rep(list(result), ny)
+          ny.previous <- ny
+        } else {
+          ## check dimensions of ysub are consistent with previous partial results
+          if(ny != ny.previous)
+            stop("FUN returned results with different lengths for different pixels", call.=FALSE)
         }
-        result[ii, jj] <- ysub
+        ## save partial results
+        if(single) {
+          result[ii, jj] <- ysub
+        } else {
+          for(k in 1:ny)
+            result[[k]][ii, jj] <- ysub[,k]
+        }
       }
     }
   }
+  if(!single) result <- as.solist(result)
   return(result)
 }
 
@@ -335,15 +381,33 @@ ImApplyEngine <- function(vals, fun, funtype, fun.handles.na,
                 }
                 if(funtype == "var") v else sqrt(v)
               })
-  if(funtype == "general" && length(y) != n)
-    stop("FUN should yield one value per pixel")
-  
-  if(!full) {
-    ## put the NA's back (preserving type of 'y')
-    yfull <- rep(y[1L], nfull)
-    yfull[ok] <- y
-    yfull[!ok] <- NA
-    y <- yfull
+
+  ## determine whether the result from each pixel is a single value or a vector
+  single <- (funtype != "general") || is.null(dim(y))
+  if(single) {
+    ## check that dimensions match
+    if(length(y) != n)
+      stop("FUN should yield one value per pixel", call.=FALSE)
+    if(!full) {
+      ## put the NA's back (preserving type of 'y')
+      yfull <- rep(y[1L], nfull)
+      yfull[ok] <- y
+      yfull[!ok] <- NA
+      y <- yfull
+    }
+  } else {
+    ## by a quirk of 'apply', each *column* contains the result from one pixel
+    if(ncol(y) != n)
+      stop("FUN should return one vector of values for each pixel", call.=FALSE)
+    if(!full) {
+      yfull <- matrix(y[1L], nrow(y), nfull)
+      yfull[, ok] <- y
+      yfull[, !ok] <- NA
+      y <- yfull
+    }
+    ## transpose matrix so that rows of y correspond to pixels
+    y <- t(y)
   }
+  
   return(y)
 }

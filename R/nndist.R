@@ -3,7 +3,7 @@
 #
 #   nearest neighbour distances (nndist) and identifiers (nnwhich)
 #
-#   $Revision: 1.17 $ $Date: 2022/05/21 09:52:11 $
+#   $Revision: 1.19 $ $Date: 2025/06/16 05:35:37 $
 #
 
 nndist <- function(X, ...) {
@@ -12,35 +12,67 @@ nndist <- function(X, ...) {
 
 nndist.ppp <- local({
 
-  nndist.ppp <- function(X, ..., k=1, by=NULL, method="C", metric=NULL) {
+  nndist.ppp <- function(X, ..., k=1, by=NULL,
+                         proper=FALSE, method="C", metric=NULL) {
     verifyclass(X, "ppp")
     trap.extra.arguments(..., .Context="In nndist.ppp")
-    if(!is.null(metric)) {
-      d <- invoke.metric(metric, "nndist.ppp",
-                         X, ..., k=k, by=by, method=method)
-      return(d)
+    if(is.null(by)) {
+      if(!proper) {
+        ## allow duplicated points
+        if(is.null(metric)) {
+          ## default case: Euclidean distance
+          d <- nndist.default(X$x, X$y, k=k, method=method)
+        } else {
+          ## some other distance metric
+          d <- invoke.metric(metric, "nndist.ppp",
+                             X, ..., k=k, method=method)
+        }
+      } else {
+        ## collapse duplicated points
+        um <- uniquemap(unmark(X))
+        isuniq <- (um == seq_along(um))
+        UX <- X[isuniq]
+        ## compute nn distances between unique points
+        if(is.null(metric)) {
+          dU <- nndist.default(UX$x, UX$y, k=k, method=method)
+        } else {
+          dU <- invoke.metric(metric, "nndist.ppp",
+                              UX, ..., k=k, method=method)
+        }
+        ## remap to original dataset
+        d <- marksubset(dU, cumsum(isuniq))
+      }
+    } else {
+      ## split by a factor
+      if(is.character(by)) {
+        ## Interpret using split.ppp
+        Y <- split(X, f=by, drop=FALSE)
+        by <- attr(Y, "fgroup")
+      }
+      idX <- seq_len(npoints(X)) 
+      Y <- split(X %mark% idX, f=by, un=FALSE)
+      if(proper) {
+        ## merge duplicates, but only within a group
+        Xid <- lapply(Y, marks)
+        Zid <- lapply(lapply(Y, unmark), uniquemap)
+        Yid <- mapply("[", x=Xid, i=Zid, SIMPLIFY=FALSE)
+        Y <- mapply("marks<-", x=Y, value=Yid, SIMPLIFY=FALSE)
+        idX <- unsplit(Yid, f=by)
+      }
+      distY <- lapply(Y, nndistsub, XX=X, iX=idX, k=k, metric=metric)
+      d <- do.call(cbind, distY)
     }
-    if(is.null(by)) # usual case
-      return(nndist.default(X$x, X$y, k=k, by=by, method=method))
-    return(nndistby(X, k=k, by=by))
+    return(d)
   }
-
-  nndistby <- function(X, k, by) {
-    ## split by factor
-    if(is.character(by)) {
-      ## Interpret using split.ppp
-      Y <- split(X, f=by, drop=FALSE)
-      by <- attr(Y, "fgroup")
+  
+  nndistsub <- function(Z, XX, iX, k, metric=NULL) {
+    if(is.null(metric)) {
+      d <- nncross(XX, Z, iX=iX, iY=marks(Z), k=k, what="dist")
+    } else {
+      d <- invoke.metric(metric, "nncross.ppp",
+                    X=XX, Y=Z, iX=iX, iY=marks(Z), k=k, what="dist")
     }
-    idX <- seq_len(npoints(X))
-    Y <- split(X %mark% idX, f=by, un=FALSE)
-    distY <- lapply(Y, nndistsub, XX=X, iX=idX, k=k)
-    result <- do.call(cbind, distY)
-    return(result)
-  }
-
-  nndistsub <- function(Z, XX, iX, k) {
-    nncross(XX, Z, iX=iX, iY=marks(Z), k=k, what="dist")
+    return(d)
   }
 
   nndist.ppp
@@ -193,37 +225,66 @@ nnwhich <- function(X, ...) {
 
 nnwhich.ppp <- local({
 
-  nnwhich.ppp <- function(X, ..., k=1, by=NULL, method="C", metric=NULL) {
+  nnwhich.ppp <- function(X, ..., k=1, by=NULL,
+                          proper=FALSE, method="C", metric=NULL) {
     verifyclass(X, "ppp")
     trap.extra.arguments(..., .Context="In nnwhich.ppp")
-    if(!is.null(metric)) {
-      d <- invoke.metric(metric, "nnwhich.ppp",
-                         X, ..., k=k, by=by, method=method)
-      return(d)
+    if(is.null(by)) {
+      if(!proper) {
+        ## allow duplicated points
+        if(is.null(metric)) {
+          ## default case: Euclidean distance
+          nw <- nnwhich.default(X$x, X$y, k=k, method=method)
+        } else {
+          ## some other distance metric
+          nw <- invoke.metric(metric, "nnwhich.ppp",
+                             X, ..., k=k, method=method)
+        }
+      } else {
+        ## collapse duplicated points
+        um <- uniquemap(unmark(X))
+        isuniq <- (um == seq_along(um))
+        UX <- X[isuniq]
+        ## compute nn distances between unique points
+        if(is.null(metric)) {
+          nwUU <- nnwhich.default(UX$x, UX$y, k=k, method=method)
+        } else {
+          nwUU <- invoke.metric(metric, "nnwhich.ppp",
+                                UX, ..., k=k, method=method)
+        }
+        ## remap to original dataset
+        UtoX <- which(isuniq)
+        nwUX <- nwUU
+        nwUX[] <- UtoX[nwUU[]]
+        nw <- marksubset(nwUX, um)
+      }
+    } else {
+      ## split by a factor
+      if(is.character(by)) {
+        ## Interpret using split.ppp
+        Y <- split(X, f=by, drop=FALSE)
+        by <- attr(Y, "fgroup")
+      }
+      idX <- seq_len(npoints(X)) 
+      Y <- split(X %mark% idX, f=by, un=FALSE)
+      if(proper) {
+        ## merge duplicates, but only within a group
+        Xid <- lapply(Y, marks)
+        Zid <- lapply(lapply(Y, unmark), uniquemap)
+        Yid <- mapply("[", x=Xid, i=Zid, SIMPLIFY=FALSE)
+        Y <- mapply("marks<-", x=Y, value=Yid, SIMPLIFY=FALSE)
+        idX <- unsplit(Yid, f=by)
+      }
+      nwY <- lapply(Y, nnwhichsub, XX=X, iX=idX, k=k, metric=metric)
+      nw <- do.call(cbind, nwY)
     }
-    if(is.null(by))
-      return(nnwhich.default(X$x, X$y, k=k, method=method))
-    return(nnwhichby(X, k=k, by=by))
+    return(nw)
   }
 
-  nnwhichby <- function(X, k, by) {
-    # split by factor 
-    if(is.character(by)) {
-      ## Interpret using split.ppp
-      Y <- split(X, f=by, drop=FALSE)
-      by <- attr(Y, "fgroup")
-    }
-    idX <- seq_len(npoints(X))
-    Y <- split(X %mark% idX, f=by, un=FALSE)
-    whichY <- lapply(Y, nnwhichsub, XX=X, iX=idX, k=k)
-    result <- do.call(cbind, whichY)
-    return(result)
-  }
-
-  nnwhichsub <- function(Z, XX, iX, k) {
+  nnwhichsub <- function(Z, XX, iX, k, metric=NULL) {
     # marks(Z) gives original serial numbers of subset Z
     iY <- marks(Z)
-    Zid <- nncross(XX, Z, iX=iX, iY=iY, k=k, what="which")
+    Zid <- nncross(XX, Z, iX=iX, iY=iY, k=k, what="which", metric=metric)
     nk <- length(k)
     if(nk == 1) {
       Yid <- iY[Zid]
