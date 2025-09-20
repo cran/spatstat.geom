@@ -1,3 +1,67 @@
+        CHANGES IN spatstat.geom VERSION 3.6-0
+
+OVERVIEW
+
+    o More facilities for handling NA objects.
+
+    o More facilities for drawing a background behind a plot.
+    
+    o 'clickpoly' allows vertices to be snapped (rounded) onto a grid
+
+    o Improvements to perspective views of images.
+    
+    o More options for disc windows.
+
+    o Internal improvements.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o solapply, anylapply
+    If an entry of the list is an 'NAobject', the result for that entry
+    will be an 'NAobject'.
+
+    o with.hyperframe
+    If a column in the hyperframe contains 'NA object' entries,
+    and if the name of that column is included in the expression
+    being evaluated, then the result of evaluation is an 'NA' or 'NA object'
+    in the relevant row.
+
+    o plot.owin, plot.psp
+    New argument 'background' specifies an object (or a colour)
+    that will be plotted before x is plotted, and will
+    therefore appear underneath it.
+
+    o plot.ppp, plot.im
+    Argument 'background' can be a single colour value.
+    
+    o clickpoly
+    Allows user-selected locations of vertices to be snapped (rounded)
+    to the nearest grid points. New arguments 'snap.step' and 'snap.origin'.
+
+    o disc
+    New argument 'type' allows the user to specify an inscribed polygon
+    or a circumscribed polygon.
+
+    o as.ppp, as.owin, as.im, domain, Frame, Window
+    These generic functions now have methods for class 'NAobject'
+    which return an 'NAobject'.
+
+    o nobjects, npoints
+    These generic functions now have methods for class 'NAobject'
+    which return an NA integer value.
+
+    o marks, "marks<-"
+    These generic functions now have methods for class 'NAobject'
+    which return an 'NAobject'.
+
+    o persp.im
+    Improved appearance when apron=TRUE and the image domain is not a rectangle.
+    
+    o hyperframe
+    Removed slight inconsistencies in the internal format
+    produced in different cases.
+
+
         CHANGES IN spatstat.geom VERSION 3.5-0
 
 OVERVIEW

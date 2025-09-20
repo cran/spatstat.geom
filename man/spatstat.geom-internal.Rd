@@ -23,12 +23,16 @@
 \alias{AsMaskInternal}
 \alias{AsymmDistance.psp}
 \alias{as.character.unitname}
+\alias{as.data.frame.NAobject}
 \alias{as.data.frame.ppplist}
 \alias{as.double.im}
+\alias{as.im.NAobject}
 \alias{as.imlist}
 \alias{as.linimlist}
 \alias{as.list.hyperframe}
 \alias{as.listof}
+\alias{as.owin.NAobject}
+\alias{as.ppp.NAobject}
 \alias{as.ppplist}
 \alias{as.tess.tessfun}
 \alias{as.unitname}
@@ -75,6 +79,7 @@
 \alias{do.as.im}
 \alias{do.call.plotfun}
 \alias{drawSignedPoly}
+\alias{elementOrNA}
 \alias{emptywindow}
 \alias{ensureModelSupport}
 \alias{equalpairs.quad}          
@@ -93,6 +98,7 @@
 \alias{flipxy.diagramobj}
 \alias{flipxypolygon}
 \alias{format.numberwithunit}
+\alias{Frame.NAobject}
 \alias{framebottomleft}
 \alias{gammabreaks}
 \alias{genericNNdistBy}
@@ -124,9 +130,11 @@
 \alias{is.imlist}
 \alias{is.infline}
 \alias{is.marked.default}    
+\alias{is.marked.NAobject}    
 \alias{is.marked.psp}    
 \alias{is.marked.quad}
 \alias{is.multitype.default}    
+\alias{is.multitype.NAobject}    
 \alias{is.multitype.quad}    
 \alias{is.ppplist}
 \alias{is.pp3}
@@ -163,6 +171,8 @@
 \alias{mark.scale.default}
 \alias{markspace.integral}
 \alias{marks.default}           
+\alias{marks.NAobject}           
+\alias{marks<-.NAobject}           
 \alias{marks.quad}           
 \alias{\%mapp\%} %DoNotExport
 %NAMESPACE export("%mapp%")
@@ -187,6 +197,8 @@
 \alias{nearest.pixel}
 \alias{nearest.valid.pixel}
 \alias{needpackage}
+\alias{nobjects.NAobject}
+\alias{npoints.NAobject}
 \alias{n.quad}
 \alias{numberwithunit}
 \alias{numeric.columns}
@@ -346,6 +358,7 @@
 \alias{warn.no.metric.support}
 \alias{warn.unsupported.args}
 \alias{waxlyrical}
+\alias{Window.NAobject}
 \alias{wrangle2image}
 \alias{w.quad}               
 \alias{x.quad}
@@ -396,12 +409,16 @@ areaLoss.poly(X, r, \dots, W, subset, splitem)
 AsMaskInternal(w, \dots, eps, dimyx, xy, rule.eps)
 AsymmDistance.psp(X, Y, metric, method)
 \method{as.character}{unitname}(x, \dots)
+\method{as.data.frame}{NAobject}(x, \dots)
 \method{as.data.frame}{ppplist}(x, row.names, \dots)
 \method{as.double}{im}(x, \dots)
+\method{as.im}{NAobject}(X, \dots)
 as.imlist(x, check)
 as.linimlist(x, check)
 \method{as.list}{hyperframe}(x, \dots, expandatoms)
 as.listof(x)
+\method{as.owin}{NAobject}(W, \dots)
+\method{as.ppp}{NAobject}(X, \dots)
 as.ppplist(x, check)
 \method{as.tess}{tessfun}(X)
 as.unitname(s)
@@ -448,6 +465,7 @@ dist2dpath(dist, method="C")
 do.as.im(x, action, \dots, W, eps, dimyx, xy, rule.eps, na.replace)
 do.call.plotfun(fun, arglist, \dots, envir)
 drawSignedPoly(x,y,pars,sgn)
+elementOrNA(x, nam, cl)
 emptywindow(w)
 ensureModelSupport(model, loaded)
 equalpairs.quad(Q)
@@ -466,6 +484,7 @@ fillNA(x, value)
 \method{flipxy}{diagramobj}(X)
 flipxypolygon(p)
 \method{format}{numberwithunit}(x, \dots, collapse, modifier)
+\method{Frame}{NAobject}(X)
 framebottomleft(w)
 gammabreaks(ra, n, gamma)
 genericNNdistBy(X, by, k)
@@ -497,9 +516,11 @@ is.hyperframe(x)
 is.imlist(x)
 is.infline(x)
 \method{is.marked}{default}(\dots)  
+\method{is.marked}{NAobject}(X, \dots)  
 \method{is.marked}{psp}(X, \dots)
 \method{is.marked}{quad}(X, na.action="warn", \dots)
 \method{is.multitype}{default}(X, \dots)  
+\method{is.multitype}{NAobject}(X, \dots)  
 \method{is.multitype}{quad}(X, na.action="warn", \dots)
 is.ppplist(x)
 is.pp3(x)
@@ -540,6 +561,8 @@ mark.scale.default(marx, w, \dots,
                    minsize, zerosize, characters)
 markspace.integral(X)
 \method{marks}{default}(x, \dots)
+\method{marks}{NAobject}(x, \dots)
+\method{marks}{NAobject}(x, \dots) <- value
 \method{marks}{quad}(x, dfok=FALSE, \dots)
 markappendop(x, y)
 x \%mapp\% y
@@ -561,6 +584,8 @@ na.handle.im(X, na.replace)
 nearest.pixel(x, y, Z)
 nearest.valid.pixel(x, y, Z, method, nsearch)
 needpackage(pkg, loaded, fatal, purpose)
+\method{nobjects}{NAobject}(x)
+\method{npoints}{NAobject}(x)
 n.quad(Q)
 numberwithunit(x, u)
 numeric.columns(M, logical, others)
@@ -712,7 +737,7 @@ thickSegments(x, widths, \dots,
              add, main, do.plot, show.all, show.window,
              scale, adjust, negative.args,
              legend, leg.side, leg.sep, leg.wid, leg.args, leg.scale,
-             zlim, box)
+             zlim, box, background)
 tilecentroids(W, nx, ny)
 trianglediameters(iedge, jedge, edgelength, \dots,
                   nvert, dmax, check)
@@ -734,6 +759,7 @@ warn.once(key, \dots)
 warn.no.metric.support(caller, \dots, metric)
 warn.unsupported.args(unsup, \dots)
 waxlyrical(type, terse)
+\method{Window}{NAobject}(X, \dots)
 wrangle2image(values, template)
 w.quad(Q)               
 x.quad(Q)

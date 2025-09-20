@@ -1,7 +1,7 @@
 #
 #  hyperframe.R
 #
-# $Revision: 1.81 $  $Date: 2025/07/06 01:28:39 $
+# $Revision: 1.88 $  $Date: 2025/08/02 07:05:28 $
 #
 
 ## ------------------  utilities -------------------------
@@ -46,12 +46,12 @@ hyperframe <- function(...,
   
   if(nvars == 0) {
     ## zero columns - return
-    result <- list(nvars=0,
-                   ncases=0,
-                   vname=character(0),
+    result <- list(nvars=0L,
+                   ncases=0L,
+                   vname=character(0L),
                    vtype=factor(,
                                 levels=c("dfcolumn","hypercolumn","hyperatom")),
-                   vclass=character(0),
+                   vclass=character(0L),
                    df=data.frame(),
                    hyperatoms=list(),
                    hypercolumns=list())
@@ -76,13 +76,13 @@ hyperframe <- function(...,
   dfcolumns    <- sapply(aarg, can.be.dfcolumn)
   hypercolumns <- sapply(aarg, can.be.hypercolumn)
   hyperatoms   <- !(dfcolumns | hypercolumns)
-  
+
   ## Determine number of rows (= cases) 
   columns <- dfcolumns | hypercolumns
   if(!any(columns)) {
-    ncases <- 1
+    ncases <- 1L
   } else {
-    heights <- rep.int(1, nvars)
+    heights <- rep.int(1L, nvars)
     heights[columns] <-  lengths(aarg[columns])
     u <- unique(heights)
     if(length(u) > 1) {
@@ -111,19 +111,29 @@ hyperframe <- function(...,
   } else {
     df <- do.call(data.frame,
                   append(aarg[dfcolumns],
-                         list(check.rows=check.rows,
-                              check.names=check.names,
-                              stringsAsFactors=stringsAsFactors)))
+                         list(row.names        = row.names,
+                              check.rows       = check.rows,
+                              check.names      = check.names,
+                              stringsAsFactors = stringsAsFactors)))
     names(df) <- nama[dfcolumns]
+    row.names(df) <- as.character(row.names(df))
   }
-  if(length(row.names)) row.names(df) <- row.names
 
+  ## standardise the format of hypercolumns
+  if(any(hypercolumns)) {
+    ## coerce to solist if appropriate
+    aarg[hypercolumns] <- lapply(aarg[hypercolumns], as.solist,
+                                   promote=TRUE, demote=TRUE)
+    ## remove names 
+    aarg[hypercolumns] <- lapply(aarg[hypercolumns], unname)
+  }
+  
   ## Storage type of each variable
   vtype <- character(nvars)
-  vtype[dfcolumns] <- "dfcolumn"
+  vtype[dfcolumns]    <- "dfcolumn"
   vtype[hypercolumns] <- "hypercolumn"
-  vtype[hyperatoms] <- "hyperatom"
-  vtype=factor(vtype, levels=c("dfcolumn","hypercolumn","hyperatom"))
+  vtype[hyperatoms]   <- "hyperatom"
+  vtype <- factor(vtype, levels=c("dfcolumn","hypercolumn","hyperatom"))
   
   ## Class of each variable
   vclass <- character(nvars)
@@ -135,14 +145,18 @@ hyperframe <- function(...,
     vclass[hypercolumns] <- sapply(lapply(aarg[hypercolumns], "[[", i=1L),
                                    classIgnoringNA, first=TRUE)
   ## Put the result together
-  result <- list(nvars=nvars,
-                 ncases=ncases,
-                 vname=nama,
-                 vtype=vtype,
-                 vclass=vclass,
-                 df=df,
-                 hyperatoms=aarg[hyperatoms],
-                 hypercolumns=aarg[hypercolumns])
+  result <- list(
+    ## info
+    nvars  = as.integer(nvars),
+    ncases = as.integer(ncases),
+    vname  = as.character(nama),
+    vtype  = vtype,
+    vclass = as.character(vclass),
+    ## data
+    df           = df,
+    hyperatoms   = aarg[hyperatoms],
+    hypercolumns = aarg[hypercolumns]
+  )
     
   class(result) <- c("hyperframe", class(result))
   return(result)
@@ -420,8 +434,9 @@ as.list.hyperframe <- function(x, ..., expandatoms=TRUE) {
       out[hatom] <- ha
     }
   }
-  fullrows <- !hatom | expandatoms
-  out[fullrows] <- lapply(out[fullrows], "names<-", value=row.names(df))
+  if(any(fullcols <- !hatom | expandatoms)) {
+    out[fullcols] <- lapply(out[fullcols], "names<-", value=row.names(df))
+  }
   names(out) <- names(x)
   return(out)
 }
@@ -445,8 +460,18 @@ with.hyperframe <- function(data, expr, ..., simplify=TRUE, ee=NULL,
     enclos <- parent.frame()
   n <- nrow(data)
   out <- vector(mode="list", length=n)
+  #' consider all variables or functions provided in 'data'
+  nama <- intersect(all.names(ee), colnames(data))
+  if(length(nama)) {
+    #' check for NA value or NAobject among these variables or functions
+    bad <- apply(is.na(data)[, nama, drop=FALSE], 1, any)
+    goodrows <- which(!bad)
+    out[bad] <- NA
+  } else {
+    goodrows <- seq_len(n)
+  }
   datalist <- as.list(data)
-  for(i in 1:n) {
+  for(i in goodrows) {
     rowi <- lapply(datalist, "[[", i=i)  # ensures the result is always a list
     outi <- eval(ee, rowi, enclos)
     if(!is.null(outi))
