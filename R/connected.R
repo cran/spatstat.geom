@@ -3,7 +3,7 @@
 #
 # connected component transform
 #
-#    $Revision: 1.30 $  $Date: 2025/07/15 03:22:49 $
+#    $Revision: 1.34 $  $Date: 2026/01/17 03:29:57 $
 #
 # Interpreted code for pixel images by Julian Burgos <jmburgos@u.washington.edu>
 # Rewritten in C by Adrian Baddeley
@@ -14,14 +14,24 @@ connected <- function(X, ...) {
   UseMethod("connected")
 }
 
-connected.im <- function(X, ..., background=NA, method="C", connect=8) {
-  if(!is.na(background)) {
-    W <- solutionset(X != background)
-  } else if(X$type == "logical") {
-    W <- solutionset(X)
+connected.im <- function(X, ..., background, method="C", connect=8) {
+  if(missing(background)) {
+    if(X$type == "logical") {
+      ## region where TRUE
+      W <- solutionset(X)
+    } else {
+      ## region where defined
+      W <- as.owin(X)
+    }
   } else {
-    warning("Assuming background = NA, foreground = other values", call.=FALSE)
-    W <- as.owin(X)
+    stopifnot(length(background) == 1)
+    if(is.na(background)) {
+      ## region where defined
+      W <- as.owin(X)
+    } else {
+      ## region where defined and not background 
+      W <- solutionset(X != background)
+    }
   }
   connected.owin(W, method=method, ..., connect=connect)
 }
@@ -31,7 +41,8 @@ connected.owin <- function(X, ..., polygonal=FALSE, method="C", connect=8) {
     P <- as.polygonal(X)
     A <- xypolycomponents(P)
     W <- if(is.mask(X)) P else X
-    result <- tess(tiles=A, window=W)
+    vacuous <- all(sapply(A, is.empty))
+    result <- tess(tiles=A, window=W, keepempty=vacuous)
     return(result)
   }
   method <- pickoption("algorithm choice", method,
@@ -184,21 +195,27 @@ connected.owin <- function(X, ..., polygonal=FALSE, method="C", connect=8) {
 
   ########### COMMON CODE ############################
     
-  # Renumber labels sequentially
   mapped <- (Z != 0)
-  usedlabs <- sortunique(as.vector(Z[mapped]))
-  nlabs <- length(usedlabs)
-  labtable <- cumsum(seq_len(max(usedlabs)) %in% usedlabs)
-  Z[mapped] <- labtable[Z[mapped]]
+  if(any(mapped)) {
+    ## Renumber labels sequentially
+    usedlabs <- sortunique(as.vector(Z[mapped]))
+    nlabs <- length(usedlabs)
+    labtable <- cumsum(seq_len(max(usedlabs)) %in% usedlabs)
+    Z[mapped] <- labtable[Z[mapped]]
+  } else {
+    nlabs <- 1
+  }
 
-  # banish zeroes
+  ## banish zeroes
   Z[!mapped] <- NA
   
   # strip borders
   Z <- Z[2:(nrow(Z)-1L),2:(ncol(Z)-1L)]
   # dress up 
   Z <- im(factor(Z, levels=1:nlabs),
-          xcol=X$xcol, yrow=X$yrow, unitname=unitname(X))
+          xcol=X$xcol, yrow=X$yrow,
+          xrange=X$xrange, yrange=X$yrange,
+          unitname=unitname(X))
   return(Z)
 }
 
@@ -208,20 +225,45 @@ connected.ppp <- connected.pp3 <- function(X, R, ...) {
                 stopifnot(is.ppp(X) || is.pp3(X))
   check.1.real(R, paste("In", methodname))
   stopifnot(R >= 0)
-  internal <- resolve.1.default("internal", list(...), list(internal=FALSE))
   nv <- npoints(X)
   cl <- closepairs(X, R, what="indices")
-  lab0 <- cocoEngine(nv, cl$i - 1L, cl$j - 1L, methodname)
-  if(internal)
-    return(lab0)
-  lab <- lab0 + 1L
-  # Renumber labels sequentially 
-  lab <- as.integer(factor(lab))
-  # Convert labels to factor
-  lab <- factor(lab)
+  lab <- cocoLabels(nv, cl$i, cl$j, methodname, check=FALSE)
   # Apply to points
-  Y <- X %mark% lab
+  Y <- X %mark% as.factor(lab)
   return(Y)
+}
+
+cocoLabels <- function(nv, ie, je, algoname="connectedness algorithm",
+                       check=TRUE, resequence=TRUE) {
+  #' internal function assumes length(ie) == length(je)
+  if(length(ie) == 0) {
+    #' all connected components are singletons
+    return(seq_len(nv))
+  }
+  if(check) {
+    #' check indices are in {1, ..., nv}
+    re <- range(ie, je)    
+    if(re[1L] < 1  || re[2L] > nv)
+      stop(paste0("Internal error in ", algoname, ": indices out of bounds"),
+           call.=FALSE)
+  }
+  #' convert R indices to C indices
+  ie <- ie - 1L
+  je <- je - 1L
+  #' determine connected components (membership label for each vertex)
+  z <- cocoEngine(nv, ie, je, algoname)
+  #' values of z are C indices
+  if(resequence) {
+    #' map to arbitrary labels 1 ... m
+    uz <- sort.int(unique.default(z))
+    z <- match(z, uz)
+  } else {
+    #' convert C indices back to R indices
+    z <- z + 1L
+    #' Label attached to an equivalence class is the lowest serial number
+    #' of any vertex in the class
+  }
+  return(z)
 }
 
 cocoEngine <- function(nv, ie, je, algoname="connectedness algorithm") {

@@ -3,7 +3,7 @@
 #'
 #'  plot method for segment patterns
 #'
-#'  $Revision: 1.10 $ $Date: 2025/08/19 08:41:46 $
+#'  $Revision: 1.18 $ $Date: 2026/01/01 00:24:45 $
 
 plot.psp <- function(x, ..., main, add=FALSE,
                      show.all=!add, 
@@ -22,7 +22,8 @@ plot.psp <- function(x, ..., main, add=FALSE,
                      leg.args=list(),
                      leg.scale=1,
                      negative.args=list(col=2),
-                     background=NULL) {
+                     background=NULL,
+                     scramble.cols=FALSE) {
   if(missing(main) || is.null(main))
     main <- short.deparse(substitute(x))
   verifyclass(x, "psp")
@@ -147,42 +148,15 @@ plot.psp <- function(x, ..., main, add=FALSE,
   ## determine colours if any
   colmap <- NULL
   if(use.marks) {
-    ## use colours
+    ## Will display mark values as colours
     marx <- as.data.frame(marx)[, which.marks]
-    if(is.character(marx) || length(unique(marx)) == 1)
-      marx <- factor(marx)
-    if(is.null(col)) {
-      ## no colour info: use default colour palette
-      nc <- if(is.factor(marx)) {
-              length(levels(marx))
-            } else {
-              min(256, length(unique(marx)))
-            }
-      colfun <- spatstat.options("image.colfun")
-      col <- colfun(nc)
-    }
     ## determine colour map
-    if(inherits(col, "colourmap")) {
-      colmap <- colourmap
-    } else if(is.colour(col)) {
-      ## colour values given; create colour map
-      if(is.factor(marx)) {
-        lev <- levels(marx)
-        colmap <- colourmap(col=col, inputs=factor(lev))
-      } else {
-        if(!all(is.finite(marx)))
-          warning("Some mark values are infinite or NaN or NA")
-        colmap <- colourmap(col=col, range=range(marx, finite=TRUE))
-      }
-    } else stop("Format of argument 'col' is not recognised")
-    #' map the mark values to colours
+    colmap <- default.colourmap(marx, col=col,
+                                scramble.cols=scramble.cols)
+    #' apply colour map to marks
     col <- colmap(marx)
   }
-  ## convert to greyscale?
-  if(spatstat.options("monochrome")) {
-    col <- to.grey(col)
-    colmap <- to.grey(colmap)
-  }
+
   if(do.plot) {
     ## plot segments
     do.call.plotfun(segments,
@@ -196,7 +170,7 @@ plot.psp <- function(x, ..., main, add=FALSE,
       plot(colmap, vertical=TRUE, add=TRUE,
            xlim=bb.rib$xrange, ylim=bb.rib$yrange)
   }
-  
+
   # return colour map
   result <- colmap %orifnull% colourmap()
   attr(result, "bbox") <- bb.all
@@ -437,3 +411,4 @@ plotWidthMap <- function(bb.leg, zlim, phys.scale,
   do.call.matched(text, textargs, extrargs=graphicsPars("text"))
   return(invisible(NULL))
 }
+

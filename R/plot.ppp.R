@@ -1,7 +1,7 @@
 #
 #	plot.ppp.R
 #
-#	$Revision: 1.129 $	$Date: 2025/08/19 08:46:05 $
+#	$Revision: 1.131 $	$Date: 2025/12/31 02:59:15 $
 #
 #
 #--------------------------------------------------------------------------
@@ -15,7 +15,8 @@ plot.ppp <- function(x, main, ..., clipwin=NULL,
                      minsize=NULL, zerosize=NULL, zap=0.01, 
                      show.window=show.all, show.all=!add, do.plot=TRUE,
                      multiplot=TRUE,
-                     background=NULL, clip.background=FALSE)
+                     background=NULL, clip.background=FALSE,
+                     scramble.cols=FALSE)
 {
   if(missing(main))
     main <- short.deparse(substitute(x))
@@ -91,6 +92,7 @@ plot.ppp <- function(x, main, ..., clipwin=NULL,
                                            markscale=markscale,
                                            minsize=minsize,
                                            zerosize=zerosize,
+                                           scramble.cols=scramble.cols,
                                            zap=zap)))
       return(invisible(out))
     } 
@@ -137,6 +139,7 @@ plot.ppp <- function(x, main, ..., clipwin=NULL,
                                  maxsize=maxsize, meansize=meansize,
                                  markscale=markscale,
                                  minsize=minsize, zerosize=zerosize,
+                                 scramble.cols=scramble.cols,
                                  ...)
   }
 
@@ -147,7 +150,8 @@ plot.ppp <- function(x, main, ..., clipwin=NULL,
     ## Get relevant parameters
     par.direct <- list(main=main, use.marks=use.marks,
                        maxsize=maxsize, meansize=meansize, markscale=markscale,
-                       minsize=minsize, zerosize=zerosize)
+                       minsize=minsize, zerosize=zerosize,
+                       scramble.cols=scramble.cols)
     par.rejects <- resolve.1.default(list(par.rejects=list(pch="+")),
                                      list(...))
     par.all <- resolve.defaults(par.rejects, par.direct)
@@ -301,7 +305,7 @@ default.symbolmap.ppp <- local({
                                     fixsize=FALSE,
                                     maxsize=NULL, meansize=NULL, markscale=NULL,
                                     minsize=NULL, zerosize=NULL,
-                                    transform=NULL) {
+                                    transform=NULL, scramble.cols=FALSE) {
     Y <- lapply(unstack(x),
                 dsmEngine,
                 ...,
@@ -313,7 +317,8 @@ default.symbolmap.ppp <- local({
                 markscale=markscale,
                 minsize=minsize,
                 zerosize=zerosize,
-                transform=transform)
+                transform=transform,
+                scramble.cols=scramble.cols)
     if(length(Y) == 1)
       Y <- Y[[1L]]
     return(Y)
@@ -332,7 +337,8 @@ default.symbolmap.ppp <- local({
                         zerosize=NULL,
                         markrange=NULL,
                         marklevels=NULL,
-                        transform=NULL) {
+                        transform=NULL,
+                        scramble.cols=FALSE) {
     marx <- marks(x)
     if(is.null(marx) || npoints(x) == 0) {
       ## null or constant symbol map
@@ -400,6 +406,9 @@ default.symbolmap.ppp <- local({
 
     if(inherits(Tmarx, c("Date", "POSIXt"))) {
       ## ......... transformed marks are dates or date/times ..............
+      if(scramble.cols)
+        warning("Argument 'scramble.cols' is ignored for date/time values",
+                call.=FALSE)
       if(sizegiven) {
         g <- do.call(symbolmap,
                      resolve.defaults(list(range=markrange,
@@ -436,6 +445,9 @@ default.symbolmap.ppp <- local({
     }
     if(is.numeric(Tmarx)) {
       ## ............. marks are numeric values ...................
+      if(scramble.cols)
+        warning("Argument 'scramble.cols' is ignored for numeric values",
+                call.=FALSE)
       Tmarx <- Tmarx[is.finite(Tmarx)]
       if(length(Tmarx) == 0)
         return(symbolmap(..., chars=chars, cols=cols))
@@ -538,8 +550,24 @@ default.symbolmap.ppp <- local({
     um <- marklevels %orifnull%
           if(is.factor(marx)) levels(marx) else sortunique(marx)
     ntypes <- length(um)
-    if(!is.null(cols))
-      cols <- rep.int(cols, ntypes)[1:ntypes]
+    if(!is.null(cols)) {
+      #' symbols will be coloured
+      if(inherits(cols, "colourmap")) {
+        #' apply colour map to possible types
+        cols <- cols(um)
+      } else if(is.function(cols) && names(formals(cols))[1L] == "n") {
+        #' evaluate to obtain desired number of colours
+        cols <- cols(ntypes)
+      } else if(is.colour(cols)) {
+        if(length(cols) != ntypes) {
+          #' recycle colour values to desired length
+          cols <- rep.int(cols, ntypes)[1:ntypes]
+        }
+      } else stop("Unrecognised format for argument 'cols'", call.=FALSE)
+      #' Option to randomly permute colours
+      if(scramble.cols)
+        cols <- sample(cols)
+    }
     if(shapegiven && sizegiven) {
       #' values mapped to symbols (shape and size specified)
       g <- symbolmap(inputs=um, ..., cols=cols)

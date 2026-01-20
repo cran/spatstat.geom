@@ -3,7 +3,7 @@
 #
 # support for colour maps and other lookup tables
 #
-# $Revision: 1.70 $ $Date: 2025/06/28 02:23:09 $
+# $Revision: 1.75 $ $Date: 2026/01/01 00:28:23 $
 #
 
 colourmap <- function(col, ..., range=NULL, breaks=NULL, inputs=NULL, gamma=1,
@@ -263,9 +263,12 @@ plot.colourmap <- local({
     dFrom <- as.numeric(diff(from))
     dTo <- as.numeric(diff(to))
     b <- dTo/dFrom
-    if(is.nan(b)) b <- 0
-    if(!is.finite(b)) stop("Internal error: Cannot map zero width interval")
-    to[1L] + b * (x - from[1L])
+    y <- if(is.finite(b)) {
+           to[1L] + b * (x - from[1L])
+         } else {
+           rep(mean(to), length(x))
+         }
+    return(y)
   }
 
   ensurenumeric <- function(x) { if(is.numeric(x)) x else as.numeric(x) }
@@ -299,7 +302,7 @@ plot.colourmap <- local({
                              vertical=FALSE,
                              axis=TRUE,
                              side = if(vertical) "right" else "bottom",
-                             labelmap=NULL, gap=0.25, add=FALSE,
+                             labelmap=NULL, gap=0.25, add=FALSE, do.plot=TRUE, 
                              increasing=NULL, nticks=5, at=NULL, box=NULL) {
     if(missing(main))
       main <- short.deparse(substitute(x))
@@ -314,8 +317,8 @@ plot.colourmap <- local({
     col <- stuff$outputs
     n   <- stuff$n
     if(n == 0) {
-      ## Null map
-      return(invisible(NULL))
+      ## Nothing to plot.
+      return(invisible(x))
     }
     discrete <- stuff$discrete
     if(discrete) {
@@ -386,7 +389,15 @@ plot.colourmap <- local({
         xlim <- c(0, widthrule(ylim, separate, n, gap))
     } 
 
-    # .......... initialise plot ...............................
+    ## .......... done computing layout. ...............................
+    
+    if(!do.plot) {
+      result <- x
+      attr(result, "bbox") <- owin(xlim, ylim)
+      return(invisible(result))
+    }
+    
+    ## .......... initialise plot ...............................
     if(!add)
       do.call.matched(plot.default,
                       resolve.defaults(list(x=xlim, y=ylim,
@@ -770,3 +781,62 @@ as.colourmap.colourmap <- function(x, ...) {
   return(x)
 }
 
+default.colourmap <- function(x, ...,
+                              col=spatstat.options("image.colfun"),
+                              scramble.cols=FALSE,
+                              monochrome=spatstat.options("monochrome")) {
+  if(is.null(x)) return(colourmap())
+  #' Recognise whether values are discrete or continuous
+  if(is.factor(x)) {
+    ux <- levels(x)
+    discrete <- TRUE
+  } else if(is.logical(x)) {
+    ux <- c(FALSE, TRUE)
+    discrete <- TRUE
+  } else if(is.character(x)) {
+    ux <- sort(unique(x))
+    discrete <- TRUE
+  } else if(length(unique(x)) == 1) {
+    ux <- x[1L]
+    discrete <- TRUE
+  } else if(is.numeric(x)) {
+    ra <- range(x, na.rm=TRUE)
+    discrete <- FALSE
+  } else stop("Format of x is not understood", call.=FALSE)
+  #' Interpret colour information in argument 'col'
+  colmap <- colfun <- colvals <- NULL
+  if(is.null(col)) {
+    ## no colour info: use default colour palette
+    colfun <- spatstat.options("image.colfun")
+  } else if(inherits(col, "colourmap")) {
+    ## col is a colour map
+    colmap <- col
+  } else if(is.function(col) && names(formals(col))[1L] == "n") {
+    ## 'col' is a function that provides a colour sequence of length n
+    colfun <- col
+  } else if(is.colour(col)) {
+    ## 'col' is a sequence of colour values
+    colvals <- col
+  } else stop("Format of argument 'col' is not recognised")
+  #' Determine colour map
+  if(is.null(colmap)) {
+    #' Determine colour values to be used
+    if(is.null(colvals)) {
+      nc <- if(discrete) length(ux) else 256
+      colvals <- colfun(nc)
+    } 
+    #' Create colour map
+    if(discrete) {
+      colmap <- colourmap(colvals, inputs=ux)
+    } else {
+      colmap <- colourmap(colvals, range=ra)
+    }
+  }
+  #' Randomise?
+  if(scramble.cols)
+    colouroutputs(colmap) <- sample(colouroutputs(colmap))
+  #' Monochrome?
+  if(monochrome)
+    colmap <- to.grey(colmap)
+  return(colmap)
+}

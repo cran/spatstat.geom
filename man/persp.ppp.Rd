@@ -17,6 +17,7 @@
             point.args=list(), 
             which.marks = 1,
             zlab = NULL, zlim = NULL, zadjust = 1,
+            show.window=TRUE,
             legend=TRUE, legendpos="bottomleft",
             leg.args=list(lwd=4), leg.col=c("black", "orange"))
 }
@@ -57,6 +58,7 @@
   }
   \item{col.base}{
     Colour with which to fill the horizontal plane.
+    A single colour value, or a pixel image.
   }
   \item{win.args}{
     List of arguments passed to \code{\link{plot.owin}}
@@ -90,6 +92,10 @@
   }
   \item{zadjust}{
     Scale adjustment factor controlling the height of spikes.
+  }
+  \item{show.window}{
+    Logical value specifying whether to draw the window of \code{x}
+    on the horizontal plane.
   }
   \item{legend}{
     Logical value specifying whether to draw a reference scale bar for the
@@ -133,10 +139,39 @@
   at the spatial location of the data point, with height equal to the
   mark value of the point.
 
+  The horizontal plane is effectively transparent, by default.
+  If the argument \code{col.base} is a single colour value,
+  the horizontal plane will be painted in this colour.
+  If \code{col.base} is a pixel image, it will be rendered as a 
+  colour image shown in perspective view on the
+  horizontal plane:
+  \itemize{
+    \item If \code{valuesAreColours=TRUE} is specified,
+    the pixel values of \code{col.base} will be interpreted directly
+    as colour values. 
+    \item
+    Otherwise, the argument \code{colmap} controls the mapping
+    from pixel values of \code{col.base} to physical colours.
+  }
+  After the horizontal plane has been coloured, 
+  the observation window \code{Window(x)} will be drawn
+  on the horizontal plane (unless \code{show.window=FALSE}).
+  By default, only the edges of the window will be drawn,
+  as black line segments. The style of plotting the window 
+  can be modified using \code{win.args}. The colour of the line
+  segments is controlled by \code{win.args$border}. If
+  \code{win.args$col} is given, the window will be filled in the
+  specified colour, overwriting any previous colours.
+  See the Examples.
+    
   If any mark values are negative, the corresponding spikes will
   penetrate below the horizontal plane. They can be drawn in a different
   colour by specifying \code{neg.args} as shown in the examples.
-
+  These would be obscured if \code{col.base} is an opaque colour
+  other than white, or if \code{col.base} is a pixel image.
+  A transparent colour for \code{col.base} can be used
+  if it is supported by the graphics device.
+  
   Like all spatial plots in the \pkg{spatstat} family,
   \code{persp.ppp} does not independently rescale
   the \eqn{x} and \eqn{y} coordinates. A long narrow window will be
@@ -149,10 +184,11 @@
   (Invisibly) the perspective transformation matrix.
 }
 \author{
-Adrian Baddeley.
+  \adrian.
 }
 \examples{
-   persp(longleaf, theta=-30, phi=35, spike.args=list(lwd=3), zadjust=1.5)
+   persp(longleaf, theta=-30, phi=35, spike.args=list(lwd=3), zadjust=1.5,
+         zlab="diameter")
 
    # negative mark values
    X <- longleaf
@@ -166,7 +202,7 @@ Adrian Baddeley.
    marks(Y) <- runif(npoints(Y))
    persp(Y, theta=30, phi=20, col.base="lightblue",
          win.args=list(col="pink", border=NA),
-         spike.args=list(lwd=2), zadjust=1.5)
+         spike.args=list(lwd=2), zadjust=1.5, zlab="")
 
    persp(Y, type="b",
          theta=30, phi=20, col.base="lightblue",

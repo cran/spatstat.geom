@@ -57,6 +57,7 @@
 \alias{clippoly.psp}
 \alias{closethresh}
 \alias{cocoEngine}
+\alias{cocoLabels}
 \alias{coerce.marks.numeric}
 \alias{coerceNAtoObject}
 \alias{crosspairquad}
@@ -79,6 +80,7 @@
 \alias{do.as.im}
 \alias{do.call.plotfun}
 \alias{drawSignedPoly}
+\alias{dummytilecentroids}        
 \alias{elementOrNA}
 \alias{emptywindow}
 \alias{ensureModelSupport}
@@ -148,6 +150,8 @@
 \alias{levels.im}
 \alias{levels<-.im}
 \alias{levelsAsFactor}
+\alias{levelset.default}
+\alias{levelset.tessfun}
 \alias{listof}
 \alias{logi.dummy}
 \alias{markvaluetype}
@@ -199,6 +203,7 @@
 \alias{needpackage}
 \alias{nobjects.NAobject}
 \alias{npoints.NAobject}
+\alias{npoints.quad}
 \alias{n.quad}
 \alias{numberwithunit}
 \alias{numeric.columns}
@@ -286,6 +291,7 @@
 \alias{rebound.ppp}
 \alias{rebound.psp}
 \alias{rebound.owin}
+\alias{recognise.plotcommand.type}
 \alias{recognise.spatstat.type}
 \alias{rectquadrat.breaks}
 \alias{rectquadrat.countEngine}
@@ -337,7 +343,6 @@
 \alias{tail.hyperframe}
 \alias{tessfunvalues}
 \alias{thickSegments}
-\alias{tilecentroids}        
 \alias{trianglediameters}
 \alias{trim.mask}
 \alias{tweak.closepairs}
@@ -443,6 +448,7 @@ cliprect.psp(x, window, fragments)
 clippoly.psp(s, window, fragments)
 closethresh(X,R,S,twice,\dots)
 cocoEngine(nv, ie, je, algoname)
+cocoLabels(nv, ie, je, algoname, check, resequence)
 coerce.marks.numeric(X, warn)
 coerceNAtoObject(x, cls)
 crosspairquad(Q,rmax,what)
@@ -465,6 +471,7 @@ dist2dpath(dist, method="C")
 do.as.im(x, action, \dots, W, eps, dimyx, xy, rule.eps, na.replace)
 do.call.plotfun(fun, arglist, \dots, envir)
 drawSignedPoly(x,y,pars,sgn)
+dummytilecentroids(W, nx, ny)
 elementOrNA(x, nam, cl)
 emptywindow(w)
 ensureModelSupport(model, loaded)
@@ -534,6 +541,8 @@ is.vanilla(u)
 \method{levels}{im}(x)
 \method{levels}{im}(x) <- value
 levelsAsFactor(x)
+\method{levelset}{default}(X, thresh, compare, \dots)
+\method{levelset}{tessfun}(X, thresh, compare, \dots)
 listof(\dots)
 logi.dummy(X, dummytype, nd, mark.repeat, \dots)
 markvaluetype(x)
@@ -542,7 +551,7 @@ parbreak(terse)
 perspVisible(x, y, z, M)
 plan.legend.layout(B, \dots, side, sep, leg.size, sep.frac, size.frac,
                    started, map)
-pointweights(X, \dots, weights, parent, dfok)
+pointweights(X, \dots, weights, parent, dfok, weightsname)
 polytileareaEngine(P, xrange, yrange, nx, ny, DivideByPixelArea)
 putSpatstatVariable(name, value)
 lookup.im(Z, x, y, naok, strict)
@@ -586,6 +595,7 @@ nearest.valid.pixel(x, y, Z, method, nsearch)
 needpackage(pkg, loaded, fatal, purpose)
 \method{nobjects}{NAobject}(x)
 \method{npoints}{NAobject}(x)
+\method{npoints}{quad}(x)
 n.quad(Q)
 numberwithunit(x, u)
 numeric.columns(M, logical, others)
@@ -683,6 +693,7 @@ rebound(x, rect)
 \method{rebound}{ppp}(x, rect) 
 \method{rebound}{psp}(x, rect) 
 \method{rebound}{owin}(x, rect)
+recognise.plotcommand.type(s)
 recognise.spatstat.type(x)
 rectquadrat.breaks(xr, yr, nx = 5, ny = nx, xbreaks = NULL, ybreaks = NULL)
 rectquadrat.countEngine(x, y, xbreaks, ybreaks, weights, left.open)
@@ -738,7 +749,6 @@ thickSegments(x, widths, \dots,
              scale, adjust, negative.args,
              legend, leg.side, leg.sep, leg.wid, leg.args, leg.scale,
              zlim, box, background)
-tilecentroids(W, nx, ny)
 trianglediameters(iedge, jedge, edgelength, \dots,
                   nvert, dmax, check)
 trim.mask(M, R, tolerant)

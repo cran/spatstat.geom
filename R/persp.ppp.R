@@ -5,7 +5,7 @@
 #'  Copyright (C) Adrian Baddeley 2024
 #'  GPL Public Licence >= 2.0
 #'
-#' $Revision: 1.6 $ $Date: 2024/12/02 04:33:39 $
+#' $Revision: 1.12 $ $Date: 2025/12/13 07:52:15 $
 
 persp.ppp <- local({
   
@@ -15,7 +15,7 @@ persp.ppp <- local({
                         spike.args=list(), 
                         neg.args=list(), point.args=list(), which.marks=1,
                         zlab=NULL, zlim=NULL,
-                        zadjust=1,
+                        zadjust=1, show.window=TRUE,
                         legend=TRUE, legendpos="bottomleft",
                         leg.args=list(lwd=4),
                         leg.col=c("black", "orange")) {
@@ -69,8 +69,6 @@ persp.ppp <- local({
     }
     #' Set up objects to be plotted in perspective
     Rplus <- grow.rectangle(R, fraction=1/(2*ngrid))
-    #' base plane image
-    Z <- as.im(0, W=Rplus, dimyx=rev(ngrid)+1)
     #' spikes
     S <- xyzsegmentdata(x$x, x$y, 0,
                         x$x, x$y, scaled.marx)
@@ -82,9 +80,27 @@ persp.ppp <- local({
     col.grid.used <- if(grid && (zlim[1] >= 0)) col.grid else NA
     if(!is.na(k <- match("adj.main", names(dotargs))))
       names(dotargs)[k] <- "adj"
-    argh <- resolve.defaults(list(x=Z, main=main,
-                                  border=col.grid.used,
-                                  col=col.base),
+    if(is.im(col.base)) {
+      #' Horizontal plane will be painted by a colour image
+      if(!is.subset.owin(Window(x), Window(col.base)))
+        Window(x) <- boundingbox(Window(x), Window(col.base))
+      #' base plane height
+      Z <- as.im(0, W=col.base)
+      BaseInfo <- list(colin=col.base)
+    } else if(length(col.base) == 1 && is.colour(col.base)) {
+      #' Usual case: horizontal plane will be painted a single colour
+      #' Base plane image
+      Z <- as.im(0, W=Rplus, dimyx=rev(ngrid)+1)
+      #' Draw grid lines by setting 'border' argument of persp.default
+      #' provided the function has no negative values
+      border <- if(grid && (zlim[1] >= 0)) col.grid else NA
+      BaseInfo <- list(col=col.base, border=border)
+    } else {
+      stop("Argument col.base should be a single colour or a pixel image",
+           call.=FALSE)
+    }
+    argh <- resolve.defaults(list(x=quote(Z), main=main),
+                             BaseInfo,
                              dotargs,
                              list(axes=FALSE, box=FALSE,
                                   zlim=scaled.zlim, zlab=zlab,
@@ -92,10 +108,9 @@ persp.ppp <- local({
                                   scale=FALSE,
                                   #' expand=0.1 is default in persp.default
                                   expand=zadjust * 0.1))
-    
     #' Start perspective plot; plot horizontal plane
     M <- do.call.matched(persp.im, argh,
-                         funargs=graphicsPars("persp"))
+                         extrargs=graphicsPars("persp"))
     
     #' Start drawing objects
     if(grid) {
@@ -116,7 +131,7 @@ persp.ppp <- local({
         spectiveFlatGrid(R, ngrid, M, col=col.grid)
       }
     }
-    if(!is.rectangle(W)) {
+    if(isTRUE(show.window) && !is.rectangle(W)) {
       #' plot window
       spectiveFlatPolygons(W, M, win.args, dotargs)
     }
@@ -154,9 +169,22 @@ persp.ppp <- local({
       tixseg <- xyzsegmentdata(legxy[1], legxy[2], scaled.tix[-ntix],
                                legxy[1], legxy[2], scaled.tix[-1])
       tixcol <- rep(leg.col, ntix)[1:ntix]
+      #' inclination of vertical spike relative to projection plane
+      a <- trans3dz(legxy[1], legxy[2], scal*zlim, M)
+      spikeangle <- with(a, atan2(diff(y), diff(x))) * 180/pi - 90
+      #' draw zebra segments
       spectiveSegments(tixseg, list(col=tixcol), leg.args, M=M)
+      #' draw tickmark values
       spectiveText(legxy[1], legxy[2], scaled.tix[-c(1,ntix)],
-                   labels=tix[-c(1,ntix)], pos=4, M=M)
+                   labels=tix[-c(1,ntix)], pos=4, M=M, srt=spikeangle)
+      #' add text for z axis?
+      if(!isTRUE(argh$box) && nchar(zlab) > 0) {
+        #' persp.default(box=FALSE) suppresses axis labels,
+        #' so draw a vertical axis label now
+        spectiveText(legxy[1], legxy[2], scal * zlim[2],
+                     labels=zlab, M=M,
+                     pos=2, offset=0.75, srt=spikeangle + 90)
+      }
     }
     invisible(M)
   }

@@ -3,7 +3,7 @@
 #
 #   distance function (returns a function of x,y)
 #
-#   $Revision: 1.29 $   $Date: 2023/05/02 04:46:55 $
+#   $Revision: 1.32 $   $Date: 2026/01/08 05:22:59 $
 #
 
 distfun <- function(X, ...) {
@@ -42,10 +42,11 @@ distfun.psp <- function(X, ...) {
   return(g)
 }
 
-distfun.owin <- function(X, ..., invert=FALSE) {
+distfun.owin <- function(X, ..., invert=FALSE, signed=FALSE) {
   # this line forces X to be bound
   stopifnot(is.owin(X))
   force(invert)
+  force(signed)
   #
   P <- edges(X)
   #
@@ -53,7 +54,19 @@ distfun.owin <- function(X, ..., invert=FALSE) {
     Y <-  xy.coords(x, y)
     inside <- inside.owin(Y$x, Y$y, X)
     D <- nncross(Y, P, what="dist")
-    out <- if(!invert) ifelseAX(inside, 0, D) else ifelseXB(inside, D, 0)
+    out <- if(!signed) {
+             if(!invert) {
+               ifelseAX(inside, 0, D)
+             } else {
+               ifelseXB(inside, D, 0)
+             }
+           } else {
+             if(!invert) {
+               ifelse(inside, -D, D)
+             } else {
+               ifelse(inside, D, -D)
+             }
+           }
     return(out)
   }
   attr(g, "Xclass") <- "owin"
@@ -220,3 +233,162 @@ rescale.distfun <- function(X, s, unitname) {
   return(fnew)
 }
   
+levelset.distfun <- function(X, thresh, compare="<=", ...) {
+  f <- X
+  X <- get("X", envir=environment(f))
+  if(is.owin(X) && isTRUE(get("invert", envir=environment(f)))) {
+    ## distance to complement of a window
+    result <-
+      switch(compare,
+             ">"  = {
+               if(thresh < 0) {
+                 Frame(X)
+               } else {
+                 erosion(X, thresh)
+               }
+             },
+             ">="  = {
+               if(thresh <= 0) {
+                 Frame(X)
+               } else {
+                 erosion(X, thresh)
+               }
+             },
+             "<"  = {
+               if(thresh <= 0) {
+                 emptywindow(Frame(X))
+               } else {
+                 complement.owin(erosion(X, thresh))
+               }
+             },
+             "<=" = {
+               if(thresh < 0) {
+                 emptywindow(Frame(X))
+               } else {
+                 complement.owin(erosion(X, thresh))
+               }
+             },
+             "==" = {
+               if(thresh < 0) {
+                 emptywindow(Frame(X))
+               } else if(thresh == 0) {
+                 complement.owin(X)
+               } else {
+                 levelset(as.im(f, ...), thresh, "==")
+               }
+             },
+             "!=" = {
+               if(thresh < 0) {
+                 Frame(X)
+               } else if(thresh == 0) {
+                 X
+               } else {
+                 levelset(as.im(f, ...), thresh, "!=")
+               }
+             },
+             stop(paste("unrecognised comparison operator", sQuote(compare))))
+  } else if(is.owin(X)) {
+    ## distance to an object with nonempty interior
+    result <- 
+      switch(compare,
+             "<"  = {
+               if(thresh <= 0) {
+                 emptywindow(Frame(X))
+               } else {
+                 dilation(X, thresh)
+               }
+             },
+             "<=" = {
+               if(thresh < 0) {
+                 emptywindow(Frame(X))
+               } else {
+                 dilation(X, thresh)
+               }
+             },
+             ">"  = {
+               if(thresh < 0) {
+                 Frame(X)
+               } else {
+                 complement.owin(dilation(X, thresh))
+               }
+             },
+             ">="  = {
+               if(thresh <= 0) {
+                 Frame(X)
+               } else {
+                 complement.owin(dilation(X, thresh))
+               }
+             },
+             "==" = {
+               if(thresh < 0) {
+                 emptywindow(Frame(X))
+               } else if(thresh == 0) {
+                 X
+               } else {
+                 levelset(as.im(f, ...), thresh, "==")
+               }
+             },
+             "!=" = {
+               if(thresh < 0) {
+                 X
+               } else if(thresh == 0) {
+                 complement.owin(X)
+               } else {
+                 levelset(as.im(f, ...), thresh, "!=")
+               }
+             },
+             stop(paste("unrecognised comparison operator", sQuote(compare))))
+  } else {
+    ## distance to an object with empty interior
+    result <-
+      switch(compare,
+             "<"  = {
+               if(thresh <= 0) {
+                 emptywindow(Frame(X))
+               } else {
+                 dilation(X, thresh)
+               }
+             },
+             "<=" = {
+               if(thresh < 0) {
+                 emptywindow(Frame(X))
+               } else if(thresh == 0) {
+                 as.mask(X, ...)
+               } else {
+                 dilation(X, thresh)
+               }
+             },
+             ">"  = {
+               if(thresh < 0) {
+                 Frame(X)
+               } else if(thresh == 0) {
+                 complement.owin(as.mask(X, ...))
+               } else {
+                 complement.owin(dilation(X, thresh))
+               }
+             },
+             ">="  = {
+               if(thresh <= 0) {
+                 Frame(X)
+               } else {
+                 complement.owin(dilation(X, thresh))
+               }
+             },
+             "==" = {
+               if(thresh < 0) {
+                 emptywindow(Frame(X))
+               } else {
+                 levelset(as.im(f, ...), thresh, "==")
+               }
+             },
+             "!=" = {
+               if(thresh < 0) {
+                 Frame(X)
+               } else {
+                 levelset(as.im(f, ...), thresh, "!=")
+               }
+             },
+             stop(paste("unrecognised comparison operator", sQuote(compare))))
+  }
+  return(result)
+}
