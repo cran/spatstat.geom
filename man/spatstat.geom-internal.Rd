@@ -193,6 +193,7 @@
 \alias{meanX.owin}
 \alias{meanY.owin}
 \alias{MinimalTess}
+\alias{MinkowskiSumInternal}
 \alias{multiplicityNumeric}
 \alias{multiply.only.finite.entries}
 \alias{na.handle.im}
@@ -264,6 +265,7 @@
 \alias{print.summary.splitppp}
 \alias{print.summary.splitppx}
 \alias{print.summary.symbolmap}       
+\alias{print.summary.tess}       
 \alias{print.summary.unitname}
 \alias{print.symbolmap}
 \alias{print.tessfun}
@@ -335,6 +337,7 @@
 \alias{summary.ppx}
 \alias{summary.splitppx}
 \alias{summary.symbolmap}
+\alias{summary.tess}
 \alias{superimposeMarks}
 \alias{symbolmapdomain}
 \alias{symbolmapparnames}
@@ -480,7 +483,7 @@ equals.quad(Q)
 equalsfun.quad(Q)
 erodemask(w,r,strict)
 even.breaks.owin(w)
-exactdt(X, \dots)              
+exactdt(X, \dots, squared)              
 exactPdt(w)
 existsSpatstatVariable(name)
 expandSpecialLists(x, special)
@@ -585,6 +588,7 @@ maxflow(costm)
 meanX.owin(w)            
 meanY.owin(w)
 MinimalTess(W, \dots)
+MinkowskiSumInternal(A, B, \dots, do.specialcases, p)
 multiplicityNumeric(x)
 multiply.only.finite.entries(x, a)
 na.handle.im(X, na.replace)
@@ -597,7 +601,7 @@ needpackage(pkg, loaded, fatal, purpose)
 \method{npoints}{NAobject}(x)
 \method{npoints}{quad}(x)
 n.quad(Q)
-numberwithunit(x, u)
+numberwithunit(x, u, modifier)
 numeric.columns(M, logical, others)
 onecolumn(m)
 owinInternalRect(xrange, yrange, \dots, unitname,
@@ -666,6 +670,7 @@ prepareTitle(main)
 \method{print}{summary.solist}(x, \dots)
 \method{print}{summary.splitppx}(x, \dots)
 \method{print}{summary.symbolmap}(x, \dots)
+\method{print}{summary.tess}(x, \dots)
 \method{print}{summary.unitname}(x, \dots)
 \method{print}{symbolmap}(x, \dots)
 \method{print}{tessfun}(x, \dots)
@@ -681,7 +686,7 @@ quad(data, dummy, w, param)
 quadscheme.replicated(data, dummy, method, \dots)
 quadscheme.spatial(data, dummy, method, \dots)
 rasterfilter(X, f)
-rastersample(X, Y)
+rastersample(X, Y, \dots, phase, scale)
 rasterx.mask(w, drop)
 rastery.mask(w, drop)
 rasterxy.mask(w, drop)
@@ -737,6 +742,7 @@ store.versionstring.spatstat()
 \method{summary}{ppx}(object, \dots)
 \method{summary}{splitppx}(object, \dots)
 \method{summary}{symbolmap}(object, \dots)
+\method{summary}{tess}(object, \dots)
 superimposeMarks(arglist, nobj)
 symbolmapdomain(x)
 symbolmapparnames(x)

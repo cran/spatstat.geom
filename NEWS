@@ -1,3 +1,104 @@
+        CHANGES IN spatstat.geom VERSION 3.7-2
+
+OVERVIEW
+
+    o Minor improvements and bug fixes.
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o erosion.owin
+    When shrink.frame=TRUE, the frame of the resulting window
+    is always the erosion of the original frame by distance r,
+    as promised in the help file.
+    
+BUG FIXES
+
+    o erosion.owin, dilation.owin
+    The 'unitname' of w was sometimes ignored.
+    Fixed.
+    
+        CHANGES IN spatstat.geom VERSION 3.7-1
+
+OVERVIEW
+
+    o We thank Ute Hahn for contributions.
+    
+    o Support function, Feret diameter, polar body, Voronoi flower.
+
+    o Merge tiles in a tessellation.
+
+    o Return squared nearest neighbour distances.
+    
+    o Bug fix in Minkowski sum.
+
+    o Summary method for tessellations.
+
+    o Minor improvements and bug fixes.
+
+NEW FUNCTIONS
+
+    o mergeTiles
+    Merge tiles in a tessellation.
+    
+    o FeretDiamFun
+    Create a function that computes the Feret diameter of a domain at any angle.
+
+    o FeretBox
+    Compute the tightest rectangle enclosing a domain at any angle.
+
+    o minFeretDiam, maxFeretDiam
+    Minimum or maximum Feret diameter of a domain
+
+    o SupportFun
+    Create a function that computes the support function of a domain.
+
+    o polarbody
+    Compute the polar body of a domain.
+
+    o voronoiFlower
+    Compute the Voronoi flower of a domain.
+
+    o summary.tess, print.summary.tess
+    Method for 'summary' for tessellations.
+    
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o distmap.ppp
+    New option 'squared=TRUE' returns the squared distances,
+    reducing computation time.
+    
+    o distmap.ppp
+    New option 'extras=FALSE' avoids returning additional attributes,
+    reducing computation time.
+    
+    o nnmap.ppp
+    New option 'squared=TRUE' returns the squared distances,
+    reducing computation time.
+
+    o nndist.ppp, nndist.default, nncross.ppp, nncross.default
+    New option 'squared=TRUE' returns the squared nearest neighbour distances,
+    reducing computation time.
+
+    o print.summary.owin
+    Output can now be abbreviated by
+    increasing the value of spatstat.options('terse')
+    
+    o print.summary.psp
+    Output can now be abbreviated by
+    increasing the value of spatstat.options('terse')
+    
+BUG FIXES
+
+    o MinkowskiSum, operator %(+)%
+    Result was often incorrect for non-convex sets
+    (and was not symmetric in A and B).
+    [Spotted by Ute Hahn]
+    Fixed.
+
+    o im.apply
+    Did not preserve the name of the unit of length.
+    Fixed.
+    
         CHANGES IN spatstat.geom VERSION 3.7-0
 
 OVERVIEW

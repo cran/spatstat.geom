@@ -167,7 +167,7 @@ if(FULLTEST) {
 #
 #  tests/imageops.R
 #
-#   $Revision: 1.46 $   $Date: 2025/12/23 02:49:34 $
+#   $Revision: 1.47 $   $Date: 2026/02/24 01:26:07 $
 #
 
 
@@ -410,6 +410,16 @@ local({
     stop("Inconsistent results from im.apply max (parallel vs batch-wise)")
   if(max(abs(Z-Z2)) > sqrt(.Machine$double.eps))
     stop("Inconsistent results from im.apply sd (parallel vs batch-wise)")
+  #' check unitname information was retained
+  metres <- unitname(BE[[1L]])  
+  chuk <- function(A, txt) {
+    if(!identical(unitname(A), metres))
+      stop(paste(txt, "does not retain unitname"))
+  }
+  chuk(Z, "im.apply(bei.extra, sd)")
+  chuk(Y, "im.apply(bei.extra, max)")
+  chuk(Z2, "im.apply(bei.extra, sd) for big data")
+  chuk(Y2, "im.apply(bei.extra, max) for big data")
   
   #' Math.imlist, Ops.imlist, Complex.imlist
   U <- Z+2i
@@ -441,5 +451,17 @@ if(ALWAYS) {
         stop("Equal, but not identical, results in nearest.valid.pixel")
   })
 }
+
+if(ALWAYS) {
+  local({
+    #' rastersample
+    Z <- distmap(letterR, invert=TRUE, eps=0.02) ## non-square raster
+    Zs <- rastersample(Z, phase=2, scale=3)
+    Zf <- rastersample(Z, phase=1.5, scale=2.7)
+    Zss <- rastersample(Z, Zs)
+    Zff <- rastersample(Z, Zf)
+  })
+}
+    
 
 

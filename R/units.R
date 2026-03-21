@@ -1,7 +1,7 @@
 #
 # Functions for extracting and setting the name of the unit of length
 #
-#   $Revision: 1.32 $   $Date: 2020/12/06 02:32:01 $
+#   $Revision: 1.34 $   $Date: 2026/03/13 07:26:37 $
 #
 #
 
@@ -183,6 +183,12 @@ compatible.unitname <- function(A, B, ..., coerce=TRUE) {
 harmonize.unitname <-
 harmonise.unitname <- function(..., coerce=TRUE, single=FALSE) {
   argh <- list(...)
+  if(length(argh) == 1) {
+    ## single argument, could be a list of unitnames
+    a <- argh[[1L]]
+    if(all(sapply(a, is.null) | sapply(a, inherits, what="unitname")))
+      argh <- a
+  }
   n <- length(argh)
   if(n == 0) return(NULL)
   u <- lapply(argh, as.unitname)
@@ -203,13 +209,16 @@ harmonise.unitname <- function(..., coerce=TRUE, single=FALSE) {
   return(z)
 }
 
-# class 'numberwithunit':  numeric value(s) with unit of length
+## class 'numberwithunit':  numeric value(s) with unit of length
+##
+##     'modifier' could be 'square', 'cubic' etc
 
-numberwithunit <- function(x, u) {
+numberwithunit <- function(x, u, modifier=NULL) {
   u <- as.unitname(u)
   x <- as.numeric(x)
   unitname(x) <- u
   class(x) <- c(class(x), "numberwithunit")
+  attr(x, "modifier") <- modifier
   return(x)
 }
 
@@ -218,6 +227,7 @@ numberwithunit <- function(x, u) {
 }
 
 format.numberwithunit <- function(x, ..., collapse=" x ", modifier=NULL) {
+  if(missing(modifier)) modifier <- attr(x, "modifier")
   u <- summary(unitname(x))
   uname <- if(all(x == 1)) u$singular else u$plural
   y <- format(as.numeric(x), ...)

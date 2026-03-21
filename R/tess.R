@@ -3,7 +3,7 @@
 #
 # support for tessellations
 #
-#   $Revision: 1.129 $ $Date: 2026/01/17 04:23:46 $
+#   $Revision: 1.136 $ $Date: 2026/03/13 08:17:09 $
 #
 tess <- function(..., xgrid=NULL, ygrid=NULL, tiles=NULL, image=NULL,
                  window=NULL, marks=NULL, keepempty=FALSE,
@@ -134,23 +134,25 @@ print.tess <- function(x, ..., brief=FALSE) {
          rect={
            if(full) {
              unitinfo <- summary(unitname(win))
-             if(evenly.spaced(x$xgrid) && evenly.spaced(x$ygrid)) 
+             if(evenly.spaced(x$xgrid) && evenly.spaced(x$ygrid)) {
                splat("Tiles are equal rectangles, of dimension",
                      signif(mean(diff(x$xgrid)), 5),
                      "x",
                      signif(mean(diff(x$ygrid)), 5),
                      unitinfo$plural, " ", unitinfo$explain)
-             else
+             } else {
                splat("Tiles are unequal rectangles")
+             }
            }
            splat(length(x$xgrid)-1, "by", length(x$ygrid)-1, "grid of tiles")
          },
          tiled={
            if(full) {
-             if(win$type == "polygonal")
+             if(win$type %in% c("rectangle", "polygonal")) {
                splat("Tiles are irregular polygons")
-             else
+             } else {
                splat("Tiles are windows of general type")
+             }
            }
            splat(length(x$tiles), "tiles (irregular windows)")
          },
@@ -202,6 +204,103 @@ print.tess <- function(x, ..., brief=FALSE) {
   }
   if(full) print(win)
   invisible(NULL)
+}
+
+summary.tess <- function(object, ...) {
+  y <- list(type      = object$type,
+            window    = summary(object$window),
+            units     = summary(unitname(object)),
+            ntiles    = nobjects(object),
+            names     = tilenames(object),
+            areas     = NULL,
+            polygonal = FALSE,
+            congruent = FALSE,
+            dim       = NULL, 
+            marks     = NULL,
+            mf        = "none"
+            )
+  switch(object$type,
+         rect = {
+           xg <- object$xgrid
+           yg <- object$ygrid
+           y$dim <- c(length(xg)-1, length(yg)-1)
+           y$congruent <- evenly.spaced(xg) && evenly.spaced(yg)
+         },
+         tiled = {
+           y$polygonal <- (object$window$type %in% c("rectangle", "polygonal"))
+         },
+         image = {
+         })
+  ## tile areas
+  areas <- tile.areas(object)
+  ua <- unique(areas)
+  y$areas <- if(length(ua) == 1) {
+               numberwithunit(ua, unitname(object), "square")
+             } else {
+               summary(areas)
+             }
+  ## marks
+  marx <- marks(object)
+  y$mf <- mf <- markformat(marx)
+  y$marks <- switch(mf,
+                    none = { NULL },
+                    list = {
+                      cl <- sapply(marx, classIgnoringNA, first=TRUE)
+                      if(length(unique(cl)) == 1) {
+                        paste("list of objects of class", sQuote(cl[1L]))
+                      } else if(is.solist(marx)) {
+                        "list of spatial objects"
+                      } else {
+                        "list"
+                      }
+                    }, 
+                    summary(marx))
+  ## 
+  class(y) <- c("summary.tess", class(y))
+  return(y)
+}
+
+print.summary.tess <- function(x, ...) {
+  terse <- spatstat.options('terse')
+  splat("Tessellation containing", x$ntiles, "tiles")
+  switch(x$type,
+         rect={
+           splat("Tiles are", if(x$congruent) "equal" else NULL, "rectangles",
+                 "arranged in a", x$dim[1], "x", x$dim[2], "grid")
+         },
+         tiled={
+           if(x$polygonal) {
+             splat("Tiles are irregular polygons")
+           } else {
+             splat("Tiles are windows of general type")
+           }
+         },
+         image={
+           splat("Tessellation is determined by a factor-valued image")
+         })
+  if(waxlyrical('gory', terse) && (x$type != "rect")) {
+    splat("Tile names:")
+    print(x$names)
+    parbreak(terse)
+  }
+  ## tile areas
+  if(waxlyrical('extras', terse)) {
+    splat("Tile areas:")
+    print(x$areas)
+  }
+  parbreak(terse)
+  ## marks
+  mf <- x$mf
+  splat("Marks:", mf)
+  if(waxlyrical('extras', terse)) {
+    if(mf != "none") print(x$marks)
+    parbreak(terse)
+  }
+  ## window
+  if(waxlyrical('extras', terse)) {
+    print(x$window)
+  }
+  return(invisible(NULL))
 }
 
 unitname.tess <- function(x) unitname(x$window)
@@ -1392,3 +1491,31 @@ identify.tess <- function(x, ..., labels=tilenames(x),
   return(out)
 }
 
+mergeTiles <- function(x, group, ...) {
+  UseMethod("mergeTiles")
+}
+
+mergeTiles.tess <- function(x, group, ...) {
+  verifyclass(x, "tess")
+  group <- as.factor(group)
+  switch(x$type,
+         rect = ,
+         tiled = {
+           ## compute unions of tiles
+           newtiles <- lapply(split(tiles(x), group), union.owin)
+           result <- tess(tiles=newtiles, window=Window(x))
+         },
+         image = {
+           ## map levels of factor-valued image
+           ima <- x$image
+           gmap <- as.integer(group)
+           glev <- levels(group)
+           gn <- length(glev)
+           newima <- eval.im(factor(gmap[as.integer(ima)],
+                                    levels=1:gn, labels=glev))
+           result <- tess(image=newima)
+         })
+  if(!is.null(marks(x)))
+    warning("marks were discarded when tiles were merged", call.=FALSE)
+  return(result)
+}
