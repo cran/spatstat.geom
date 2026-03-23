@@ -1,6 +1,6 @@
-1ba9c4a07ed30e0fda0a2691000c67e5 *DESCRIPTION
+2e6ba3c75c7a008eadd0b961109185c7 *DESCRIPTION
 f1e998caba1a85a34edf23b88bcaff14 *NAMESPACE
-a7af2acf228e3f677ef070aa85327ae2 *NEWS
+a9415ea3d42af6962e001f2b34aab655 *NEWS
 61e66e2561a8a0e89e9c9d0fa32ff495 *R/First.R
 7b5da2ffbcca4f497eb3c33f786306e3 *R/Math.im.R
 44f8a71ab76fed0cb52bcee94c0262f8 *R/Math.imlist.R
@@ -156,8 +156,8 @@ ace004c50a7d331be74f45bc3062dc6f *R/window.R
 976ef7aea3bc95f2b7279eedca2dee8e *R/xypolycomponents.R
 f2d49fc8f50fef7f76bcb3fc7f34efb4 *inst/CITATION
 ac6aa02ee30a52f0a13abc4a17ff0174 *inst/doc/downstream.txt
-f6e1cdd1a4944b81bb818009bc70aa0e *inst/doc/packagesizes.txt
-f6e1cdd1a4944b81bb818009bc70aa0e *inst/info/packagesizes.txt
+e81214a274ba11dc573a2868d551de55 *inst/doc/packagesizes.txt
+e81214a274ba11dc573a2868d551de55 *inst/info/packagesizes.txt
 12e68895fef0d3aa0bde45a0ddbadfa4 *inst/ratfor/Makefile
 22e8a5189942ba190c13475b35459c7f *inst/ratfor/dppll.r
 6d471ec061ea91398ba16323de56b9db *inst/ratfor/inxypOld.r
@@ -645,7 +645,7 @@ b8e39cf74bcbc31350f0d8b28914ce74 *src/dist2dpath.h
 d01ea69ef69b56df372f6266011f38f9 *src/distmapbin.h
 7028f09de82307e1e46de69c104b7423 *src/dwpure.c
 7f2a10ed27158ad0012d3a0cb66093d3 *src/exactPdist.c
-de280599dc764f81288a224a4f7ea6a6 *src/exactdist.c
+e5b20d69cc553e4b700a5dc5f82583f7 *src/exactdist.c
 f7a6e3b0fe734ce44c852647af539efa *src/fardist.c
 ae97c2bb0e1cc33983b7ce71ebd63dce *src/fardist.h
 f64c32ad80b0c295009994ffb7299670 *src/hasclose.c
@@ -702,7 +702,7 @@ cbe9cd859887cfe33c9e82f951cd42f8 *tests/testsGtoJ.R
 bd48e397baa926bd320898c771fc2ecf *tests/testsK.R
 2656e51d2502ce38411ac2618bdde3d6 *tests/testsL.R
 9e8f43244f6213772e79404838bf1f49 *tests/testsM.R
-3e6bd6c858784f8d83535909dc7254f9 *tests/testsNtoO.R
+5e8bd3c161b1e77e4be423178e633436 *tests/testsNtoO.R
 5b7cea4bd8327e1834a80809d78d5804 *tests/testsP1.R
 e5a2f544dfca1d606d7ffc1dd81d3b30 *tests/testsP2.R
 0798b67fa097ade9ff175991dc3e0148 *tests/testsQ.R
