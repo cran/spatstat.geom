@@ -1,7 +1,7 @@
 #
 #	wingeom.R	Various geometrical computations in windows
 #
-#	$Revision: 4.152 $	$Date: 2026/02/12 03:38:42 $
+#	$Revision: 4.156 $	$Date: 2026/05/23 10:18:49 $
 #
 
 volume.owin <- function(x) { area.owin(x) }
@@ -258,7 +258,7 @@ function(x, i, ...) {
 #
 #
 
-intersect.owin <- function(..., fatal=FALSE, p) {
+intersect.owin <- function(..., fatal=FALSE, rescue=FALSE, p) {
   argh <- list(...)
   ## p is a list of arguments to polyclip::polyclip
   if(missing(p) || is.null(p)) p <- list()
@@ -266,8 +266,8 @@ intersect.owin <- function(..., fatal=FALSE, p) {
   argh <- expandSpecialLists(argh, "solist")
   rasterinfo <- list()
   if(length(argh) > 0) {
-    # explicit arguments controlling raster info
-    israster <- names(argh) %in% names(formals(as.mask))
+    #' recognise explicit arguments controlling raster info
+    israster <- names(argh) %in% .Spatstat.RasterInfoNames
     if(any(israster)) {
       rasterinfo <- argh[israster]
       ## remaining arguments
@@ -316,8 +316,10 @@ intersect.owin <- function(..., fatal=FALSE, p) {
   }
 
   ## There are now only two windows, which are not empty.
-  if(identical(A, B))
+  if(identical(A, B)) {
+    if(rescue) A <- rescue.rectangle(A)
     return(A)
+  }
 
   # check units
   if(!compatible(unitname(A), unitname(B)))
@@ -361,7 +363,7 @@ intersect.owin <- function(..., fatal=FALSE, p) {
     if(totarea < 0)
       ab <- lapply(ab, reverse.xypolygon)
     AB <- owin(poly=ab, check=FALSE, unitname=uname)
-    AB <- rescue.rectangle(AB)
+    if(rescue) AB <- rescue.rectangle(AB)
     return(AB)
   }
 
@@ -386,38 +388,51 @@ intersect.owin <- function(..., fatal=FALSE, p) {
     if(fatal) stop("Intersection is empty", call.=FALSE)
     return(B)
   }
-  
+
   # Did the user specify the pixel raster?
   if(length(rasterinfo) > 0) {
-    # convert to masks with specified parameters, and intersect
+    #' convert to masks with specified parameters, and intersect
+    rule.pix <- rasterinfo$rule.pix %orifnull% rasterinfo$op
     if(Amask) {
-      A <- do.call(as.mask, append(list(A), rasterinfo))
-      AB <- restrict.mask(A, B)
+      A <- do.call(AsMaskInternal, append(list(A), rasterinfo))
+      AB <- restrict.mask(A, B, rule.pix=rule.pix)
       if(fatal && is.empty(AB)) stop("Intersection is empty", call.=FALSE)
+      if(rescue)
+        AB <- rescue.rectangle(AB)
       return(AB)
     } else {
-      B <- do.call(as.mask, append(list(B), rasterinfo))
-      BA <- restrict.mask(B,A)
+      B <- do.call(AsMaskInternal, append(list(B), rasterinfo))
+      BA <- restrict.mask(B,A, rule.pix=rule.pix)
       if(fatal && is.empty(BA)) stop("Intersection is empty", call.=FALSE)
+      if(rescue)
+        BA <- rescue.rectangle(BA)
       return(BA)
     }
   } 
+
+  # No raster information given
   
   # One mask and one rectangle?
-  if(Arect && Bmask)
-      return(B)
-  if(Amask && Brect)
-      return(A)
+  if(Arect && Bmask) {
+    if(rescue) B <- rescue.rectangle(B)
+    return(B)
+  }
+  if(Amask && Brect) {
+    if(rescue) A <- rescue.rectangle(A)
+    return(A)
+  }
 
   # One mask and one polygon?
   if(Amask && !Bmask) {
     AB <- restrict.mask(A, B)
     if(fatal && is.empty(AB)) stop("Intersection is empty", call.=FALSE)
+    if(rescue) AB <- rescue.rectangle(AB)
     return(AB)
   }
   if(!Amask && Bmask) {
     BA <- restrict.mask(B, A)
     if(fatal && is.empty(BA)) stop("Intersection is empty", call.=FALSE)
+    if(rescue) BA <- rescue.rectangle(BA)
     return(BA)
   }
 
@@ -426,6 +441,7 @@ intersect.owin <- function(..., fatal=FALSE, p) {
     # choose the finer one
     AB <- if(A$xstep <= B$xstep) restrict.mask(A, B) else restrict.mask(B, A)
     if(fatal && is.empty(AB)) stop("Intersection is empty", call.=FALSE)
+    if(rescue) AB <- rescue.rectangle(AB)
     return(AB)
   }
 
@@ -446,7 +462,7 @@ intersect.owin <- function(..., fatal=FALSE, p) {
 }
 
 
-union.owin <- function(..., p) {
+union.owin <- function(..., rescue=FALSE, p) {
   argh <- list(...)
   ## weed out NULL arguments
   argh <- argh[!sapply(argh, is.null)]
@@ -457,7 +473,7 @@ union.owin <- function(..., p) {
   rasterinfo <- list()
   if(length(argh) > 0) {
     ## arguments controlling raster info
-    israster <- names(argh) %in% names(formals(as.mask))
+    israster <- names(argh) %in% .Spatstat.RasterInfoNames
     if(any(israster)) {
       rasterinfo <- argh[israster]
       ## remaining arguments
@@ -508,13 +524,18 @@ union.owin <- function(..., p) {
       ## undo rescaling
       A <- reversePolyclipArgs(A, p=p)
     }
+    if(rescue)
+      A <- rescue.rectangle(A)
     return(A)
   }
 
   ## Exactly two windows
   B <- argh[[2L]]
-  if(identical(A, B))
+  if(identical(A, B)) {
+    if(rescue)
+      A <- rescue.rectangle(A)
     return(A)
+  }
 
   ## check units
   if(!compatible(unitname(A), unitname(B)))
@@ -551,7 +572,8 @@ union.owin <- function(..., p) {
     if(totarea < 0)
       ab <- lapply(ab, reverse.xypolygon)
     AB <- owin(poly=ab, check=FALSE, unitname=uname)
-    AB <- rescue.rectangle(AB)
+    if(rescue)
+      AB <- rescue.rectangle(AB)
     return(AB)
   }
 
@@ -571,14 +593,14 @@ union.owin <- function(..., p) {
   }
 
   ## Convert C to mask
-  C <- do.call(as.mask, append(list(w=C), rasterinfo))
+  C <- do.call(owin2mask, append(list(w=C), rasterinfo))
 
   rxy <- rasterxy.mask(C)
   x <- rxy$x
   y <- rxy$y
   ok <- inside.owin(x, y, A) | inside.owin(x, y, B)
 
-  if(all(ok)) {
+  if(rescue && all(ok)) {
     ## result is a rectangle
     C <- as.rectangle(C)
   } else {
@@ -588,7 +610,7 @@ union.owin <- function(..., p) {
   return(C)
 }
 
-setminus.owin <- function(A, B, ..., p) {
+setminus.owin <- function(A, B, ..., rescue=FALSE, p) {
   if(is.null(B)) return(A)
   verifyclass(B, "owin")
   if(is.null(A)) return(emptywindow(Frame(B)))
@@ -619,8 +641,10 @@ setminus.owin <- function(A, B, ..., p) {
     if(is.subset.owin(A, B))
       return(emptywindow(B))
     C <- intersect.owin(A, B, fatal=FALSE)
-    if(is.null(C) || is.empty(C)) return(A)
-    return(complement.owin(C, A))
+    result <- if(is.null(C) || is.empty(C)) A else complement.owin(C, A)
+    if(rescue)
+      result <- rescue.rectangle(result)
+    return(result)
   }
     
   ## Polygonal case
@@ -640,7 +664,7 @@ setminus.owin <- function(A, B, ..., p) {
     if(totarea < 0)
       ab <- lapply(ab, reverse.xypolygon)
     AB <- owin(poly=ab, check=FALSE, unitname=uname)
-    AB <- rescue.rectangle(AB)
+    if(rescue) AB <- rescue.rectangle(AB)
     return(AB)
   }
 
@@ -660,16 +684,16 @@ setminus.owin <- function(A, B, ..., p) {
       list()
 
   ## Convert A to mask
-  AB <- do.call(as.mask, append(list(w=A), rasterinfo))
+  AB <- do.call(owin2mask, append(list(w=A), rasterinfo))
 
   rxy <- rasterxy.mask(AB)
   x <- rxy$x
   y <- rxy$y
   ok <- inside.owin(x, y, A) & !inside.owin(x, y, B)
 
-  if(!all(ok))
-    AB$m[] <- ok
-  else
+  AB$m[] <- ok
+
+  if(rescue)
     AB <- rescue.rectangle(AB)
 
   return(AB)
@@ -736,13 +760,15 @@ trim.mask <- function(M, R, tolerant=TRUE) {
     return(Z)
 }
 
-restrict.mask <- function(M, W) {
+restrict.mask <- function(M, W, ..., rule.pix=NULL) {
   ## M is a mask, W is any window
   stopifnot(is.mask(M))
-  stopifnot(inherits(W, "owin"))
+  stopifnot(is.owin(W))
+  M <- trim.mask(M, Frame(W))
+  if(!is.null(rule.pix)) 
+    W <- owin2mask(W, rule.pix=rule.pix)
   if(is.rectangle(W))
     return(trim.mask(M, W))
-  M <- trim.mask(M, as.rectangle(W))
   ## Determine which pixels of M are inside W
   rxy <- rasterxy.mask(M, drop=TRUE)
   x <- rxy$x

@@ -4,18 +4,21 @@
 #'    Mask approximations which are guaranteed to be entirely inside
 #'    or entirely covering the original window.
 #'
-#'    $Revision: 1.9 $  $Date: 2025/10/30 01:26:55 $
+#'    $Revision: 1.14 $  $Date: 2026/05/17 02:47:11 $
 #'
 
-owin2mask <- function(W, 
-                      op=c("sample", "notsample",
-                           "cover", "inside", "uncover", "outside",
-                           "boundary", "majority", "minority"),
-                      ...) {
-  op <- match.arg(op)
+owin2mask <- function(w,
+                      ...,
+                      rule.pix = c("sample", "notsample",
+                                   "cover", "inside", "uncover", "outside",
+                                   "boundary", "majority", "minority"),
+                      W=w) {
+  if(missing(w)) w <- NULL
+  W <- w %orifnull% W
+  rule.pix <- if(is.null(rule.pix)) "sample" else match.arg(rule.pix)
   if(is.mask(W) && (length(list(...)) == 0)) {
     ## W is already a mask and there is no change to the raster
-    switch(op,
+    switch(rule.pix,
            sample = ,
            cover = ,
            majority = ,
@@ -32,7 +35,7 @@ owin2mask <- function(W,
   ## (M consists of all pixels whose centres are inside W)
   
   ## Do more processing
-  switch(op,
+  switch(rule.pix,
          sample = ,
          notsample = {
            ## nothing
@@ -53,13 +56,13 @@ owin2mask <- function(W,
          })
 
   ## Finally determine the mask
-  R <- switch(op,
+  R <- switch(rule.pix,
               sample    = M,
               notsample = complement.owin(M),
-              inside   = setminus.owin(M, B),
-              outside  = setminus.owin(complement.owin(M), B),
-              cover    = union.owin(M, B),
-              uncover  = union.owin(complement.owin(M), B),
+              inside   = setminus.owin(M, B, rescue=FALSE),
+              outside  = setminus.owin(complement.owin(M), B, rescue=FALSE),
+              cover    = union.owin(M, B, rescue=FALSE),
+              uncover  = union.owin(complement.owin(M), B, rescue=FALSE),
               boundary = B,
               majority = levelset(U, 0.5, ">="), 
               minority = levelset(U, 0.5, "<"))

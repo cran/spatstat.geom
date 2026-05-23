@@ -22,7 +22,7 @@
   }
   \item{\dots}{
     Optional. Extra arguments passed to \code{\link[spatstat.geom]{as.mask}}
-    to determine the pixel raster.
+    and \code{\link[spatstat.geom]{owin2mask}} to determine the pixel raster.
   }
   \item{DivideByPixelArea}{
     Logical value, indicating whether the resulting pixel values
@@ -64,6 +64,17 @@
   The result is a pixel image with pixel entries equal to these
   intersection areas.
 }
+\section{Boundary pixels}{
+  When \code{x} is a rectangle or a polygonal window,
+  the default behaviour is to represent the window as the set of pixels
+  whose \emph{centres} fall inside the polygon. A pixel which contains
+  part of the interior of the polygon, but whose centre falls outside
+  the polygon, is excluded by default, for the sake of efficiency.
+
+  To ensure that all pixels which intersect the interior of the
+  polygon are included in the pixel image, use the argument
+  \code{rule.pix="cover"} which will be passed to \code{\link[spatstat.geom]{owin2mask}}.
+}
 \value{
   A pixel image (object of class \code{"im"}).
 }
@@ -74,10 +85,14 @@
 }
 \examples{
    plot(pixellate(letterR, dimyx=15))
+   plot(letterR, add=TRUE)
+   plot(pixellate(letterR, dimyx=15, rule.pix="cover"))
+   plot(letterR, add=TRUE)
    W <- grow.rectangle(as.rectangle(letterR), 0.2)
    plot(pixellate(letterR, W, dimyx=15))
 }
-\author{\adrian
+\author{
+  \adrian
   and \rolf
 }
 \keyword{spatial}

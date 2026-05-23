@@ -1,7 +1,7 @@
 #
 #       images.R
 #
-#      $Revision: 1.186 $     $Date: 2026/01/21 06:26:39 $
+#      $Revision: 1.188 $     $Date: 2026/05/17 02:12:14 $
 #
 #      The class "im" of raster images
 #
@@ -169,7 +169,7 @@ shift.im <- function(X, vec=c(0,0), ..., origin=NULL) {
 
   Extract.im <- function(x, i, j, ...,
                          drop=TRUE, tight=FALSE, raster=NULL,
-                         rescue=is.owin(i)) {
+                         rescue=is.owin(i), rule.pix=NULL) {
 
     ## detect 'blank' arguments like second argument in x[i, ] 
     ngiven <- length(sys.call())
@@ -248,6 +248,10 @@ shift.im <- function(X, vec=c(0,0), ..., origin=NULL) {
           out <- im(values, out$xcol, out$yrow, unitname=unitname(out))
         }
 
+        if(!is.mask(i) && !is.null(rule.pix)) {
+          ## 'rule.pix' indicates requirement for pixel coverage of polygonal window
+          i <- owin2mask(i, rule.pix=rule.pix, xy=xy)
+        }
         inside <- inside.owin(xy$x, xy$y, i)
 
         if(drop && !(rescue && i$type == "rectangle")) {
@@ -317,7 +321,7 @@ shift.im <- function(X, vec=c(0,0), ..., origin=NULL) {
         if(jtype == "given")
           warning("Argument j ignored")
         W <- raster %orifnull% as.owin(x)
-        M <- psp2mask(as.psp(i), W=W, ...)
+        M <- psp2mask(as.psp(i), W=W, ..., rule.pix=rule.pix)
         xM <- x[M, drop=drop]
         if(is.im(xM)) xM <- spatstat.linnet::linim(i, xM)
         return(xM)
