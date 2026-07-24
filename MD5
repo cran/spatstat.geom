@@ -1,6 +1,6 @@
-6f8303a8c59cdaa016ab86dac86de8b0 *DESCRIPTION
-f1e998caba1a85a34edf23b88bcaff14 *NAMESPACE
-bb3fb756b9a9f2eaf8344f13ba3aa0f0 *NEWS
+47680e7fcc27dce4912b986e898897fe *DESCRIPTION
+9789c6ef34cd515711233de577a22ee9 *NAMESPACE
+68b029df8a71e051bb2c1dde4c75eb22 *NEWS
 61e66e2561a8a0e89e9c9d0fa32ff495 *R/First.R
 7b5da2ffbcca4f497eb3c33f786306e3 *R/Math.im.R
 44f8a71ab76fed0cb52bcee94c0262f8 *R/Math.imlist.R
@@ -42,7 +42,7 @@ ecead658bd75cf01fa87003f4a3f9555 *R/distancemetrics.R
 2cc4fbd0a6771de70444f4c8addd9152 *R/distances.R
 9fcd580554528a2b523c60d64f1efaf8 *R/distances.psp.R
 4dd0b46396fbf6e149ac0d0d41d1f8e0 *R/distanxD.R
-91dd5e5dc0dce7f255379411f161b733 *R/distbdry.R
+0644437b1a73e91d1dbe1bca5992eaef *R/distbdry.R
 f69b0cdf005e90c0ad94f74d0504a6ad *R/distfun.R
 35d7af0d3d8c23cbdbbc1fd17525fa09 *R/distmap.R
 17e22314049316d7e0e6d563ecbce028 *R/dummy.R
@@ -78,7 +78,7 @@ a8849465fb1980f6f2202c896e91a750 *R/levelset.R
 3591cd315df9311e6a8c8847fe907a4f *R/metricPdt.R
 a276db0ad9cc7a78dbc9d992ab771891 *R/minkowski.R
 817b25a9cfc6ee25d4bbd3a0951b5775 *R/minnndist.R
-ea6ae75dbab0509b4214771ba7c51705 *R/morphology.R
+132be0bec939ca66f3ab90fafd05e7a7 *R/morphology.R
 1d9d2611f418fa3fe75da434390b1643 *R/nearestsegment.R
 79010d8762aacdabb29705b6cce4c5c6 *R/needpackage.R
 d21435cf33d3994d48a4d51b7731ff2f *R/nncross.R
@@ -105,7 +105,7 @@ fb78ab475eba24c6202f9dafb81560a2 *R/pointsonlines.R
 3173bd14fa221a7cd68e094c73145f74 *R/pointweights.R
 93f8d51fa25fcd69340d2a72f74c6111 *R/polartess.R
 e59cdc092c14db2888891e7879a223fe *R/polygood.R
-5299dabd2f25f18a343b3a1556679dcf *R/pp3.R
+fe63fc0b3a8b4f97dec3b8c22dd426bf *R/pp3.R
 f17a4c621a28a539556bc2f4535a4e1c *R/ppp.R
 f93c36af4fe440a5994cc1d3797e34f0 *R/pppmatch.R
 5817068060fbe4de81e377923ad28724 *R/ppx.R
@@ -117,7 +117,7 @@ c784bd48092ca94b0fadfeee3cf92b21 *R/pspcross.R
 6fc8f4e4e3df66212da5d59b39ce707a *R/quadscheme.R
 40d92ee81858ea56b28c0b7892758491 *R/quantess.R
 84efac90a60297aca6d1357cf1bf5474 *R/quasirandom.R
-d76da1df40da7e6a86c5de2f5255d904 *R/randombasic.R
+d3b2618b99469c19a0d8231a36823f68 *R/randombasic.R
 fe27f36bee879cb6f086946ec05dfdf8 *R/randomseg.R
 e71cc12bc401de8c1ce8833957f481d7 *R/rasterfilter.R
 99f3f901362509f3494658b3b853981a *R/replace.ppp.R
@@ -144,7 +144,7 @@ b3d64b9c5d664bf378e0809ef7b3fcb6 *R/tessfun.R
 c3032a7090caf3ec6606ec27f85a6772 *R/timed.R
 7143eaf3c90beea6b15d60fc9fb65c77 *R/transmat.R
 746a816204b6077878f2bb7e3bdb4fdb *R/triangulate.R
-d8f145ac58fcc411c444d87b96f982db *R/unique.ppp.R
+2cd4c1d38ffb8a11bfe469e39c2b808c *R/unique.ppp.R
 3ac4f6261aa8b5bded69fb2514aab026 *R/uniquemap.ppp.R
 57b0ae5ea8b7cf9f8dcdc8fac0b58364 *R/units.R
 5a275a60736b9d87a342856c9da7a7f4 *R/unstack.R
@@ -156,8 +156,8 @@ a4585a695aa9cd763b3f2f1a830bdca0 *R/wingeom.R
 976ef7aea3bc95f2b7279eedca2dee8e *R/xypolycomponents.R
 f2d49fc8f50fef7f76bcb3fc7f34efb4 *inst/CITATION
 ac6aa02ee30a52f0a13abc4a17ff0174 *inst/doc/downstream.txt
-a6548da01abfd252356d82327b9f2290 *inst/doc/packagesizes.txt
-a6548da01abfd252356d82327b9f2290 *inst/info/packagesizes.txt
+12af25f92cecb4a3ddadfe772767757c *inst/doc/packagesizes.txt
+12af25f92cecb4a3ddadfe772767757c *inst/info/packagesizes.txt
 12e68895fef0d3aa0bde45a0ddbadfa4 *inst/ratfor/Makefile
 22e8a5189942ba190c13475b35459c7f *inst/ratfor/dppll.r
 6d471ec061ea91398ba16323de56b9db *inst/ratfor/inxypOld.r
@@ -303,13 +303,14 @@ f510f4e52f986f053131794faab95bcd *man/disc.Rd
 4c4218514e71a0fcf58e752e8786fa69 *man/discpartarea.Rd
 5f89a05ae2f87e01d71b709ebcf018b5 *man/discretise.Rd
 34db2e9ea39424273e0420ca2bb93068 *man/discs.Rd
+ce110652dce7d8027ef9694c4b71f422 *man/distbdry.Rd
 13daa5a367e5cbab6ef6a254593f9d11 *man/distfun.Rd
 af98debd7a3a66429a5c7b0b455fb712 *man/distmap.Rd
 e76bd3055e340e779e8fc7f74b3655ad *man/distmap.owin.Rd
 deac9256cef14e968309a7fe4a555839 *man/distmap.ppp.Rd
 a287975d788d2fb1e0a24b8f456825a3 *man/distmap.psp.Rd
 ca54a66c0706b40e8aad3ba4f0621b27 *man/domain.Rd
-f6b361ee19802275e239b31f06d60879 *man/duplicated.ppp.Rd
+5099b975359cbffa49c9b55bc19ff7f8 *man/duplicated.ppp.Rd
 2c8a2832c36a28895f184e502e3b6624 *man/edges.Rd
 34b1bf16cb0a8c40bffabcd2d64655ed *man/edges2triangles.Rd
 b1150d865b52154abe4431d659e9142f *man/edges2vees.Rd
@@ -394,7 +395,7 @@ a8cda00ce5ed48007e36636c52f828f9 *man/layout.boxes.Rd
 64a7e64b46abc3df8e62b4e943e7dcfb *man/levelset.Rd
 42f676c1f0801b8607ca122243c79e2e *man/levelset.distfun.Rd
 d08a415b66f936be1a8ce62be57016af *man/lut.Rd
-0ff8a0c7a7247b3896de477dcf1eedc3 *man/macros/defns.Rd
+f27d958a624c9d428a5cf6a27e436d23 *man/macros/defns.Rd
 d2a9ee8b6a6e538dbf76f281f811f7da *man/marks.Rd
 cbe8805c7a3c8b2b452921800ab86f4e *man/marks.psp.Rd
 2018946a1b50c71e54f53360e375311a *man/marks.tess.Rd
@@ -530,7 +531,8 @@ e692265fcd2437cdd6e22effe2481f20 *man/restrict.colourmap.Rd
 2e591df588961978a36b7293c0fda359 *man/rexplode.Rd
 c5ce1488ee8e313ad78c398f546c8c1f *man/rgbim.Rd
 e2f8608735bfec6d306dea2be09ed6bd *man/ripras.Rd
-9decd2a0be3587244a2eca64bbe15ab3 *man/rjitter.Rd
+3eb7f0cb6f698e3a3ad23d060ece89a3 *man/rjitter.Rd
+1d877390b05bea9e1c9747dcfa706051 *man/rjitter.pp3.Rd
 2a6d6f79b9bf7ba6ea08815d937a1470 *man/rlinegrid.Rd
 46de1489970165e679298e0bfa806389 *man/rotate.Rd
 ac9a85fac4ba1a83841e50b65c67cc12 *man/rotate.im.Rd
@@ -564,7 +566,7 @@ bd0c088722b2ab0ed1f888fff75139e4 *man/solist.Rd
 8a06c516216701c55b29d991c9deb5a1 *man/solutionset.Rd
 2f2b1a7f76f1ad52fd10304afc65186b *man/spatdim.Rd
 95b6c4119e63b2b47e30758d05e8d081 *man/spatstat.geom-deprecated.Rd
-6517b3cee7b182d679cd4c0851a2b38c *man/spatstat.geom-internal.Rd
+d753d0c338a0d323365c54b3b2b4569e *man/spatstat.geom-internal.Rd
 32dbc5bd94234e480d3d861a7b84dc81 *man/spatstat.geom-package.Rd
 c27b57ffa272542e5afc9b8865157162 *man/spatstat.options.Rd
 c542af7c96e45067fd97f43574d48da6 *man/split.hyperframe.Rd
@@ -701,7 +703,7 @@ c3ec5358551fe13cd284e054d4b31b54 *tests/testsD.R
 eb705e4b3fa611d186b0a54f6f3ee32f *tests/testsGtoJ.R
 bd48e397baa926bd320898c771fc2ecf *tests/testsK.R
 2656e51d2502ce38411ac2618bdde3d6 *tests/testsL.R
-9e8f43244f6213772e79404838bf1f49 *tests/testsM.R
+3262e0e87a92264a2c9e0385f4f876a4 *tests/testsM.R
 5e8bd3c161b1e77e4be423178e633436 *tests/testsNtoO.R
 5b7cea4bd8327e1834a80809d78d5804 *tests/testsP1.R
 e5a2f544dfca1d606d7ffc1dd81d3b30 *tests/testsP2.R
