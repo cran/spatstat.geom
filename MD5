@@ -1,6 +1,6 @@
-47680e7fcc27dce4912b986e898897fe *DESCRIPTION
-9789c6ef34cd515711233de577a22ee9 *NAMESPACE
-68b029df8a71e051bb2c1dde4c75eb22 *NEWS
+cb2c6b740e87b9b5981cf7ffdf92ae31 *DESCRIPTION
+831cc731833885f79b77913953616960 *NAMESPACE
+02d952f52bff2779e495b17ca06616cb *NEWS
 61e66e2561a8a0e89e9c9d0fa32ff495 *R/First.R
 7b5da2ffbcca4f497eb3c33f786306e3 *R/Math.im.R
 44f8a71ab76fed0cb52bcee94c0262f8 *R/Math.imlist.R
@@ -74,7 +74,7 @@ b0a2b87c4a2a7e481bb4361c006c4402 *R/is.R
 a8849465fb1980f6f2202c896e91a750 *R/levelset.R
 805e0fd3d2de1ae802a704d921400f0e *R/listof.R
 9163a961ba96bac39140a95581a29871 *R/logiquad.R
-2691de2a0dcdb20968158877a2e12017 *R/marks.R
+1822609fc4b5cd270f83d87b60a9904c *R/marks.R
 3591cd315df9311e6a8c8847fe907a4f *R/metricPdt.R
 a276db0ad9cc7a78dbc9d992ab771891 *R/minkowski.R
 817b25a9cfc6ee25d4bbd3a0951b5775 *R/minnndist.R
@@ -96,7 +96,7 @@ dd22678e40c706eb0e420defa401b966 *R/options.R
 c73888548368e8f3a0b3c4a7abd1f51f *R/pickoption.R
 f8bd2cca339d62f4a77d3e5b9ae989e8 *R/pixellate.R
 34eabcbd93bd5fdb061613fe9e8d883b *R/plot.anylist.R
-652e9fd5e67f836d76161d1a68768d02 *R/plot.im.R
+40aec7c96f266c733acfa6dfba807f6d *R/plot.im.R
 6d18de838c2b73bf0e984a1e5a084889 *R/plot.owin.R
 ddbdc0dce24b44b2cace3fa8b30ce508 *R/plot.ppp.R
 e2f239b5f2a99f31687d638e216e3776 *R/plot.psp.R
@@ -123,7 +123,7 @@ e71cc12bc401de8c1ce8833957f481d7 *R/rasterfilter.R
 99f3f901362509f3494658b3b853981a *R/replace.ppp.R
 e34c842a124f8b2a99d7349dfa0800d3 *R/rescale.R
 30fee31c09f49fe5452cf44fdaba1744 *R/rescue.rectangle.R
-2259600b046e03fbd0dfa779960eea21 *R/ripras.R
+3443c9092ec2a453fc19d49a3a04ced4 *R/ripras.R
 47761a7635c5dee7d6414e200219b7f4 *R/rotate.R
 649ff07655eb041cbd2c234b7e10cf9d *R/round.R
 561a24d904aff0d09c1184106f6082ba *R/setcov.R
@@ -156,8 +156,8 @@ a4585a695aa9cd763b3f2f1a830bdca0 *R/wingeom.R
 976ef7aea3bc95f2b7279eedca2dee8e *R/xypolycomponents.R
 f2d49fc8f50fef7f76bcb3fc7f34efb4 *inst/CITATION
 ac6aa02ee30a52f0a13abc4a17ff0174 *inst/doc/downstream.txt
-12af25f92cecb4a3ddadfe772767757c *inst/doc/packagesizes.txt
-12af25f92cecb4a3ddadfe772767757c *inst/info/packagesizes.txt
+37a83ce2aee9cc3085750c6e30a1765b *inst/doc/packagesizes.txt
+37a83ce2aee9cc3085750c6e30a1765b *inst/info/packagesizes.txt
 12e68895fef0d3aa0bde45a0ddbadfa4 *inst/ratfor/Makefile
 22e8a5189942ba190c13475b35459c7f *inst/ratfor/dppll.r
 6d471ec061ea91398ba16323de56b9db *inst/ratfor/inxypOld.r
@@ -530,7 +530,7 @@ e692265fcd2437cdd6e22effe2481f20 *man/restrict.colourmap.Rd
 3393832640695615f6c99c1fc41f6ecc *man/rev.colourmap.Rd
 2e591df588961978a36b7293c0fda359 *man/rexplode.Rd
 c5ce1488ee8e313ad78c398f546c8c1f *man/rgbim.Rd
-e2f8608735bfec6d306dea2be09ed6bd *man/ripras.Rd
+9ab2909f55fe359b31a3d208f25ba17b *man/ripras.Rd
 3eb7f0cb6f698e3a3ad23d060ece89a3 *man/rjitter.Rd
 1d877390b05bea9e1c9747dcfa706051 *man/rjitter.pp3.Rd
 2a6d6f79b9bf7ba6ea08815d937a1470 *man/rlinegrid.Rd
@@ -566,7 +566,7 @@ bd0c088722b2ab0ed1f888fff75139e4 *man/solist.Rd
 8a06c516216701c55b29d991c9deb5a1 *man/solutionset.Rd
 2f2b1a7f76f1ad52fd10304afc65186b *man/spatdim.Rd
 95b6c4119e63b2b47e30758d05e8d081 *man/spatstat.geom-deprecated.Rd
-d753d0c338a0d323365c54b3b2b4569e *man/spatstat.geom-internal.Rd
+b6a13f999a7f179f91f747c797025a12 *man/spatstat.geom-internal.Rd
 32dbc5bd94234e480d3d861a7b84dc81 *man/spatstat.geom-package.Rd
 c27b57ffa272542e5afc9b8865157162 *man/spatstat.options.Rd
 c542af7c96e45067fd97f43574d48da6 *man/split.hyperframe.Rd
